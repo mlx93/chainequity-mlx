@@ -40,7 +40,7 @@ router.get('/cap-table', async (req: Request, res: Response) => {
     const capTable = filteredBalances.map((b) => {
       const balance = BigInt(b.balance);
       const percentage = totalSupply > 0
-        ? Number((balance * BigInt(10000)) / totalSupply / BigInt(100)).toFixed(2)
+        ? ((Number(balance) / Number(totalSupply)) * 100).toFixed(2)
         : '0.00';
       
       return {
