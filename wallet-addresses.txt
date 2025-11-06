@@ -46,6 +46,15 @@ Visibility: Public
 Connected to: Vercel
 Created: 2025-11-06
 
+## Backend API (Railway - Phase 2A)
+Backend URL: https://tender-achievement-production-3aa5.up.railway.app
+API Base URL: https://tender-achievement-production-3aa5.up.railway.app/api
+Service Name: tender-achievement
+Project: superb-trust
+Status: ✅ Deployed and Running
+Health Check: ✅ Passing (database and blockchain connected)
+Port: 3001 (Railway auto-assigned)
+
 ## Vercel Deployment
 Vercel URL: https://chainequity-mlx.vercel.app/
 Connected Repository: chainequity-mlx
