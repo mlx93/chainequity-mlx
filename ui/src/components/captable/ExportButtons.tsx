@@ -11,8 +11,8 @@ export default function ExportButtons({ capTable }: ExportButtonsProps) {
     const headers = ['Address', 'Balance', 'Ownership %']
     const rows = capTable.capTable.map(entry => [
       entry.address,
-      entry.balance,
-      entry.ownershipPercent,
+      entry.balanceFormatted,
+      entry.percentage + '%',
     ])
     
     const csvContent = [
