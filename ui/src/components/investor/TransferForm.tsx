@@ -91,28 +91,32 @@ export default function TransferForm() {
   // Handle errors
   useEffect(() => {
     if (error) {
-      toast.error('Transfer failed', {
+      toast.error('Transfer failed on-chain', {
         description: error.message,
-        duration: 6000,
+        duration: 8000,
+        action: hash ? {
+          label: 'View on BaseScan',
+          onClick: () => window.open(getBlockExplorerUrl(hash, 84532), '_blank'),
+        } : undefined,
       })
     }
-  }, [error])
+  }, [error, hash])
 
   const onSubmit = async (data: TransferFormData) => {
-    if (!recipientApproved) {
-      toast.error('Recipient not approved', {
-        description: 'The recipient wallet is not approved to receive tokens',
-        duration: 6000,
-      })
-      return
-    }
-
     if (amountError) {
       toast.error('Invalid amount', {
         description: amountError,
         duration: 6000,
       })
       return
+    }
+
+    // Warn about unapproved recipient, but allow transaction to proceed (for demo purposes)
+    if (!recipientApproved) {
+      toast.warning('Recipient not approved', {
+        description: 'Transaction will be submitted but will fail on-chain. Check BaseScan for revert reason.',
+        duration: 8000,
+      })
     }
 
     try {
@@ -197,7 +201,7 @@ export default function TransferForm() {
 
         <Button
           type="submit"
-          disabled={isPending || isConfirming || !recipientApproved || !!amountError}
+          disabled={isPending || isConfirming || !!amountError}
           className="w-full h-9 text-sm"
         >
           {isPending || isConfirming ? 'Processing...' : 'Transfer Tokens'}
