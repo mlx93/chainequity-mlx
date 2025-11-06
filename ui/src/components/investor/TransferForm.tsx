@@ -41,7 +41,7 @@ export default function TransferForm() {
     reset: resetWrite,
   } = useWriteContract()
 
-  const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({
+  const { isLoading: isConfirming, isSuccess: isConfirmed, isError: isReverted, error: receiptError } = useWaitForTransactionReceipt({
     hash,
   })
 
@@ -101,6 +101,30 @@ export default function TransferForm() {
       })
     }
   }, [error, hash])
+
+  // Handle reverted transactions (failed on-chain after mining)
+  useEffect(() => {
+    if (isReverted && hash && !hasShownToast.current) {
+      hasShownToast.current = true
+      const errorMsg = receiptError?.message || 'Transaction reverted - recipient wallet not approved'
+      toast.error('Transfer failed on-chain', {
+        description: errorMsg,
+        duration: 8000,
+        action: {
+          label: 'View on BaseScan',
+          onClick: () => window.open(getBlockExplorerUrl(hash, 84532), '_blank'),
+        },
+      })
+      
+      // Reset form after a delay
+      setTimeout(() => {
+        reset()
+        setToAddress('')
+        resetWrite()
+        hasShownToast.current = false
+      }, 2000)
+    }
+  }, [isReverted, hash, receiptError, reset, resetWrite])
 
   const onSubmit = async (data: TransferFormData) => {
     if (amountError) {
