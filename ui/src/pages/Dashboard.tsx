@@ -49,7 +49,7 @@ export default function Dashboard() {
             </CardHeader>
             <CardContent>
               <p className="text-2xl font-bold">
-                {parseFloat(capTable.totalSupply) / 1e18} tokens
+                {capTable.totalSupply ? (parseFloat(capTable.totalSupply) / 1e18).toLocaleString() : '0'} tokens
               </p>
             </CardContent>
           </Card>
@@ -58,7 +58,7 @@ export default function Dashboard() {
               <CardTitle>Holders</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-2xl font-bold">{capTable.holderCount}</p>
+              <p className="text-2xl font-bold">{capTable.holderCount ?? 0}</p>
             </CardContent>
           </Card>
           <Card>
@@ -66,7 +66,7 @@ export default function Dashboard() {
               <CardTitle>Current Block</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-2xl font-bold">{capTable.blockNumber.toLocaleString()}</p>
+              <p className="text-2xl font-bold">{capTable.blockNumber?.toLocaleString() ?? 'N/A'}</p>
             </CardContent>
           </Card>
         </div>
