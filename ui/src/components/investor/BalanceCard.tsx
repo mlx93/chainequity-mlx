@@ -40,24 +40,19 @@ export default function BalanceCard() {
     : 0
 
   return (
-    <Card className="flex flex-col">
+    <Card>
       <CardHeader className="pb-3">
-        <CardTitle className="text-base">Balance</CardTitle>
-        <CardDescription className="text-xs">Your token holdings</CardDescription>
+        <CardTitle className="text-sm text-muted-foreground">Balance</CardTitle>
       </CardHeader>
-      <CardContent className="flex-1">
-        <div className="space-y-2">
-          <div>
-            <p className="text-3xl font-bold">
-              {formattedBalance} {symbol as string || 'TOKENS'}
-            </p>
-          </div>
+      <CardContent>
+        <div className="space-y-1">
+          <p className="text-3xl font-bold">
+            {formattedBalance} {symbol as string || 'TOKENS'}
+          </p>
           {capTable && balanceValue > 0 && (
-            <div>
-              <p className="text-xs text-muted-foreground">
-                Ownership: {ownershipPercent.toFixed(2)}%
-              </p>
-            </div>
+            <p className="text-sm text-muted-foreground">
+              {ownershipPercent.toFixed(2)}% ownership
+            </p>
           )}
         </div>
       </CardContent>

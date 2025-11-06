@@ -15,50 +15,46 @@ export default function InvestorView() {
   }
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold">Investor Dashboard</h1>
-        <p className="text-muted-foreground">View your balance and transfer tokens</p>
-      </div>
-
-      <div className="flex items-center gap-2">
-        <span className="text-xs font-medium">Wallet Status:</span>
+    <div className="space-y-4">
+      {/* Header with status badge inline */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold">Portfolio</h1>
+          <p className="text-sm text-muted-foreground">Manage your token holdings</p>
+        </div>
         {isApproved ? (
-          <Badge variant="default" className="text-xs">Approved</Badge>
+          <Badge variant="default">✓ Approved</Badge>
         ) : (
-          <Badge variant="secondary" className="text-xs">Not Approved</Badge>
-        )}
-        {!isApproved && (
-          <p className="text-xs text-muted-foreground">
-            Contact an admin to approve your wallet
-          </p>
+          <Badge variant="secondary">Pending Approval</Badge>
         )}
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2">
-        <BalanceCard />
-        <Card className="flex flex-col">
+      {/* Two-column layout: Left = Balance + Transfer, Right = History */}
+      <div className="grid gap-4 lg:grid-cols-[2fr_3fr]">
+        {/* Left Column: Balance and Transfer in compact vertical stack */}
+        <div className="space-y-4">
+          <BalanceCard />
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm">Transfer Tokens</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <TransferForm />
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Right Column: Transaction History */}
+        <Card>
           <CardHeader className="pb-3">
-            <CardTitle className="text-base">Transfer Tokens</CardTitle>
-            <CardDescription className="text-xs">
-              Send tokens to other approved investors
-            </CardDescription>
+            <CardTitle className="text-sm">Recent Activity</CardTitle>
+            <CardDescription className="text-xs">Your transaction history</CardDescription>
           </CardHeader>
-          <CardContent className="flex-1">
-            <TransferForm />
+          <CardContent>
+            <TransactionHistory address={address} />
           </CardContent>
         </Card>
       </div>
-
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-base">Transaction History</CardTitle>
-          <CardDescription className="text-xs">Your recent transfers</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <TransactionHistory address={address} />
-        </CardContent>
-      </Card>
     </div>
   )
 }
