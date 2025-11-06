@@ -10,6 +10,7 @@ import {
   processTokensMintedEvent,
   processTokensBurnedEvent,
 } from './services/eventProcessor';
+import { initializeSchema } from './db/initSchema';
 
 const CONTRACT_ADDRESS = env.CONTRACT_ADDRESS as `0x${string}`;
 
@@ -20,6 +21,10 @@ async function startIndexer() {
   console.log(`⛓️  Chain ID: ${env.CHAIN_ID}`);
 
   try {
+    // Initialize database schema on startup
+    await initializeSchema();
+    console.log('✅ Database schema ready');
+
     // Get current block
     const currentBlock = await publicClient.getBlockNumber();
     console.log(`⛓️  Current block: ${currentBlock}`);
