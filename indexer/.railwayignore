@@ -1,0 +1,8 @@
+# Railway-specific ignores
+node_modules/
+dist/
+*.log
+.DS_Store
+
+# Keep .env for reference but Railway will use its own variables
+

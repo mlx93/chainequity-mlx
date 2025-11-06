@@ -1,0 +1,68 @@
+# ChainEquity Wallet Addresses
+# Base Sepolia Testnet
+# Created: 2025-11-06
+
+## Test Wallets
+Admin Address:      0x4f10f93e2b0f5faf6b6e5a03e8e48f96921d24c6
+Investor A Address: 0x0d9cf1dc3e134a736aafb1296d2b316742b5c13e
+Investor B Address: 0xefd94a1534959e04630899abdd5d768601f4af5b
+
+## Gnosis Safe (2-of-3 Multi-Sig)
+Safe Address: 0x6264F29968e8fd2810cB79fb806aC65dAf9db73d
+Network: Base Sepolia
+Threshold: 2 of 3 signers
+Deployed: 2025-11-06
+
+## Environment Variables (for later use)
+ADMIN_ADDRESS=0x4f10f93e2b0f5faf6b6e5a03e8e48f96921d24c6
+ADMIN_PRIVATE_KEY=0x948123033193e7bdf6bc2a2dc4cfc911a99977beebacaed5e545cac418eb5fbe
+INVESTOR_A_ADDRESS=0x0d9cf1dc3e134a736aafb1296d2b316742b5c13e
+INVESTOR_B_ADDRESS=0xefd94a1534959e04630899abdd5d768601f4af5b
+SAFE_ADDRESS=0x6264F29968e8fd2810cB79fb806aC65dAf9db73d
+BASE_SEPOLIA_RPC=https://sepolia.base.org
+
+## Railway PostgreSQL Database
+DATABASE_URL=postgresql://postgres:ITpPoRYgfwPwGkhtpysPwOBzczfKQDxQ@postgres.railway.internal:5432/railway
+Project: lucid-strength
+Environment: production
+
+## Wallet Balances (Base Sepolia)
+Admin: 0.0125 ETH ✅
+Investor A: 0.0125 ETH ✅
+Investor B: 0.0125 ETH ✅
+Total: 0.0375 ETH
+
+## GitHub Repository
+Repository: https://github.com/mlx93/chainequity-mlx
+Owner: mlx93
+Visibility: Public
+Connected to: Vercel
+Created: 2025-11-06
+
+## Vercel Deployment
+Vercel URL: https://chainequity-mlx.vercel.app/
+Connected Repository: chainequity-mlx
+Status: Ready for Phase 3 deployment
+Note: Frontend will auto-deploy from main branch
+
+## Setup Status
+✅ Foundry installed (v1.4.4-stable)
+✅ 3 MetaMask wallets created and funded
+✅ Base Sepolia network added to MetaMask
+✅ Gnosis Safe deployed (2-of-3 multi-sig)
+✅ Railway account created with PostgreSQL
+✅ GitHub repository created
+✅ Vercel account connected to GitHub
+
+## Ready for Phase 1!
+All prerequisites complete. Ready to generate Contract Specialist prompt.
+
+---
+⚠️ SECURITY WARNING ⚠️
+These are testnet addresses only. Never use these wallets on mainnet with real funds.
+Private keys and DATABASE_URL should NEVER be committed to Git or shared publicly.
+
+## Notes
+- Original GitHub repo (mlx93/ChainEquity) deleted - using chainequity-mlx only
+- All code will be committed to chainequity-mlx repository
+- Vercel auto-deploys frontend from main branch
