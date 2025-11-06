@@ -2,25 +2,36 @@ import { useAccount, useDisconnect, useChainId } from 'wagmi'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { formatAddress } from '@/lib/utils'
-import { Wallet, LogOut } from 'lucide-react'
-import { Link } from 'react-router-dom'
+import { Wallet, LogOut, LayoutDashboard, User, Table2 } from 'lucide-react'
+import { NavLink, useLocation } from 'react-router-dom'
 import { useIsAdmin } from '@/hooks/useIsAdmin'
+import { cn } from '@/lib/utils'
 
 export default function Header() {
   const { address, isConnected } = useAccount()
   const { disconnect } = useDisconnect()
   const chainId = useChainId()
   const isAdmin = useIsAdmin()
-
   const isBaseSepolia = chainId === 84532
+
+  const navLinkClass = ({ isActive }: { isActive: boolean }) =>
+    cn(
+      'flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-colors',
+      isActive
+        ? 'bg-primary text-primary-foreground'
+        : 'text-muted-foreground hover:text-foreground hover:bg-accent'
+    )
 
   if (!isConnected) {
     return (
-      <header className="border-b">
+      <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container mx-auto flex h-16 items-center justify-between px-4">
-          <Link to="/" className="text-xl font-bold">
-            ChainEquity
-          </Link>
+          <NavLink to="/" className="flex items-center gap-2 text-xl font-bold hover:opacity-80 transition-opacity">
+            <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
+              <span className="text-primary-foreground font-bold text-sm">CE</span>
+            </div>
+            <span>ChainEquity</span>
+          </NavLink>
           <div className="flex items-center gap-2">
             {!isBaseSepolia && (
               <Badge variant="destructive">Wrong Network</Badge>
@@ -36,29 +47,67 @@ export default function Header() {
   }
 
   return (
-    <header className="border-b">
+    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
-        <Link to="/" className="text-xl font-bold">
-          ChainEquity
-        </Link>
-        <nav className="flex items-center gap-4">
+        <NavLink 
+          to="/" 
+          className="flex items-center gap-2 text-xl font-bold hover:opacity-80 transition-opacity"
+        >
+          <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
+            <span className="text-primary-foreground font-bold text-sm">CE</span>
+          </div>
+          <span>ChainEquity</span>
+        </NavLink>
+        
+        <nav className="flex items-center gap-1">
           {isAdmin && (
-            <Link to="/" className="text-sm hover:underline">Dashboard</Link>
+            <NavLink
+              to="/"
+              className={navLinkClass}
+              end
+            >
+              <LayoutDashboard className="h-4 w-4" />
+              <span>Dashboard</span>
+            </NavLink>
           )}
-          <Link to="/investor" className="text-sm hover:underline">Investor</Link>
-          <Link to="/captable" className="text-sm hover:underline">Cap Table</Link>
+          <NavLink
+            to="/investor"
+            className={navLinkClass}
+          >
+            <User className="h-4 w-4" />
+            <span>Investor</span>
+          </NavLink>
+          <NavLink
+            to="/captable"
+            className={navLinkClass}
+          >
+            <Table2 className="h-4 w-4" />
+            <span>Cap Table</span>
+          </NavLink>
         </nav>
-        <div className="flex items-center gap-2">
+
+        <div className="flex items-center gap-3">
           {!isBaseSepolia && (
-            <Badge variant="destructive">Wrong Network</Badge>
+            <Badge variant="destructive" className="hidden sm:inline-flex">
+              Wrong Network
+            </Badge>
           )}
           {isBaseSepolia && (
-            <Badge variant="secondary">Base Sepolia</Badge>
+            <Badge variant="secondary" className="hidden sm:inline-flex">
+              Base Sepolia
+            </Badge>
           )}
-          <Badge variant="outline">{formatAddress(address!)}</Badge>
-          <Button variant="outline" size="sm" onClick={() => disconnect()}>
-            <LogOut className="mr-2 h-4 w-4" />
-            Disconnect
+          <Badge variant="outline" className="font-mono text-xs">
+            {formatAddress(address!)}
+          </Badge>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={() => disconnect()}
+            className="gap-2"
+          >
+            <LogOut className="h-4 w-4" />
+            <span className="hidden sm:inline">Disconnect</span>
           </Button>
         </div>
       </div>
