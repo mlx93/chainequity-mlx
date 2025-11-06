@@ -1,0 +1,12 @@
+{
+  "build": {
+    "commands": [
+      "npm install",
+      "npm run build"
+    ]
+  },
+  "start": {
+    "command": "node dist/index.js"
+  }
+}
+
