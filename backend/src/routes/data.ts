@@ -8,8 +8,26 @@ import {
 import { formatTokenAmount } from '../services/blockchain.service';
 import { TransferRow, CorporateActionRow } from '../types';
 import { publicClient } from '../config/viem';
+import { env } from '../config/env';
+import GatedTokenABI from '../abis/GatedToken.json';
 
 const router = Router();
+
+// Helper to get split multiplier from contract
+async function getSplitMultiplier(): Promise<bigint> {
+  try {
+    const multiplier = await publicClient.readContract({
+      address: env.CONTRACT_ADDRESS as `0x${string}`,
+      abi: GatedTokenABI as any,
+      functionName: 'splitMultiplier',
+      args: [],
+    }) as bigint;
+    return multiplier;
+  } catch (error) {
+    console.error('Failed to read split multiplier:', error);
+    return BigInt(1); // Default to 1 if read fails
+  }
+}
 
 // Helper to format transfer type
 function getTransferType(from: string, to: string): 'mint' | 'burn' | 'transfer' {
@@ -24,29 +42,34 @@ router.get('/cap-table', async (req: Request, res: Response) => {
     const minBalance = req.query.minBalance ? BigInt(req.query.minBalance as string) : BigInt(0);
     const balances = await getCapTable();
     
-    // Get current block number
-    const blockNumber = await publicClient.getBlockNumber();
+    // Get current block number and split multiplier
+    const [blockNumber, splitMultiplier] = await Promise.all([
+      publicClient.getBlockNumber(),
+      getSplitMultiplier(),
+    ]);
     
-    // Calculate total supply
+    // Calculate total supply (applying split multiplier)
     let totalSupply = BigInt(0);
     const filteredBalances = balances.filter((b) => {
-      const balance = BigInt(b.balance);
-      if (balance < minBalance) return false;
-      totalSupply += balance;
+      const baseBalance = BigInt(b.balance);
+      const adjustedBalance = baseBalance * splitMultiplier;
+      if (adjustedBalance < minBalance) return false;
+      totalSupply += adjustedBalance;
       return true;
     });
     
     // Format response
     const capTable = filteredBalances.map((b) => {
-      const balance = BigInt(b.balance);
+      const baseBalance = BigInt(b.balance);
+      const adjustedBalance = baseBalance * splitMultiplier;
       const percentage = totalSupply > 0
-        ? ((Number(balance) / Number(totalSupply)) * 100).toFixed(2)
+        ? ((Number(adjustedBalance) / Number(totalSupply)) * 100).toFixed(2)
         : '0.00';
       
       return {
         address: b.address,
-        balance: b.balance,
-        balanceFormatted: formatTokenAmount(b.balance),
+        balance: adjustedBalance.toString(),
+        balanceFormatted: formatTokenAmount(adjustedBalance.toString()),
         percentage,
         lastUpdated: b.updated_at.toISOString(),
       };
@@ -57,6 +80,7 @@ router.get('/cap-table', async (req: Request, res: Response) => {
       totalSupply: totalSupply.toString(),
       totalHolders: capTable.length,
       blockNumber: Number(blockNumber),
+      splitMultiplier: Number(splitMultiplier),
       timestamp: new Date().toISOString(),
     });
   } catch (error) {
