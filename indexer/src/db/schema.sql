@@ -63,3 +63,4 @@ CREATE TABLE IF NOT EXISTS corporate_actions (
 CREATE INDEX IF NOT EXISTS idx_corporate_actions_block_number ON corporate_actions(block_number);
 CREATE INDEX IF NOT EXISTS idx_corporate_actions_type ON corporate_actions(action_type);
 
+

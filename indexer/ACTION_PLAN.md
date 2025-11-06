@@ -68,3 +68,4 @@ After applying any option:
 3. Should see: `Building Docker image...` or `Step 1/X : FROM node:18-alpine`
 4. Should NOT see: `Detected Node.js... Using Railpack...`
 
+

@@ -38,3 +38,4 @@ After updating, check logs - you should see:
 - ✅ Database schema initialized successfully
 - No more ENOTFOUND errors
 
+

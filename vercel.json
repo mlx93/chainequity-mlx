@@ -1,9 +1,9 @@
 {
   "$schema": "https://schema.vercel.com/project-configuration",
-  "buildCommand": "cd ui && npm install && npm run build",
+  "buildCommand": "cd ui && npm run build",
   "outputDirectory": "ui/dist",
-  "installCommand": "npm --version",
-  "framework": null,
+  "installCommand": "cd ui && npm install",
+  "framework": "vite",
   "headers": [
     {
       "source": "/(.*)",

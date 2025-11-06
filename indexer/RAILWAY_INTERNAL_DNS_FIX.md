@@ -96,3 +96,4 @@ After fixing:
 2. **Use Public URL** - As temporary workaround (less secure, slower)
 3. **Recreate Services** - Sometimes recreating PostgreSQL in same project fixes DNS
 
+

@@ -59,6 +59,17 @@ export async function updateSymbol(newSymbol: string) {
   return hash;
 }
 
+export async function mintTokens(to: string, amount: string) {
+  const hash = await walletClient.writeContract({
+    address: CONTRACT_ADDRESS,
+    abi: GatedTokenABI as any,
+    functionName: 'mint',
+    args: [to as `0x${string}`, BigInt(amount)],
+  });
+  
+  return hash;
+}
+
 export async function getCurrentBlockNumber(): Promise<bigint> {
   return await publicClient.getBlockNumber();
 }

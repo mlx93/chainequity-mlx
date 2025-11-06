@@ -74,3 +74,4 @@ export interface WalletInfo {
   lastTransferAt: string | null;
 }
 
+

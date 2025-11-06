@@ -66,3 +66,4 @@ After fixing:
 - Indexer connects successfully
 - Logs show: `✅ Database schema initialized successfully`
 
+

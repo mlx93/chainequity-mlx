@@ -6,6 +6,7 @@ import {
   executeStockSplit,
   updateSymbol,
   getTokenSymbol,
+  mintTokens,
 } from '../services/blockchain.service';
 import { isWalletApproved } from '../services/database.service';
 import { env } from '../config/env';
@@ -17,6 +18,7 @@ import {
   revokeWalletRequestSchema,
   stockSplitRequestSchema,
   updateSymbolRequestSchema,
+  mintTokensRequestSchema,
 } from '../middleware/validation';
 
 const router = Router();
@@ -181,6 +183,47 @@ router.post(
       console.error('Update symbol error:', error);
       res.status(500).json({
         error: error instanceof Error ? error.message : 'Failed to update symbol',
+        timestamp: new Date().toISOString(),
+      });
+    }
+  }
+);
+
+// POST /api/admin/mint
+router.post(
+  '/admin/mint',
+  validateBody(mintTokensRequestSchema),
+  async (req: Request, res: Response) => {
+    try {
+      const { to, amount } = req.body;
+      
+      // Check if recipient is approved
+      const isApproved = await isWalletApproved(to);
+      
+      if (!isApproved) {
+        return res.status(400).json({
+          error: 'Recipient wallet is not approved',
+          to,
+          isApproved: false,
+          timestamp: new Date().toISOString(),
+        });
+      }
+      
+      const transactionHash = await mintTokens(to, amount);
+      
+      res.json({
+        success: true,
+        transactionHash,
+        to,
+        amount,
+        blockExplorerUrl: getBlockExplorerUrl(transactionHash),
+        message: 'Token minting submitted',
+        timestamp: new Date().toISOString(),
+      });
+    } catch (error) {
+      console.error('Mint tokens error:', error);
+      res.status(500).json({
+        error: error instanceof Error ? error.message : 'Failed to mint tokens',
         timestamp: new Date().toISOString(),
       });
     }

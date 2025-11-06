@@ -96,3 +96,4 @@ After fixing DATABASE_URL:
 - Logs should show: `✅ Database schema initialized successfully`
 - No more `ENOTFOUND` errors
 
+

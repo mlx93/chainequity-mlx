@@ -121,3 +121,4 @@ echo ""
 echo "The indexer should now be processing blockchain events!"
 echo ""
 
+

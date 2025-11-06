@@ -32,6 +32,14 @@ export const updateSymbolRequestSchema = z.object({
   newSymbol: z.string().min(1).max(11).regex(/^[A-Z0-9-]+$/),
 });
 
+// Mint tokens request schema
+export const mintTokensRequestSchema = z.object({
+  to: ethereumAddressSchema,
+  amount: z.string().regex(/^\d+$/).refine((val) => BigInt(val) > 0, {
+    message: 'Amount must be positive',
+  }),
+});
+
 // Validation middleware factory
 export function validateBody<T>(schema: z.ZodSchema<T>) {
   return (req: Request, res: Response, next: NextFunction) => {
