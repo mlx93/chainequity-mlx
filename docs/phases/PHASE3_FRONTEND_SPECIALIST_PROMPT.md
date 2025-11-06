@@ -36,7 +36,7 @@ Build a polished React frontend application that connects to the deployed backen
 - Service: `tender-achievement`
 - API URL: **https://tender-achievement-production-3aa5.up.railway.app/api**
 - Port: 3001
-- Status: ✅ All 10 endpoints operational
+- Status: ✅ All 11 endpoints operational
 - Health Check: Passing (database + blockchain connected)
 
 ### Railway Architecture
@@ -108,7 +108,7 @@ See `/RAILWAY_ARCHITECTURE.md` for complete deployment architecture details.
 - **wagmi**: `^2.4.0` (React hooks for Ethereum)
 - **@wagmi/core**: `^2.4.0`
 - **@wagmi/connectors**: `^2.4.0` (MetaMask connector)
-- **viem**: `^2.7.0` (underlying Ethereum library, peer dependency)
+- **viem**: `^2.38.0` (underlying Ethereum library, peer dependency)
 
 ### UI Components
 - **shadcn/ui**: Radix UI components + Tailwind styling
@@ -312,7 +312,21 @@ https://tender-achievement-production-3aa5.up.railway.app/api
    Response: Same as approve-wallet
    ```
 
-9. `POST /api/admin/stock-split` - Execute stock split
+9. `POST /api/admin/mint` - Mint tokens to approved wallet
+   ```typescript
+   Body: { to: string, amount: string }
+   Response: {
+     success: boolean,
+     transactionHash: string,
+     to: string,
+     amount: string,
+     blockExplorerUrl: string,
+     message: string,
+     timestamp: string
+   }
+   ```
+
+10. `POST /api/admin/stock-split` - Execute stock split
    ```typescript
    Body: { multiplier: number }
    Response: {
@@ -326,7 +340,7 @@ https://tender-achievement-production-3aa5.up.railway.app/api
    }
    ```
 
-10. `POST /api/admin/update-symbol` - Update token symbol
+11. `POST /api/admin/update-symbol` - Update token symbol
     ```typescript
     Body: { newSymbol: string }
     Response: {
@@ -476,6 +490,7 @@ event TokensBurned(address indexed from, uint256 amount, address indexed burner)
   export async function submitTransfer(to: string, amount: string): Promise<TransactionResponse>
   export async function approveWallet(address: string): Promise<TransactionResponse>
   export async function revokeWallet(address: string): Promise<TransactionResponse>
+  export async function mintTokens(to: string, amount: string): Promise<TransactionResponse>
   export async function executeStockSplit(multiplier: number): Promise<TransactionResponse>
   export async function updateSymbol(newSymbol: string): Promise<TransactionResponse>
   ```
