@@ -52,11 +52,10 @@ export default function DisplayNameEditor() {
   if (!address) return null
 
   return (
-    <div className="flex items-center justify-center gap-3 py-3">
+    <div className="flex items-center gap-2">
       {!isEditing ? (
         <>
-          <span className="text-sm text-muted-foreground">Display Name:</span>
-          <span className="text-lg font-semibold">{displayName}</span>
+          <span className="text-3xl font-bold">{displayName}</span>
           <Button
             variant="ghost"
             size="sm"
@@ -73,14 +72,14 @@ export default function DisplayNameEditor() {
             onChange={(e) => setEditValue(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder="Enter display name"
-            className="h-9 max-w-xs"
+            className="h-10 text-lg font-bold max-w-xs"
             autoFocus
           />
           <Button
             variant="default"
             size="sm"
             onClick={saveDisplayName}
-            className="h-9 w-9 p-0"
+            className="h-10 w-10 p-0"
           >
             <Check className="h-4 w-4" />
           </Button>
@@ -88,7 +87,7 @@ export default function DisplayNameEditor() {
             variant="ghost"
             size="sm"
             onClick={cancelEditing}
-            className="h-9 w-9 p-0"
+            className="h-10 w-10 p-0"
           >
             <X className="h-4 w-4" />
           </Button>
