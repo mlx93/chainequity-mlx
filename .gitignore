@@ -1,7 +1,9 @@
 <<<<<<< HEAD
 # Dependencies
 node_modules/
-package-lock.json
+# Allow package-lock.json in subdirectories (needed for Railway builds)
+# package-lock.json
+!/indexer/package-lock.json
 
 # Build outputs
 dist/
