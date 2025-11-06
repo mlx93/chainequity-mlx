@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useConnect } from 'wagmi'
+import { wagmiConfig } from '@/config/wagmi'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Wallet } from 'lucide-react'
@@ -15,6 +16,17 @@ export default function NotConnected() {
 
   const metaMaskConnector = connectors.find(c => c.id === 'metaMask')
   const hasMetaMask = typeof window !== 'undefined' && window.ethereum?.isMetaMask
+
+  // Debug: Log connector state
+  useEffect(() => {
+    console.log('=== Wagmi Connector Debug ===')
+    console.log('All connectors:', connectors)
+    console.log('Connector IDs:', connectors.map(c => c.id))
+    console.log('MetaMask connector found:', metaMaskConnector)
+    console.log('hasMetaMask:', hasMetaMask)
+    console.log('window.ethereum:', window.ethereum)
+    console.log('wagmiConfig connectors:', wagmiConfig?.connectors)
+  }, [connectors, metaMaskConnector, hasMetaMask])
 
   // Wait for client-side hydration before checking connectors
   if (!isClient) {
@@ -57,8 +69,23 @@ export default function NotConnected() {
                     const result = await connect({ connector: metaMaskConnector })
                     console.log('Connection result:', result)
                   } else if (hasMetaMask) {
-                    console.log('MetaMask detected but no connector, reloading...')
-                    window.location.reload()
+                    console.error('MetaMask detected but no wagmi connector found!')
+                    console.error('This should not happen - wagmi connector should be initialized')
+                    console.error('Available connectors:', connectors)
+                    console.error('Trying to create connector manually...')
+                    
+                    // Try to connect directly via window.ethereum as last resort
+                    try {
+                      const accounts = await window.ethereum.request({ 
+                        method: 'eth_requestAccounts' 
+                      })
+                      console.log('Direct connection successful:', accounts)
+                      // Force page reload to let wagmi pick up the connection
+                      window.location.reload()
+                    } catch (err) {
+                      console.error('Direct connection also failed:', err)
+                      alert(`MetaMask connection failed: ${err instanceof Error ? err.message : String(err)}\n\nCheck console for details.`)
+                    }
                   }
                 } catch (error) {
                   console.error('Connection error:', error)
