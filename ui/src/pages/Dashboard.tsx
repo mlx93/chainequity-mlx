@@ -37,7 +37,7 @@ export default function Dashboard() {
         <div className="grid gap-4 md:grid-cols-3">
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Total Supply</CardTitle>
+              <CardTitle className="text-base font-medium text-muted-foreground">Total Supply</CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-2xl font-bold">
@@ -48,7 +48,7 @@ export default function Dashboard() {
           </Card>
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Holders</CardTitle>
+              <CardTitle className="text-base font-medium text-muted-foreground">Holders</CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-2xl font-bold">{capTable.totalHolders ?? 0}</p>
@@ -57,7 +57,7 @@ export default function Dashboard() {
           </Card>
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Current Block</CardTitle>
+              <CardTitle className="text-base font-medium text-muted-foreground">Current Block</CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-2xl font-bold">{capTable.blockNumber?.toLocaleString() ?? 'N/A'}</p>
@@ -71,8 +71,8 @@ export default function Dashboard() {
       <div className="grid gap-4 md:grid-cols-3">
         <Card className="flex flex-col">
           <CardHeader className="pb-3">
-            <CardTitle className="text-base">Wallet Approval</CardTitle>
-            <CardDescription className="text-xs">Approve or revoke wallet addresses</CardDescription>
+            <CardTitle className="text-lg">Wallet Approval</CardTitle>
+            <CardDescription>Approve or revoke wallet addresses</CardDescription>
           </CardHeader>
           <CardContent className="flex-1">
             <ApprovalForm />
@@ -81,8 +81,8 @@ export default function Dashboard() {
 
         <Card className="flex flex-col">
           <CardHeader className="pb-3">
-            <CardTitle className="text-base">Mint Tokens</CardTitle>
-            <CardDescription className="text-xs">Mint tokens to approved wallets</CardDescription>
+            <CardTitle className="text-lg">Mint Tokens</CardTitle>
+            <CardDescription>Mint tokens to approved wallets</CardDescription>
           </CardHeader>
           <CardContent className="flex-1">
             <MintForm />
@@ -91,8 +91,8 @@ export default function Dashboard() {
 
         <Card className="flex flex-col">
           <CardHeader className="pb-3">
-            <CardTitle className="text-base">Corporate Actions</CardTitle>
-            <CardDescription className="text-xs">Execute stock splits and symbol changes</CardDescription>
+            <CardTitle className="text-lg">Corporate Actions</CardTitle>
+            <CardDescription>Execute stock splits and symbol changes</CardDescription>
           </CardHeader>
           <CardContent className="flex-1">
             <CorporateActions />
