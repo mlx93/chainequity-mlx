@@ -6,6 +6,7 @@ import { ADMIN_ADDRESSES } from '@/config/contracts'
 import BalanceCard from '@/components/investor/BalanceCard'
 import TransferForm from '@/components/investor/TransferForm'
 import TransactionHistory from '@/components/transactions/TransactionHistory'
+import DisplayNameEditor from '@/components/profile/DisplayNameEditor'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 
@@ -44,6 +45,9 @@ export default function InvestorView() {
           <Badge variant="secondary">Pending Approval</Badge>
         )}
       </div>
+
+      {/* Display Name Editor */}
+      <DisplayNameEditor />
 
       {/* Top Row: Balance and Transfer side by side */}
       <div className="grid gap-6 md:grid-cols-2">

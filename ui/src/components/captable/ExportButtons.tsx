@@ -1,31 +1,17 @@
 import { Button } from '@/components/ui/button'
 import { Download } from 'lucide-react'
+import { getDisplayName } from '@/hooks/useDisplayName'
 import type { CapTableResponse } from '@/types'
 
 interface ExportButtonsProps {
   capTable: CapTableResponse
 }
 
-// Map addresses to account names
-const getAccountName = (address: string): string => {
-  const addr = address.toLowerCase()
-  
-  // Known addresses
-  const addressMap: Record<string, string> = {
-    '0x4f10f93e2b0f5faf6b6e5a03e8e48f96921d24c6': 'Admin',
-    '0x0d9cf1dc3e134a736aafb1296d2b316742b5c13e': 'Investor A',
-    '0xefd94a1534959e04630899abdd5d768601f4af5b': 'Investor B',
-    '0x6264f29968e8fd2810cb79fb806ac65daf9db73d': 'Gnosis Safe',
-  }
-  
-  return addressMap[addr] || 'Unknown Wallet'
-}
-
 export default function ExportButtons({ capTable }: ExportButtonsProps) {
   const downloadCSV = () => {
     const headers = ['Account Name', 'Address', 'Balance', 'Ownership %']
     const rows = capTable.capTable.map(entry => [
-      getAccountName(entry.address),
+      getDisplayName(entry.address),
       entry.address,
       entry.balanceFormatted,
       entry.percentage + '%',
@@ -50,7 +36,7 @@ export default function ExportButtons({ capTable }: ExportButtonsProps) {
     const enrichedCapTable = {
       ...capTable,
       capTable: capTable.capTable.map(entry => ({
-        accountName: getAccountName(entry.address),
+        accountName: getDisplayName(entry.address),
         ...entry,
       })),
     }

@@ -1,5 +1,6 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { formatAddress } from '@/lib/utils'
+import { getDisplayName } from '@/hooks/useDisplayName'
 import type { CapTableResponse } from '@/types'
 import { ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -46,6 +47,7 @@ export default function CapTableGrid({
       <Table>
         <TableHeader>
           <TableRow>
+            <TableHead>Account Name</TableHead>
             <TableHead>
               <Button
                 variant="ghost"
@@ -90,7 +92,7 @@ export default function CapTableGrid({
         <TableBody>
           {sortedCapTable.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={3} className="text-center text-muted-foreground">
+              <TableCell colSpan={4} className="text-center text-muted-foreground">
                 No holders found
               </TableCell>
             </TableRow>
@@ -106,6 +108,9 @@ export default function CapTableGrid({
               
               return (
                 <TableRow key={entry?.address || 'unknown'}>
+                  <TableCell className="font-medium">
+                    {getDisplayName(entry?.address || '')}
+                  </TableCell>
                   <TableCell className="font-mono text-sm">
                     {formatAddress(entry?.address || '')}
                   </TableCell>
