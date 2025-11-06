@@ -18,6 +18,8 @@ export function useTransactions(params?: {
       fromBlock: params.fromBlock,
       toBlock: params.toBlock,
     } : undefined),
+    enabled: !!params?.address, // Only fetch if address is provided
+    retry: false, // Don't retry on 404
   })
 }
 

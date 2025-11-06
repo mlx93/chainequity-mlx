@@ -29,6 +29,7 @@ export default function TransferForm() {
   const { address } = useAccount()
   const queryClient = useQueryClient()
   const [toAddress, setToAddress] = useState<string>('')
+  const [showInlineError, setShowInlineError] = useState(false)
   const { data: recipientApproved } = useApprovalStatus(toAddress as `0x${string}` | undefined)
   const { data: balance, refetch: refetchBalance } = useBalance(address)
   const hasShownToast = useRef(false)
@@ -106,9 +107,9 @@ export default function TransferForm() {
   useEffect(() => {
     if (isReverted && hash && !hasShownToast.current) {
       hasShownToast.current = true
-      const errorMsg = receiptError?.message || 'Transaction reverted - recipient wallet not approved'
-      toast.error('Transfer failed on-chain', {
-        description: errorMsg,
+      setShowInlineError(true)
+      toast.error('Transaction failed - Recipient not approved', {
+        description: 'The smart contract rejected this transfer because the recipient wallet is not on the allowlist.',
         duration: 8000,
         action: {
           label: 'View on BaseScan',
@@ -121,8 +122,9 @@ export default function TransferForm() {
         reset()
         setToAddress('')
         resetWrite()
+        setShowInlineError(false)
         hasShownToast.current = false
-      }, 2000)
+      }, 8000)
     }
   }, [isReverted, hash, receiptError, reset, resetWrite])
 
@@ -230,6 +232,17 @@ export default function TransferForm() {
         >
           {isPending || isConfirming ? 'Processing...' : 'Transfer Tokens'}
         </Button>
+
+        {showInlineError && (
+          <div className="rounded-md bg-destructive/10 border border-destructive p-3">
+            <p className="text-sm font-medium text-destructive">
+              ⚠️ Transaction failed - Recipient not approved
+            </p>
+            <p className="text-xs text-destructive/80 mt-1">
+              Check the notification above for BaseScan link.
+            </p>
+          </div>
+        )}
       </form>
     </div>
   )
