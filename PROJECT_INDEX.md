@@ -1,8 +1,8 @@
 # ChainEquity Project - Master Index
 
 **Last Updated**: November 6, 2025  
-**Current Phase**: Phase 2A (Backend API) - Ready to Start  
-**Overall Progress**: 40% Complete (2 of 5 phases done)
+**Current Phase**: Phase 2A (Backend API) - ✅ COMPLETE & DEPLOYED  
+**Overall Progress**: 60% Complete (3 of 5 phases done)
 
 ---
 
@@ -10,10 +10,10 @@
 
 | Phase | Status | Report | Prompt |
 |-------|--------|--------|--------|
-| **Phase 1: Smart Contracts** | ✅ Complete | `PHASE1_COMPLETION_REPORT.md` | `PHASE1_CONTRACT_SPECIALIST_PROMPT.md` |
-| **Phase 2B: Event Indexer** | ✅ Complete | `PHASE2B_COMPLETE_FINAL_REPORT.md` | `PHASE2B_INDEXER_SPECIALIST_PROMPT.md` |
-| **Phase 2A: Backend API** | 🎯 Ready | - | `PHASE2A_BACKEND_SPECIALIST_PROMPT.md` |
-| **Phase 3: Frontend** | ⏳ Pending | - | (To be generated) |
+| **Phase 1: Smart Contracts** | ✅ Complete | `PHASE1_COMPLETION_REPORT.md` | `docs/phases/PHASE1_CONTRACT_SPECIALIST_PROMPT.md` |
+| **Phase 2B: Event Indexer** | ✅ Complete | `PHASE2B_COMPLETE_FINAL_REPORT.md` | `docs/phases/PHASE2B_INDEXER_SPECIALIST_PROMPT.md` |
+| **Phase 2A: Backend API** | ✅ Complete & Deployed | `PHASE2A_COMPLETION_REPORT.md` | `docs/phases/PHASE2A_BACKEND_SPECIALIST_PROMPT.md` |
+| **Phase 3: Frontend** | 🎯 Ready to Start | - | (To be generated) |
 | **Phase 4: Integration** | ⏳ Pending | - | (To be generated) |
 
 ---
@@ -37,15 +37,31 @@ Located in `/memory-bank/` - Essential context for all agents
 ---
 
 ### 🎯 Phase Implementation Prompts
-Ready-to-use prompts for sub-agents
+**Location**: `/docs/phases/` - Moved for better organization
 
 | Phase | Prompt File | Status | Output Report |
 |-------|-------------|--------|---------------|
-| Phase 1 | `PHASE1_CONTRACT_SPECIALIST_PROMPT.md` | ✅ Used | `PHASE1_COMPLETION_REPORT.md` |
-| Phase 2B | `PHASE2B_INDEXER_SPECIALIST_PROMPT.md` | ✅ Used | `PHASE2B_COMPLETE_FINAL_REPORT.md` |
-| Phase 2A | `PHASE2A_BACKEND_SPECIALIST_PROMPT.md` | 🎯 **Ready to Use** | (Pending) |
+| Phase 1 | `docs/phases/PHASE1_CONTRACT_SPECIALIST_PROMPT.md` | ✅ Used | `PHASE1_COMPLETION_REPORT.md` |
+| Phase 2B | `docs/phases/PHASE2B_INDEXER_SPECIALIST_PROMPT.md` | ✅ Used | `PHASE2B_COMPLETE_FINAL_REPORT.md` |
+| Phase 2A | `docs/phases/PHASE2A_BACKEND_SPECIALIST_PROMPT.md` | ✅ Used | `PHASE2A_COMPLETION_REPORT.md` |
 | Phase 3 | (TBD) | ⏳ To be generated | - |
 | Phase 4 | (TBD) | ⏳ To be generated | - |
+
+### 📂 Documentation Organization
+**Main Directory (`/`)**: Essential files only for Phase 3/4 orchestrator
+- Phase completion reports
+- Configuration files (wallet-addresses.txt)
+- Memory bank
+- Navigation docs
+
+**Docs Directory (`/docs/`)**: Reference materials organized by category
+- `/docs/phases/` - Implementation prompts
+- `/docs/testing/` - Testing guides and results
+- `/docs/deployment/` - Deployment guides
+- `/docs/troubleshooting/` - Issue resolution
+- `/docs/railway/` - Railway-specific docs
+
+**See**: `docs/ORGANIZATION.md` for complete documentation structure
 
 ---
 
@@ -121,9 +137,17 @@ Located in `/docs/railway/`
 - **ABI**: `/contracts/out/GatedToken.sol/GatedToken.json`
 
 ### Database (Railway PostgreSQL)
-- **Public URL**: `postgresql://postgres:dYjiuLvfSvaOjsNHXhtAbWHtbwWPFpUW@nozomi.proxy.rlwy.net:25369/railway`
+- **Public URL**: `postgresql://postgres:opjpippLFhoVcIuuMllwtrKcSGTBJgar@yamanote.proxy.rlwy.net:23802/railway`
+- **Internal URL**: `postgresql://postgres:opjpippLFhoVcIuuMllwtrKcSGTBJgar@postgres.railway.internal:5432/railway`
 - **Tables**: `transfers`, `balances`, `approvals`, `corporate_actions`
 - **Indexer Status**: ✅ Running 24/7
+- **Backend Connection**: ✅ Using public URL
+
+### Backend API (Railway)
+- **URL**: https://tender-achievement-production-3aa5.up.railway.app/api
+- **Health Check**: ✅ Passing
+- **Status**: ✅ Deployed and operational
+- **Port**: 3001 (Railway auto-assigned)
 
 ### Wallets
 - **Admin**: `0x4f10f93e2b0f5faf6b6e5a03e8e48f96921d24c6`

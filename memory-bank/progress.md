@@ -184,8 +184,10 @@ corporate_actions (id, action_type, transaction_hash, block_number,
 
 ### Deployment Status
 - ✅ Local development ready (`npm run dev`)
-- ⏳ Railway deployment pending
-- ⏳ Manual endpoint testing pending
+- ✅ Deployed to Railway (service: tender-achievement)
+- ✅ Health check passing (database + blockchain connected)
+- ✅ All endpoints verified working
+- ✅ Integration tests passing
 
 ### Key Files Created
 - `/backend/src/index.ts` - Express server entry point

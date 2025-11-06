@@ -2,7 +2,7 @@
 
 ## Current Work Focus
 
-**Primary Goal**: Phase 2A (Backend API) ✅ COMPLETE - Express/TypeScript API implemented with 10 endpoints (5 GET for data queries, 5 POST for transaction submission). Backend is ready for Railway deployment and testing. Next step is Phase 3 (Frontend) development with React + Vite + wagmi.
+**Primary Goal**: Phase 2A (Backend API) ✅ COMPLETE and DEPLOYED - Express/TypeScript API running on Railway at https://tender-achievement-production-3aa5.up.railway.app/api with all 10 endpoints operational. All integration tests passing. Phase 2B (Indexer) running 24/7. Ready for Phase 3 (Frontend) development with React + Vite + wagmi.
 
 ## Recent Changes (Last Session)
 
@@ -39,6 +39,19 @@
 
 **Files Created**: 18 source files in `/backend/src/` directory with proper structure
 
+### Railway Deployment Architecture (Current)
+**Project**: superb-trust (Railway)
+**Services**:
+1. **PostgreSQL Database**: Running, shared by indexer and backend
+2. **chainequity-mlx (Indexer)**: Running 24/7, monitors blockchain, writes to database (internal URL)
+3. **tender-achievement (Backend)**: Running, serves API at https://tender-achievement-production-3aa5.up.railway.app/api (uses public database URL)
+
+**Key Configuration**:
+- Indexer root: `indexer/` (GitHub repo, auto-deploys)
+- Backend root: `backend/` (GitHub repo, auto-deploys)
+- Database: PostgreSQL in same Railway project (enables internal DNS)
+- See `RAILWAY_ARCHITECTURE.md` for complete details
+
 ### Railway Database Troubleshooting
 1. **Attempted**: `railway run npm run init-db` locally
    - **Result**: Failed with `ENOTFOUND postgres.railway.internal`
@@ -64,52 +77,43 @@ From `RAILWAY_FIX_COMPLETE.md`: The Railway project was misconfigured from the s
 
 ## Next Steps (Ordered by Priority)
 
-### 1. Deploy Phase 2A Backend to Railway [IMMEDIATE - NEXT]
-Backend implementation is complete. Deploy to Railway:
+### 1. ✅ Phase 2A Backend Deployed [COMPLETE]
+Backend successfully deployed to Railway:
 
-**Deployment Steps**:
-```bash
-cd /Users/mylessjs/Desktop/ChainEquity/backend
-railway link  # Select superb-trust or create new backend service
-railway variables set NODE_ENV=production
-railway variables set PORT=3000
-railway variables set BASE_SEPOLIA_RPC=https://sepolia.base.org
-railway variables set CONTRACT_ADDRESS=0xFCc9E74019a2be5808d63A941a84dEbE0fC39964
-railway variables set CHAIN_ID=84532
-railway variables set DATABASE_URL=postgresql://postgres:opjpippLFhoVcIuuMllwtrKcSGTBJgar@yamanote.proxy.rlwy.net:23802/railway
-railway variables set ADMIN_PRIVATE_KEY=0x948123033193e7bdf6bc2a2dc4cfc911a99977beebacaed5e545cac418eb5fbe
-railway variables set ADMIN_ADDRESS=0x4f10f93e2b0f5faf6b6e5a03e8e48f96921d24c6
-railway variables set SAFE_ADDRESS=0x6264F29968e8fd2810cB79fb806aC65dAf9db73d
-railway up
-railway logs  # Verify deployment
-```
+**Deployment Complete**:
+- ✅ Service: tender-achievement
+- ✅ URL: https://tender-achievement-production-3aa5.up.railway.app/api
+- ✅ Port: 3001 (Railway auto-assigned)
+- ✅ Health check: Passing
+- ✅ Database: Connected
+- ✅ Blockchain: Connected
+- ✅ All endpoints: Working
+- ✅ Integration tests: Passing
 
-**Verification**:
-- [ ] Backend deployed and accessible
-- [ ] GET /api/health returns 200
-- [ ] Database connection working
-- [ ] Can query cap-table endpoint
-- [ ] Save Railway URL for Phase 3
+**Issues Fixed During Deployment**:
+- ✅ Database column name mismatch (`is_approved` vs `approved`) - Fixed
+- ✅ Root directory configuration - Set to `backend/`
+- ✅ Environment variables - All set correctly
 
-### 2. Test Phase 2A Backend Endpoints [AFTER DEPLOYMENT]
-Manual testing of all endpoints:
-- [ ] Test GET /api/health
-- [ ] Test GET /api/cap-table
-- [ ] Test GET /api/transfers
-- [ ] Test GET /api/corporate-actions
-- [ ] Test GET /api/wallet/:address
-- [ ] Test POST /api/transfer (requires approved recipient)
-- [ ] Test POST /api/admin/approve-wallet
-- [ ] Test transaction submission to blockchain
+### 2. ✅ Phase 2A Backend Testing [COMPLETE]
+All endpoints verified:
+- ✅ GET /api/health - Working
+- ✅ GET /api/cap-table - Working
+- ✅ GET /api/transfers - Working
+- ✅ GET /api/corporate-actions - Working
+- ✅ GET /api/wallet/:address - Working (after column fix)
+- ✅ POST endpoints - Correctly require Gnosis Safe (expected behavior)
+- ✅ Error handling - Working correctly
 
-### 3. Generate Phase 3 Frontend Prompt [AFTER 2A DEPLOYMENT]
-Once backend is deployed and tested, create comprehensive prompt for frontend agent including:
-- Backend API URL (from Railway deployment)
-- All available endpoints with request/response formats
-- Contract information and ABI
-- Frontend tech stack (React + Vite + wagmi + shadcn/ui)
+### 3. Generate Phase 3 Frontend Prompt [NEXT - IMMEDIATE]
+Create comprehensive prompt for frontend agent including:
+- **Backend API URL**: https://tender-achievement-production-3aa5.up.railway.app/api
+- All 10 endpoints with request/response formats (documented in PHASE2A_COMPLETION_REPORT.md)
+- Contract information (address: 0xFCc9E74019a2be5808d63A941a84dEbE0fC39964, ABI location)
+- Frontend tech stack (React + Vite + wagmi + shadcn/ui + Tailwind)
 - Vercel deployment instructions
 - Success criteria and testing requirements
+- Reference: `RAILWAY_ARCHITECTURE.md` for deployment context
 
 ### 4. Implement Phase 3 Frontend [AFTER 2A TESTING]
 Hand off to Frontend Specialist sub-agent who will:
