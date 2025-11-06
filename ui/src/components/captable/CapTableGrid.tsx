@@ -101,7 +101,7 @@ export default function CapTableGrid({
               const balanceNum = isNaN(balanceValue) || !isFinite(balanceValue) ? 0 : balanceValue / 1e18
               const balance = typeof balanceNum === 'number' && !isNaN(balanceNum) ? balanceNum : 0
               
-              const ownershipValue = entry?.ownershipPercent ? parseFloat(String(entry.ownershipPercent)) : 0
+              const ownershipValue = entry?.percentage ? parseFloat(String(entry.percentage)) : 0
               const ownership = isNaN(ownershipValue) || !isFinite(ownershipValue) ? 0 : ownershipValue
               
               return (

@@ -7,6 +7,7 @@ import {
 } from '../services/database.service';
 import { formatTokenAmount } from '../services/blockchain.service';
 import { TransferRow, CorporateActionRow } from '../types';
+import { publicClient } from '../config/viem';
 
 const router = Router();
 
@@ -22,6 +23,9 @@ router.get('/cap-table', async (req: Request, res: Response) => {
   try {
     const minBalance = req.query.minBalance ? BigInt(req.query.minBalance as string) : BigInt(0);
     const balances = await getCapTable();
+    
+    // Get current block number
+    const blockNumber = await publicClient.getBlockNumber();
     
     // Calculate total supply
     let totalSupply = BigInt(0);
@@ -52,6 +56,7 @@ router.get('/cap-table', async (req: Request, res: Response) => {
       capTable,
       totalSupply: totalSupply.toString(),
       totalHolders: capTable.length,
+      blockNumber: Number(blockNumber),
       timestamp: new Date().toISOString(),
     });
   } catch (error) {
