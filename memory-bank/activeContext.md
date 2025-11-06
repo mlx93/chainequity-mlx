@@ -106,7 +106,7 @@ All endpoints verified:
 - ✅ Error handling - Working correctly
 
 ### 3. ✅ Phase 3 Frontend Complete [COMPLETE]
-Frontend application built and ready for deployment:
+Frontend application built and deployed:
 - ✅ React 19 + Vite + TypeScript configured
 - ✅ wagmi integrated with Base Sepolia + MetaMask
 - ✅ shadcn/ui components styled with Tailwind
@@ -115,7 +115,14 @@ Frontend application built and ready for deployment:
 - ✅ Cap Table with CSV/JSON export
 - ✅ All 14 functional requirements from PRD implemented
 - ✅ Build successful (639 KB bundle)
-- ⏭️ **Next**: Deploy to Vercel (instructions in PHASE3_FRONTEND_COMPLETION_REPORT.md)
+- ✅ **Deployed to Vercel**: https://chainequity-mlx.vercel.app/
+- ✅ **MetaMask connection working**: Connector ID fix applied
+
+**MetaMask Connection Issue Resolution**:
+- **Root Cause**: wagmi connector ID mismatch - code was looking for `'metaMask'` but wagmi creates connector with ID `'metaMaskSDK'`
+- **Solution**: Updated connector lookup in `ui/src/pages/NotConnected.tsx` to find `'metaMaskSDK'` (or `'metaMask'` for backward compatibility)
+- **CSP Configuration**: Added permissive CSP in `ui/vercel.json` with `unsafe-eval` for wagmi/viem requirements
+- **Status**: ✅ MetaMask connection modal appears on first click, no console errors
 
 ### 4. Phase 4 Integration & Testing [NEXT - IMMEDIATE]
 - End-to-end testing of all components

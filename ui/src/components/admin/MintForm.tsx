@@ -10,7 +10,6 @@ import { toast } from 'sonner'
 import { isAddress, parseUnits } from 'viem'
 import { useApprovalStatus } from '@/hooks/useApprovalStatus'
 import { Badge } from '@/components/ui/badge'
-import { Alert, AlertDescription } from '@/components/ui/alert'
 
 const mintSchema = z.object({
   to: z.string().refine(val => isAddress(val), 'Invalid Ethereum address'),

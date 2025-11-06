@@ -6,8 +6,8 @@ export interface CapTableEntry {
 
 export interface CapTableResponse {
   totalSupply: string
-  holderCount: number
-  blockNumber: number
+  totalHolders: number
+  blockNumber?: number
   timestamp: string
   capTable: CapTableEntry[]
 }

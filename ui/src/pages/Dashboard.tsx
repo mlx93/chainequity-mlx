@@ -59,7 +59,7 @@ export default function Dashboard() {
               <CardTitle className="text-sm font-medium text-muted-foreground">Holders</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-2xl font-bold">{capTable.holderCount ?? 0}</p>
+              <p className="text-2xl font-bold">{capTable.totalHolders ?? 0}</p>
               <p className="text-xs text-muted-foreground mt-1">approved wallets</p>
             </CardContent>
           </Card>

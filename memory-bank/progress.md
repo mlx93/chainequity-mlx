@@ -234,9 +234,11 @@ corporate_actions (id, action_type, transaction_hash, block_number,
 - ✅ All components rendering correctly
 
 ### Deployment Status
-- ⏳ Ready for Vercel deployment
-- ⏳ Environment variables configured
-- ⏳ Deployment instructions provided
+- ✅ **Deployed to Vercel**: https://chainequity-mlx.vercel.app/
+- ✅ **Root Directory**: Set to `ui/` in Vercel dashboard
+- ✅ **vercel.json**: Located in `ui/` directory with CSP headers configured
+- ✅ **Environment variables**: Configured in Vercel dashboard
+- ✅ **MetaMask connection**: Working (connector ID fix applied)
 
 ### Key Files Created
 - `/ui/src/` - 38 source files (pages, components, hooks, config)
@@ -249,8 +251,26 @@ corporate_actions (id, action_type, transaction_hash, block_number,
 - `/ui/src/lib/api.ts` - Backend API client (10+ functions)
 - `PHASE3_FRONTEND_COMPLETION_REPORT.md` - Complete completion report
 
+### MetaMask Connection Issue Resolution
+**Problem**: MetaMask connection modal not appearing on first click, requiring fallback direct connection.
+
+**Root Causes Identified**:
+1. **Connector ID Mismatch**: Code was looking for connector ID `'metaMask'` but wagmi creates it as `'metaMaskSDK'`
+   - Console showed: `Connector IDs: ['metaMaskSDK', 'com.coinbase.wallet']`
+   - Code was doing: `connectors.find(c => c.id === 'metaMask')` → returned `undefined`
+2. **CSP Configuration**: Initial CSP issues resolved with permissive policy in `ui/vercel.json`
+3. **Vercel Configuration**: Consolidated `vercel.json` into `ui/` directory to match Root Directory setting
+
+**Solution Applied**:
+- Updated `ui/src/pages/NotConnected.tsx` to use: `connectors.find(c => c.id === 'metaMaskSDK' || c.id === 'metaMask')`
+- Added CSP headers in `ui/vercel.json` with `unsafe-eval` for wagmi/viem
+- Removed conflicting `ui/public/_headers` file
+- Removed CSP meta tag from `ui/index.html` (using HTTP headers only)
+
+**Result**: ✅ MetaMask connection works on first click, no console errors, modal appears correctly.
+
 ### Next Steps for Phase 3
-1. ⏭️ Deploy to Vercel (instructions provided in completion report)
+1. ✅ Deploy to Vercel - **COMPLETE**
 2. ⏭️ Test all user flows end-to-end
 3. ⏭️ Verify integration with backend API
 4. ⏭️ Verify integration with smart contract
@@ -269,7 +289,7 @@ corporate_actions (id, action_type, transaction_hash, block_number,
 - ✅ Completion report created (`PHASE4_COMPLETION_REPORT.md`)
 
 ### Pending Work
-- ⏳ Manual testing of all 7 demo scenarios (requires MetaMask)
+- ⏳ Manual testing of all 7 demo scenarios (MetaMask connection now working ✅)
 - ⏳ Transaction execution verification
 - ⏳ Frontend-Blockchain integration testing
 - ⏳ Indexer event capture verification
@@ -280,7 +300,7 @@ corporate_actions (id, action_type, transaction_hash, block_number,
 - ✅ Frontend deployed and accessible
 - ✅ Indexer running and monitoring
 - ✅ Database schema initialized
-- ⏳ Can connect wallet to frontend (pending manual test)
+- ✅ Can connect wallet to frontend (MetaMask connection working)
 - ⏳ Can view cap table with correct balances (pending manual test)
 - ⏳ Can execute transfer between approved wallets (pending manual test)
 - ⏳ Transfer rejection to non-approved wallet works (pending manual test)
