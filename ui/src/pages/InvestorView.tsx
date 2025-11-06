@@ -22,38 +22,38 @@ export default function InvestorView() {
       </div>
 
       <div className="flex items-center gap-2">
-        <span className="text-sm">Wallet Status:</span>
+        <span className="text-xs font-medium">Wallet Status:</span>
         {isApproved ? (
-          <Badge variant="default">Approved</Badge>
+          <Badge variant="default" className="text-xs">Approved</Badge>
         ) : (
-          <Badge variant="secondary">Not Approved</Badge>
+          <Badge variant="secondary" className="text-xs">Not Approved</Badge>
         )}
         {!isApproved && (
-          <p className="text-sm text-muted-foreground">
+          <p className="text-xs text-muted-foreground">
             Contact an admin to approve your wallet
           </p>
         )}
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2">
+      <div className="grid gap-4 md:grid-cols-2">
         <BalanceCard />
-        <Card>
-          <CardHeader>
-            <CardTitle>Transfer Tokens</CardTitle>
-            <CardDescription>
+        <Card className="flex flex-col">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base">Transfer Tokens</CardTitle>
+            <CardDescription className="text-xs">
               Send tokens to other approved investors
             </CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="flex-1">
             <TransferForm />
           </CardContent>
         </Card>
       </div>
 
       <Card>
-        <CardHeader>
-          <CardTitle>Transaction History</CardTitle>
-          <CardDescription>Your recent transfers</CardDescription>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base">Transaction History</CardTitle>
+          <CardDescription className="text-xs">Your recent transfers</CardDescription>
         </CardHeader>
         <CardContent>
           <TransactionHistory address={address} />

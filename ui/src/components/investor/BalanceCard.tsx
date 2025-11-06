@@ -20,9 +20,9 @@ export default function BalanceCard() {
   if (balanceLoading || capTableLoading || symbolLoading) {
     return (
       <Card>
-        <CardHeader>
-          <CardTitle>Balance</CardTitle>
-          <CardDescription>Your token holdings</CardDescription>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base">Balance</CardTitle>
+          <CardDescription className="text-xs">Your token holdings</CardDescription>
         </CardHeader>
         <CardContent>
           <Skeleton className="h-8 w-32" />
@@ -40,12 +40,12 @@ export default function BalanceCard() {
     : 0
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Balance</CardTitle>
-        <CardDescription>Your token holdings</CardDescription>
+    <Card className="flex flex-col">
+      <CardHeader className="pb-3">
+        <CardTitle className="text-base">Balance</CardTitle>
+        <CardDescription className="text-xs">Your token holdings</CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="flex-1">
         <div className="space-y-2">
           <div>
             <p className="text-3xl font-bold">
@@ -54,7 +54,7 @@ export default function BalanceCard() {
           </div>
           {capTable && balanceValue > 0 && (
             <div>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-xs text-muted-foreground">
                 Ownership: {ownershipPercent.toFixed(4)}%
               </p>
             </div>

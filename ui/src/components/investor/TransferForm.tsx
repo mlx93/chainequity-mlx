@@ -13,7 +13,6 @@ import { useApprovalStatus } from '@/hooks/useApprovalStatus'
 import { useBalance } from '@/hooks/useBalance'
 import { getBlockExplorerUrl } from '@/lib/utils'
 import { Badge } from '@/components/ui/badge'
-import { Alert, AlertDescription } from '@/components/ui/alert'
 
 const transferSchema = z.object({
   to: z.string().refine(val => isAddress(val), 'Invalid Ethereum address'),
@@ -121,52 +120,52 @@ export default function TransferForm() {
   }
 
   return (
-    <div className="space-y-4">
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-        <div className="space-y-2">
-          <Label htmlFor="to">Recipient Address</Label>
+    <div className="space-y-3">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-3">
+        <div className="space-y-1.5">
+          <Label htmlFor="to" className="text-xs">Recipient Address</Label>
           <Input
             id="to"
             {...register('to')}
             placeholder="0x..."
+            className="h-9 text-sm"
             onChange={(e) => {
               register('to').onChange(e)
               checkAddress()
             }}
           />
           {errors.to && (
-            <p className="text-sm text-destructive">{errors.to.message}</p>
+            <p className="text-xs text-destructive">{errors.to.message}</p>
           )}
         </div>
 
         {toAddress && isAddress(toAddress) && (
           <div>
             {recipientApproved ? (
-              <Badge variant="default">Recipient Approved</Badge>
+              <Badge variant="default" className="text-xs">Recipient Approved</Badge>
             ) : (
-              <Alert variant="destructive">
-                <AlertDescription>
-                  Recipient wallet is not approved. Transfer will fail on-chain.
-                </AlertDescription>
-              </Alert>
+              <p className="text-xs text-destructive">
+                Recipient wallet is not approved. Transfer will fail on-chain.
+              </p>
             )}
           </div>
         )}
 
-        <div className="space-y-2">
-          <Label htmlFor="amount">Amount</Label>
+        <div className="space-y-1.5">
+          <Label htmlFor="amount" className="text-xs">Amount</Label>
           <Input
             id="amount"
             type="number"
             step="0.000001"
             {...register('amount')}
             placeholder="100"
+            className="h-9 text-sm"
           />
           {errors.amount && (
-            <p className="text-sm text-destructive">{errors.amount.message}</p>
+            <p className="text-xs text-destructive">{errors.amount.message}</p>
           )}
           {amountError && (
-            <p className="text-sm text-destructive">{amountError}</p>
+            <p className="text-xs text-destructive">{amountError}</p>
           )}
           {balance !== undefined && balance !== null && (
             <p className="text-xs text-muted-foreground">
@@ -178,7 +177,7 @@ export default function TransferForm() {
         <Button
           type="submit"
           disabled={isPending || isConfirming || !recipientApproved || !!amountError}
-          className="w-full"
+          className="w-full h-9 text-sm"
         >
           {isPending || isConfirming ? 'Processing...' : 'Transfer Tokens'}
         </Button>
