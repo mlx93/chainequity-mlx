@@ -107,7 +107,7 @@ export async function getWalletInfo(address: string) {
   
   // Get approval status
   const approvalResult = await pool.query<ApprovalRow>(
-    'SELECT is_approved, approved_at, revoked_at FROM approvals WHERE address = $1',
+    'SELECT approved as is_approved, approved_at, revoked_at FROM approvals WHERE address = $1',
     [normalizedAddress]
   );
   
@@ -141,11 +141,11 @@ export async function getWalletInfo(address: string) {
 }
 
 export async function isWalletApproved(address: string): Promise<boolean> {
-  const result = await pool.query<ApprovalRow>(
-    'SELECT is_approved FROM approvals WHERE address = $1',
+  const result = await pool.query<{ approved: boolean }>(
+    'SELECT approved FROM approvals WHERE address = $1',
     [address.toLowerCase()]
   );
   
-  return result.rows[0]?.is_approved || false;
+  return result.rows[0]?.approved || false;
 }
 
