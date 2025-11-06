@@ -93,15 +93,15 @@ export default function CorporateActions() {
   }
 
   return (
-    <Tabs defaultValue="split">
-      <TabsList>
-        <TabsTrigger value="split">Stock Split</TabsTrigger>
-        <TabsTrigger value="symbol">Change Symbol</TabsTrigger>
+    <Tabs defaultValue="split" className="w-full">
+      <TabsList className="grid w-full grid-cols-2 h-9">
+        <TabsTrigger value="split" className="text-xs">Stock Split</TabsTrigger>
+        <TabsTrigger value="symbol" className="text-xs">Change Symbol</TabsTrigger>
       </TabsList>
-      <TabsContent value="split" className="space-y-4">
-        <form onSubmit={handleSplitSubmit(onSplitSubmit)} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="multiplier">Multiplier</Label>
+      <TabsContent value="split" className="space-y-3 mt-3">
+        <form onSubmit={handleSplitSubmit(onSplitSubmit)} className="space-y-3">
+          <div className="space-y-1.5">
+            <Label htmlFor="multiplier" className="text-xs">Multiplier</Label>
             <Input
               id="multiplier"
               type="number"
@@ -109,42 +109,43 @@ export default function CorporateActions() {
               min="2"
               {...registerSplit('multiplier', { valueAsNumber: true })}
               placeholder="7"
+              className="h-9 text-sm"
             />
             {splitErrors.multiplier && (
-              <p className="text-sm text-destructive">{splitErrors.multiplier.message}</p>
+              <p className="text-xs text-destructive">{splitErrors.multiplier.message}</p>
             )}
-            <p className="text-sm text-muted-foreground">
+            <p className="text-xs text-muted-foreground">
               All token balances will be multiplied by this factor
             </p>
           </div>
-          <Button type="submit" disabled={splitLoading} className="w-full">
+          <Button type="submit" disabled={splitLoading} className="w-full h-9 text-sm">
             {splitLoading ? 'Executing...' : 'Execute Stock Split'}
           </Button>
         </form>
       </TabsContent>
-      <TabsContent value="symbol" className="space-y-4">
-        <div className="space-y-2">
-          <p className="text-sm text-muted-foreground">
-            Current Symbol: <span className="font-mono font-semibold">{currentSymbol as string || 'Loading...'}</span>
+      <TabsContent value="symbol" className="space-y-3 mt-3">
+        <div>
+          <p className="text-xs text-muted-foreground">
+            Current: <span className="font-mono font-semibold">{currentSymbol as string || 'Loading...'}</span>
           </p>
         </div>
-        <form onSubmit={handleSymbolSubmit(onSymbolSubmit)} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="newSymbol">New Symbol</Label>
+        <form onSubmit={handleSymbolSubmit(onSymbolSubmit)} className="space-y-3">
+          <div className="space-y-1.5">
+            <Label htmlFor="newSymbol" className="text-xs">New Symbol</Label>
             <Input
               id="newSymbol"
               {...registerSymbol('newSymbol')}
               placeholder="CHAINEQUITY-B"
-              className="uppercase"
+              className="uppercase h-9 text-sm"
             />
             {symbolErrors.newSymbol && (
-              <p className="text-sm text-destructive">{symbolErrors.newSymbol.message}</p>
+              <p className="text-xs text-destructive">{symbolErrors.newSymbol.message}</p>
             )}
-            <p className="text-sm text-muted-foreground">
-              2-6 uppercase alphanumeric characters
+            <p className="text-xs text-muted-foreground">
+              2-6 uppercase characters
             </p>
           </div>
-          <Button type="submit" disabled={symbolLoading} className="w-full">
+          <Button type="submit" disabled={symbolLoading} className="w-full h-9 text-sm">
             {symbolLoading ? 'Updating...' : 'Change Symbol'}
           </Button>
         </form>

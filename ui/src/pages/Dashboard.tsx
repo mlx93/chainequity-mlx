@@ -44,66 +44,69 @@ export default function Dashboard() {
       {capTable && (
         <div className="grid gap-4 md:grid-cols-3">
           <Card>
-            <CardHeader>
-              <CardTitle>Total Supply</CardTitle>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">Total Supply</CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-2xl font-bold">
-                {capTable.totalSupply ? (parseFloat(capTable.totalSupply) / 1e18).toLocaleString() : '0'} tokens
+                {capTable.totalSupply ? (parseFloat(capTable.totalSupply) / 1e18).toLocaleString() : '0'}
               </p>
+              <p className="text-xs text-muted-foreground mt-1">tokens</p>
             </CardContent>
           </Card>
           <Card>
-            <CardHeader>
-              <CardTitle>Holders</CardTitle>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">Holders</CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-2xl font-bold">{capTable.holderCount ?? 0}</p>
+              <p className="text-xs text-muted-foreground mt-1">approved wallets</p>
             </CardContent>
           </Card>
           <Card>
-            <CardHeader>
-              <CardTitle>Current Block</CardTitle>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">Current Block</CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-2xl font-bold">{capTable.blockNumber?.toLocaleString() ?? 'N/A'}</p>
+              <p className="text-xs text-muted-foreground mt-1">Base Sepolia</p>
             </CardContent>
           </Card>
         </div>
       )}
 
-      {/* Admin Actions */}
-      <div className="grid gap-6 md:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle>Wallet Approval</CardTitle>
-            <CardDescription>Approve or revoke wallet addresses</CardDescription>
+      {/* Admin Actions - Three Column Layout */}
+      <div className="grid gap-4 md:grid-cols-3">
+        <Card className="flex flex-col">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base">Wallet Approval</CardTitle>
+            <CardDescription className="text-xs">Approve or revoke wallet addresses</CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="flex-1">
             <ApprovalForm />
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Mint Tokens</CardTitle>
-            <CardDescription>Mint tokens to approved wallets</CardDescription>
+        <Card className="flex flex-col">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base">Mint Tokens</CardTitle>
+            <CardDescription className="text-xs">Mint tokens to approved wallets</CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="flex-1">
             <MintForm />
           </CardContent>
         </Card>
-      </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Corporate Actions</CardTitle>
-          <CardDescription>Execute stock splits and symbol changes</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <CorporateActions />
-        </CardContent>
-      </Card>
+        <Card className="flex flex-col">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base">Corporate Actions</CardTitle>
+            <CardDescription className="text-xs">Execute stock splits and symbol changes</CardDescription>
+          </CardHeader>
+          <CardContent className="flex-1">
+            <CorporateActions />
+          </CardContent>
+        </Card>
+      </div>
     </div>
   )
 }

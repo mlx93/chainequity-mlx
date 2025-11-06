@@ -88,50 +88,49 @@ export default function ApprovalForm() {
   }
 
   return (
-    <div className="space-y-4">
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-        <div className="space-y-2">
-          <Label htmlFor="address">Wallet Address</Label>
+    <div className="space-y-3">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-3">
+        <div className="space-y-1.5">
+          <Label htmlFor="address" className="text-xs">Wallet Address</Label>
           <Input
             id="address"
             {...register('address')}
             placeholder="0x..."
+            className="h-9 text-sm"
             onChange={(e) => {
               register('address').onChange(e)
               checkStatus()
             }}
           />
           {errors.address && (
-            <p className="text-sm text-destructive">{errors.address.message}</p>
+            <p className="text-xs text-destructive">{errors.address.message}</p>
           )}
         </div>
 
         {address && isAddress(address) && (
           <div className="flex items-center gap-2">
-            <span className="text-sm">Status:</span>
             {isApproved === true ? (
-              <Badge variant="default">Approved</Badge>
+              <Badge variant="default" className="text-xs">Approved</Badge>
             ) : (
-              <Badge variant="secondary">Not Approved</Badge>
+              <Badge variant="secondary" className="text-xs">Not Approved</Badge>
             )}
           </div>
         )}
 
-        <div className="flex gap-2">
-          <Button type="submit" disabled={loading} className="flex-1">
-            {loading ? 'Approving...' : 'Approve Wallet'}
+        <Button type="submit" disabled={loading} className="w-full h-9 text-sm">
+          {loading ? 'Approving...' : 'Approve Wallet'}
+        </Button>
+        {isApproved === true && (
+          <Button
+            type="button"
+            variant="outline"
+            onClick={handleRevoke}
+            disabled={loading}
+            className="w-full h-9 text-sm"
+          >
+            Revoke
           </Button>
-          {isApproved === true && (
-            <Button
-              type="button"
-              variant="destructive"
-              onClick={handleRevoke}
-              disabled={loading}
-            >
-              Revoke
-            </Button>
-          )}
-        </div>
+        )}
       </form>
     </div>
   )
