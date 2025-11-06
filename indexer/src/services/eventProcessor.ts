@@ -23,6 +23,18 @@ export async function processTransferEvent(
     eventType = 'burn';
   }
 
+  // Check if this transaction has already been processed
+  const existing = await pool.query(
+    'SELECT id FROM transfers WHERE transaction_hash = $1',
+    [log.transactionHash]
+  );
+
+  // If transaction already exists, skip balance update
+  if (existing.rows.length > 0) {
+    console.log(`⏭️  Skipping duplicate transaction: ${log.transactionHash}`);
+    return;
+  }
+
   // Insert transfer record
   await pool.query(`
     INSERT INTO transfers (
@@ -45,7 +57,7 @@ export async function processTransferEvent(
     eventType,
   ]);
 
-  // Update balances
+  // Update balances (only if transaction wasn't a duplicate)
   await updateBalances(fromAddress, toAddress, amount, blockNumber);
 
   console.log(`✅ Processed ${eventType}: ${amount.toString()} from ${fromAddress.slice(0, 10)}... to ${toAddress.slice(0, 10)}...`);
