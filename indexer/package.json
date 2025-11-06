@@ -5,7 +5,8 @@
   "main": "dist/index.js",
   "scripts": {
     "dev": "nodemon --exec ts-node src/index.ts",
-    "build": "tsc",
+    "build": "tsc && npm run copy-files",
+    "copy-files": "mkdir -p dist/db && cp src/db/schema.sql dist/db/ && mkdir -p dist/abis && cp src/abis/GatedToken.json dist/abis/",
     "start": "node dist/index.js",
     "init-db": "ts-node src/db/initSchema.ts"
   },

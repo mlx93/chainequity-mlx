@@ -2,7 +2,7 @@ import { pool } from '../config/database';
 import fs from 'fs';
 import path from 'path';
 
-async function initializeSchema() {
+export async function initializeSchema() {
   try {
     console.log('📦 Initializing database schema...');
     
@@ -26,11 +26,23 @@ async function initializeSchema() {
     
   } catch (error) {
     console.error('❌ Schema initialization failed:', error);
-    process.exit(1);
-  } finally {
-    await pool.end();
+    throw error;
   }
 }
 
-initializeSchema();
+// Only run if executed directly (not imported)
+if (require.main === module) {
+  initializeSchema()
+    .then(() => {
+      console.log('✅ Schema initialization complete');
+      process.exit(0);
+    })
+    .catch((error) => {
+      console.error('❌ Failed:', error);
+      process.exit(1);
+    })
+    .finally(() => {
+      pool.end();
+    });
+}
 
