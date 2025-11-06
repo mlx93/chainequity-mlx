@@ -1,7 +1,9 @@
 export interface CapTableEntry {
   address: string
   balance: string
-  ownershipPercent: string
+  balanceFormatted: string
+  percentage: string
+  lastUpdated: string
 }
 
 export interface CapTableResponse {
