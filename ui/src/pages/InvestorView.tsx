@@ -15,12 +15,12 @@ export default function InvestorView() {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       {/* Header with status badge inline */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Portfolio</h1>
-          <p className="text-sm text-muted-foreground">Manage your token holdings</p>
+          <h1 className="text-3xl font-bold">Portfolio</h1>
+          <p className="text-muted-foreground">Manage your token holdings</p>
         </div>
         {isApproved ? (
           <Badge variant="default">✓ Approved</Badge>
@@ -29,32 +29,29 @@ export default function InvestorView() {
         )}
       </div>
 
-      {/* Two-column layout: Left = Balance + Transfer, Right = History */}
-      <div className="grid gap-4 lg:grid-cols-[2fr_3fr]">
-        {/* Left Column: Balance and Transfer in compact vertical stack */}
-        <div className="space-y-4">
-          <BalanceCard />
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm">Transfer Tokens</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <TransferForm />
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Right Column: Transaction History */}
+      {/* Top Row: Balance and Transfer side by side */}
+      <div className="grid gap-6 md:grid-cols-2">
+        <BalanceCard />
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm">Recent Activity</CardTitle>
-            <CardDescription className="text-xs">Your transaction history</CardDescription>
+            <CardTitle>Transfer Tokens</CardTitle>
           </CardHeader>
           <CardContent>
-            <TransactionHistory address={address} />
+            <TransferForm />
           </CardContent>
         </Card>
       </div>
+
+      {/* Bottom Row: Transaction History full width */}
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle>Recent Activity</CardTitle>
+          <CardDescription>Your transaction history</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <TransactionHistory address={address} />
+        </CardContent>
+      </Card>
     </div>
   )
 }

@@ -42,15 +42,15 @@ export default function BalanceCard() {
   return (
     <Card>
       <CardHeader className="pb-3">
-        <CardTitle className="text-sm text-muted-foreground">Balance</CardTitle>
+        <CardTitle>Balance</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="space-y-1">
-          <p className="text-3xl font-bold">
+        <div className="space-y-2">
+          <p className="text-4xl font-bold">
             {formattedBalance} {symbol as string || 'TOKENS'}
           </p>
           {capTable && balanceValue > 0 && (
-            <p className="text-sm text-muted-foreground">
+            <p className="text-muted-foreground">
               {ownershipPercent.toFixed(2)}% ownership
             </p>
           )}

@@ -2,7 +2,7 @@ import { useAccount, useDisconnect, useChainId } from 'wagmi'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { formatAddress } from '@/lib/utils'
-import { Wallet, LogOut, LayoutDashboard, User, Table2 } from 'lucide-react'
+import { Wallet, LogOut, LayoutDashboard, Table2 } from 'lucide-react'
 import { NavLink } from 'react-router-dom'
 import { useIsAdmin } from '@/hooks/useIsAdmin'
 import { cn } from '@/lib/utils'
@@ -46,39 +46,32 @@ export default function Header() {
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
-        <NavLink 
-          to="/" 
-          className="flex items-center gap-2 text-xl font-bold hover:opacity-80 transition-opacity"
-        >
-          <span>ChainEquity</span>
-        </NavLink>
-        
-        <nav className="flex items-center gap-1">
-          {isAdmin && (
+        <div className="flex items-center gap-8">
+          <NavLink 
+            to="/" 
+            className="flex items-center gap-2 text-xl font-bold hover:opacity-80 transition-opacity"
+          >
+            <span>ChainEquity</span>
+          </NavLink>
+          
+          <nav className="flex items-center gap-1">
             <NavLink
-              to="/"
+              to={isAdmin ? "/" : "/investor"}
               className={navLinkClass}
               end
             >
               <LayoutDashboard className="h-4 w-4" />
               <span>Dashboard</span>
             </NavLink>
-          )}
-          <NavLink
-            to="/investor"
-            className={navLinkClass}
-          >
-            <User className="h-4 w-4" />
-            <span>Investor</span>
-          </NavLink>
-          <NavLink
-            to="/captable"
-            className={navLinkClass}
-          >
-            <Table2 className="h-4 w-4" />
-            <span>Cap Table</span>
-          </NavLink>
-        </nav>
+            <NavLink
+              to="/captable"
+              className={navLinkClass}
+            >
+              <Table2 className="h-4 w-4" />
+              <span>Cap Table</span>
+            </NavLink>
+          </nav>
+        </div>
 
         <div className="flex items-center gap-3">
           {!isBaseSepolia && (
