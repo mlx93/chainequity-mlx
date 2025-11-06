@@ -45,12 +45,24 @@ export default function NotConnected() {
           {metaMaskConnector || hasMetaMask ? (
             <Button
               className="w-full"
-              onClick={() => {
-                if (metaMaskConnector) {
-                  connect({ connector: metaMaskConnector })
-                } else if (hasMetaMask) {
-                  // Fallback: try to detect and connect manually
-                  window.location.reload()
+              onClick={async () => {
+                try {
+                  console.log('Connect button clicked')
+                  console.log('MetaMask connector:', metaMaskConnector)
+                  console.log('hasMetaMask:', hasMetaMask)
+                  console.log('window.ethereum:', window.ethereum)
+                  
+                  if (metaMaskConnector) {
+                    console.log('Attempting to connect via wagmi connector...')
+                    const result = await connect({ connector: metaMaskConnector })
+                    console.log('Connection result:', result)
+                  } else if (hasMetaMask) {
+                    console.log('MetaMask detected but no connector, reloading...')
+                    window.location.reload()
+                  }
+                } catch (error) {
+                  console.error('Connection error:', error)
+                  alert(`Connection failed: ${error instanceof Error ? error.message : String(error)}`)
                 }
               }}
             >
