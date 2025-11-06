@@ -17,12 +17,18 @@ export default function CapTableGrid({
   sortOrder,
   onSortChange,
 }: CapTableGridProps) {
-  const sortedCapTable = [...capTable.capTable].sort((a, b) => {
+  const sortedCapTable = [...(capTable?.capTable || [])].sort((a, b) => {
     if (sortBy === 'balance') {
-      const diff = BigInt(a.balance) - BigInt(b.balance)
-      return sortOrder === 'desc' ? Number(-diff) : Number(diff)
+      try {
+        const balanceA = a?.balance ? BigInt(String(a.balance)) : BigInt(0)
+        const balanceB = b?.balance ? BigInt(String(b.balance)) : BigInt(0)
+        const diff = balanceA - balanceB
+        return sortOrder === 'desc' ? Number(-diff) : Number(diff)
+      } catch {
+        return 0
+      }
     } else {
-      const diff = a.address.localeCompare(b.address)
+      const diff = (a?.address || '').localeCompare(b?.address || '')
       return sortOrder === 'desc' ? -diff : diff
     }
   })
@@ -89,19 +95,29 @@ export default function CapTableGrid({
               </TableCell>
             </TableRow>
           ) : (
-            sortedCapTable.map((entry) => (
-              <TableRow key={entry.address}>
-                <TableCell className="font-mono text-sm">
-                  {formatAddress(entry.address)}
-                </TableCell>
-                <TableCell>
-                  {(parseFloat(entry.balance) / 1e18).toLocaleString()}
-                </TableCell>
-                <TableCell>
-                  {parseFloat(entry.ownershipPercent).toFixed(4)}%
-                </TableCell>
-              </TableRow>
-            ))
+            sortedCapTable.map((entry) => {
+              // Defensive parsing with fallbacks
+              const balanceValue = entry?.balance ? parseFloat(String(entry.balance)) : 0
+              const balanceNum = isNaN(balanceValue) || !isFinite(balanceValue) ? 0 : balanceValue / 1e18
+              const balance = typeof balanceNum === 'number' && !isNaN(balanceNum) ? balanceNum : 0
+              
+              const ownershipValue = entry?.ownershipPercent ? parseFloat(String(entry.ownershipPercent)) : 0
+              const ownership = isNaN(ownershipValue) || !isFinite(ownershipValue) ? 0 : ownershipValue
+              
+              return (
+                <TableRow key={entry?.address || 'unknown'}>
+                  <TableCell className="font-mono text-sm">
+                    {formatAddress(entry?.address || '')}
+                  </TableCell>
+                  <TableCell>
+                    {balance?.toLocaleString?.() ?? '0'}
+                  </TableCell>
+                  <TableCell>
+                    {ownership?.toFixed?.(4) ?? '0.0000'}%
+                  </TableCell>
+                </TableRow>
+              )
+            })
           )}
         </TableBody>
       </Table>
