@@ -79,15 +79,19 @@ export default function TransferForm() {
       // Refresh balance, transaction history, and reset form
       setTimeout(() => {
         refetchBalance()
-        // Invalidate transaction queries to refresh the history
-        queryClient.invalidateQueries({ queryKey: ['transactions'] })
+        // Invalidate transaction queries to refresh the history (only for this address)
+        if (address) {
+          queryClient.invalidateQueries({ 
+            queryKey: ['transactions', { address }] 
+          })
+        }
         reset()
         setToAddress('')
         resetWrite()
         hasShownToast.current = false
       }, 1000)
     }
-  }, [isConfirmed, hash, refetchBalance, reset, resetWrite, queryClient])
+  }, [isConfirmed, hash, refetchBalance, reset, resetWrite, queryClient, address])
 
   // Handle errors
   useEffect(() => {

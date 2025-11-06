@@ -10,7 +10,7 @@ interface TransactionHistoryProps {
 }
 
 export default function TransactionHistory({ address }: TransactionHistoryProps) {
-  const { data, isLoading } = useTransactions({ address, limit: 20 })
+  const { data, isLoading, isError, error } = useTransactions({ address, limit: 20 })
 
   if (isLoading) {
     return (
@@ -20,6 +20,11 @@ export default function TransactionHistory({ address }: TransactionHistoryProps)
         ))}
       </div>
     )
+  }
+
+  if (isError) {
+    console.error('Transaction fetch error:', error)
+    return <p className="text-sm text-muted-foreground">Unable to load transactions. Please refresh the page.</p>
   }
 
   if (!data || data.transfers.length === 0) {
