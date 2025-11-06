@@ -6,9 +6,16 @@ const rpcUrl = import.meta.env.VITE_BASE_SEPOLIA_RPC || 'https://sepolia.base.or
 
 export const wagmiConfig = createConfig({
   chains: [baseSepolia],
-  connectors: [metaMask()],
+  connectors: [
+    metaMask({
+      dappMetadata: {
+        name: 'ChainEquity',
+      },
+    }),
+  ],
   transports: {
     [baseSepolia.id]: http(rpcUrl),
   },
+  ssr: false, // Disable SSR for better MetaMask detection
 })
 
