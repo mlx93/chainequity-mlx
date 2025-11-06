@@ -4,15 +4,21 @@ import { metaMask } from '@wagmi/connectors'
 
 const rpcUrl = import.meta.env.VITE_BASE_SEPOLIA_RPC || 'https://sepolia.base.org'
 
+// Ensure we're on client-side before initializing connectors
+const isClient = typeof window !== 'undefined'
+
 export const wagmiConfig = createConfig({
   chains: [baseSepolia],
-  connectors: [
-    metaMask({
-      dappMetadata: {
-        name: 'ChainEquity',
-      },
-    }),
-  ],
+  connectors: isClient
+    ? [
+        metaMask({
+          dappMetadata: {
+            name: 'ChainEquity',
+            url: window.location.origin,
+          },
+        }),
+      ]
+    : [],
   transports: {
     [baseSepolia.id]: http(rpcUrl),
   },
