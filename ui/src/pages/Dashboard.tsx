@@ -1,5 +1,3 @@
-import { useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { useIsAdmin } from '@/hooks/useIsAdmin'
 import { useAccount } from 'wagmi'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -13,20 +11,14 @@ export default function Dashboard() {
   const { address } = useAccount()
   const isAdmin = useIsAdmin()
   const { data: capTable } = useCapTable()
-  const navigate = useNavigate()
 
-  useEffect(() => {
-    if (!isAdmin && address) {
-      navigate('/investor')
-    }
-  }, [isAdmin, address, navigate])
-
-  if (!isAdmin) {
+  // If not admin, show message (routing handles redirect)
+  if (!isAdmin && address) {
     return (
       <div className="space-y-4">
         <Alert>
           <AlertDescription>
-            You do not have admin privileges. Redirecting to investor view...
+            You do not have admin privileges. Please contact an administrator.
           </AlertDescription>
         </Alert>
       </div>

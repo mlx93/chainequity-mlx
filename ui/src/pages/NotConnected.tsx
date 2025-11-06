@@ -56,47 +56,52 @@ export default function NotConnected() {
         </CardHeader>
         <CardContent>
           {metaMaskConnector || hasMetaMask ? (
-            <Button
-              className="w-full"
-              onClick={async () => {
-                try {
-                  console.log('Connect button clicked')
-                  console.log('MetaMask connector:', metaMaskConnector)
-                  console.log('hasMetaMask:', hasMetaMask)
-                  console.log('window.ethereum:', window.ethereum)
-                  
-                  if (metaMaskConnector) {
-                    console.log('Attempting to connect via wagmi connector...')
-                    const result = await connect({ connector: metaMaskConnector })
-                    console.log('Connection result:', result)
-                  } else if (hasMetaMask) {
-                    console.error('MetaMask detected but no wagmi connector found!')
-                    console.error('This should not happen - wagmi connector should be initialized')
-                    console.error('Available connectors:', connectors)
-                    console.error('Trying to create connector manually...')
+            <div className="space-y-3">
+              <p className="text-sm text-muted-foreground">
+                <strong>Note:</strong> If MetaMask shows multiple accounts, only the first selected account will be used.
+              </p>
+              <Button
+                className="w-full"
+                onClick={async () => {
+                  try {
+                    console.log('Connect button clicked')
+                    console.log('MetaMask connector:', metaMaskConnector)
+                    console.log('hasMetaMask:', hasMetaMask)
+                    console.log('window.ethereum:', window.ethereum)
                     
-                    // Try to connect directly via window.ethereum as last resort
-                    try {
-                      const accounts = await window.ethereum.request({ 
-                        method: 'eth_requestAccounts' 
-                      })
-                      console.log('Direct connection successful:', accounts)
-                      // Force page reload to let wagmi pick up the connection
-                      window.location.reload()
-                    } catch (err) {
-                      console.error('Direct connection also failed:', err)
-                      alert(`MetaMask connection failed: ${err instanceof Error ? err.message : String(err)}\n\nCheck console for details.`)
+                    if (metaMaskConnector) {
+                      console.log('Attempting to connect via wagmi connector...')
+                      const result = await connect({ connector: metaMaskConnector })
+                      console.log('Connection result:', result)
+                    } else if (hasMetaMask) {
+                      console.error('MetaMask detected but no wagmi connector found!')
+                      console.error('This should not happen - wagmi connector should be initialized')
+                      console.error('Available connectors:', connectors)
+                      console.error('Trying to create connector manually...')
+                      
+                      // Try to connect directly via window.ethereum as last resort
+                      try {
+                        const accounts = await window.ethereum.request({ 
+                          method: 'eth_requestAccounts' 
+                        })
+                        console.log('Direct connection successful:', accounts)
+                        // Force page reload to let wagmi pick up the connection
+                        window.location.reload()
+                      } catch (err) {
+                        console.error('Direct connection also failed:', err)
+                        alert(`MetaMask connection failed: ${err instanceof Error ? err.message : String(err)}\n\nCheck console for details.`)
+                      }
                     }
+                  } catch (error) {
+                    console.error('Connection error:', error)
+                    alert(`Connection failed: ${error instanceof Error ? error.message : String(error)}`)
                   }
-                } catch (error) {
-                  console.error('Connection error:', error)
-                  alert(`Connection failed: ${error instanceof Error ? error.message : String(error)}`)
-                }
-              }}
-            >
-              <Wallet className="mr-2 h-4 w-4" />
-              Connect MetaMask
-            </Button>
+                }}
+              >
+                <Wallet className="mr-2 h-4 w-4" />
+                Connect MetaMask
+              </Button>
+            </div>
           ) : (
             <div className="space-y-2">
               <p className="text-sm text-muted-foreground">
