@@ -19,7 +19,9 @@ export function useTransactions(params?: {
       toBlock: params.toBlock,
     } : undefined),
     enabled: !!params?.address, // Only fetch if address is provided
-    retry: false, // Don't retry on 404
+    retry: 1, // Retry once if it fails (in case indexer is catching up)
+    retryDelay: 2000, // Wait 2 seconds before retrying
+    staleTime: 5000, // Consider data fresh for 5 seconds
   })
 }
 

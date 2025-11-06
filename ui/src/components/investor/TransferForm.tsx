@@ -77,6 +77,7 @@ export default function TransferForm() {
       })
       
       // Refresh balance, transaction history, and reset form
+      // Wait longer for indexer to catch up
       setTimeout(() => {
         refetchBalance()
         // Invalidate transaction queries to refresh the history (only for this address)
@@ -89,7 +90,7 @@ export default function TransferForm() {
         setToAddress('')
         resetWrite()
         hasShownToast.current = false
-      }, 1000)
+      }, 3000) // Increased from 1000ms to 3000ms
     }
   }, [isConfirmed, hash, refetchBalance, reset, resetWrite, queryClient, address])
 
