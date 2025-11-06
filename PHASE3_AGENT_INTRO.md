@@ -1,0 +1,4 @@
+# Phase 3 Frontend - Agent Introduction
+
+**Phase 2A Backend API is complete and deployed to Railway at https://tender-achievement-production-3aa5.up.railway.app/api - all 10 endpoints operational and tested. Phase 2B Indexer is running 24/7 monitoring blockchain events. You are now assigned to Phase 3: Frontend Development. Build a polished React + Vite + wagmi application using shadcn/ui components that connects to the deployed backend API and smart contract (0xFCc9E74019a2be5808d63A941a84dEbE0fC39964 on Base Sepolia). Deploy to Vercel and ensure all user stories from PRD_PRODUCT.md are functional. Reference `/docs/phases/PHASE3_FRONTEND_SPECIALIST_PROMPT.md` for complete specifications including all backend API endpoints, contract integration details, UI requirements, and deployment instructions.
+
