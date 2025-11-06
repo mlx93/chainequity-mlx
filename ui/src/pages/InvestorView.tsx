@@ -1,5 +1,8 @@
+import { useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useAccount } from 'wagmi'
 import { useApprovalStatus } from '@/hooks/useApprovalStatus'
+import { ADMIN_ADDRESSES } from '@/config/contracts'
 import BalanceCard from '@/components/investor/BalanceCard'
 import TransferForm from '@/components/investor/TransferForm'
 import TransactionHistory from '@/components/transactions/TransactionHistory'
@@ -8,10 +11,23 @@ import { Badge } from '@/components/ui/badge'
 
 export default function InvestorView() {
   const { address } = useAccount()
+  const navigate = useNavigate()
   const { data: isApproved } = useApprovalStatus(address)
+  const isAdmin = address && ADMIN_ADDRESSES.includes(address.toLowerCase())
+
+  // Redirect admins to their dashboard
+  useEffect(() => {
+    if (isAdmin) {
+      navigate('/', { replace: true })
+    }
+  }, [isAdmin, navigate])
 
   if (!address) {
     return <div>Please connect your wallet</div>
+  }
+
+  if (isAdmin) {
+    return null // Will redirect via useEffect
   }
 
   return (
