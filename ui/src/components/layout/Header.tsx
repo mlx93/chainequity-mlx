@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { formatAddress } from '@/lib/utils'
 import { Wallet, LogOut, LayoutDashboard, User, Table2 } from 'lucide-react'
-import { NavLink, useLocation } from 'react-router-dom'
+import { NavLink } from 'react-router-dom'
 import { useIsAdmin } from '@/hooks/useIsAdmin'
 import { cn } from '@/lib/utils'
 
