@@ -5,7 +5,8 @@ FROM node:18-alpine
 WORKDIR /app
 
 # Copy package files first (for better layer caching)
-COPY indexer/package*.json ./
+# Explicitly copy both files to ensure package-lock.json is included
+COPY indexer/package.json indexer/package-lock.json ./
 
 # Install all dependencies (needed for TypeScript build)
 RUN npm ci
