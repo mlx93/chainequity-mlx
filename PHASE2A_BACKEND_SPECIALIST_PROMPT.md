@@ -1,32 +1,44 @@
 # Phase 2A: Backend API Development - ChainEquity
 
 **Role**: Backend API Specialist Sub-Agent  
-**Model Recommendation**: Composer (fast Express/TypeScript generation)  
+**Model Recommendation**: Claude Sonnet 4.5 or Composer  
 **Estimated Duration**: 4-6 hours  
 **Workspace**: `/Users/mylessjs/Desktop/ChainEquity`  
-**Can Run in Parallel with**: Phase 2B (Event Indexer)
+**Dependencies**: Phase 2B Event Indexer MUST be complete and running
 
 ---
 
-## Your Mission
+## 🎯 Your Mission
 
-Implement the **ChainEquity Backend API** (Issuer Service) - an Express/TypeScript REST API that interfaces with the deployed GatedToken contract via Gnosis Safe multi-sig transactions. The backend provides endpoints for admin operations (wallet approvals, minting, corporate actions) and data queries (cap-table, transaction history).
+Implement the **ChainEquity Backend API** - an Express/TypeScript REST API that:
+1. **Queries** the PostgreSQL database (populated by the Phase 2B Indexer) for cap-table data
+2. **Submits transactions** to the Base Sepolia blockchain via the deployed GatedToken contract
+3. **Provides** endpoints for both data retrieval and transaction submission
+4. **Validates** requests and handles errors gracefully
 
 **You are the implementation specialist** - write production-quality TypeScript code with proper validation and error handling.
 
 ---
 
-## Project Context
+## 📚 Required Reading Before Starting
 
-ChainEquity's backend serves as the **issuer service** - the administrative interface for managing the tokenized equity. All admin operations go through the Gnosis Safe multi-signature wallet (2-of-3 threshold), requiring multiple approvals before execution.
+**CRITICAL**: Read these memory bank files first to understand the full context:
+1. `/Users/mylessjs/Desktop/ChainEquity/memory-bank/projectbrief.md` - Project overview and goals
+2. `/Users/mylessjs/Desktop/ChainEquity/memory-bank/systemPatterns.md` - Architecture and data flow
+3. `/Users/mylessjs/Desktop/ChainEquity/memory-bank/techContext.md` - Tech stack and constraints
+4. `/Users/mylessjs/Desktop/ChainEquity/memory-bank/progress.md` - Current project status
 
-**Key Principle**: The backend **submits transactions** and **queries the database** (populated by the Phase 2B Indexer). It does NOT directly index events.
+**Phase 1 Details**:
+- `/Users/mylessjs/Desktop/ChainEquity/PHASE1_COMPLETION_REPORT.md` - Contract deployment details
+
+**Phase 2B Details**:
+- `/Users/mylessjs/Desktop/ChainEquity/PHASE2B_INDEXER_COMPLETION_REPORT.md` - Database schema and indexer implementation
 
 ---
 
-## Phase 1 Outputs (Use These Values)
+## 📦 Phase 1 & 2B Outputs (Use These Values)
 
-### **Deployed Contract Information**
+### Deployed Contract Information
 ```typescript
 CONTRACT_ADDRESS = "0xFCc9E74019a2be5808d63A941a84dEbE0fC39964"
 SAFE_ADDRESS = "0x6264F29968e8fd2810cB79fb806aC65dAf9db73d"
@@ -35,8 +47,55 @@ BASE_SEPOLIA_RPC = "https://sepolia.base.org"
 DEPLOYMENT_BLOCK = 33313307
 ```
 
-### **Contract ABI Location**
-The full ABI is in: `/Users/mylessjs/Desktop/ChainEquity/contracts/out/GatedToken.sol/GatedToken.json`
+### Database Schema (Phase 2B)
+The indexer maintains these tables in Railway PostgreSQL:
+
+**transfers** - All token transfer events
+```sql
+id SERIAL PRIMARY KEY
+transaction_hash TEXT NOT NULL UNIQUE
+block_number BIGINT NOT NULL
+block_timestamp TIMESTAMP NOT NULL
+from_address TEXT NOT NULL
+to_address TEXT NOT NULL
+amount TEXT NOT NULL
+created_at TIMESTAMP DEFAULT NOW()
+
+INDEXES: from_address, to_address, block_number
+```
+
+**balances** - Current token balances (derived from transfers)
+```sql
+address TEXT PRIMARY KEY
+balance TEXT NOT NULL
+updated_at TIMESTAMP DEFAULT NOW()
+```
+
+**approvals** - Wallet allowlist status
+```sql
+address TEXT PRIMARY KEY
+is_approved BOOLEAN NOT NULL
+approved_at TIMESTAMP
+revoked_at TIMESTAMP
+updated_at TIMESTAMP DEFAULT NOW()
+```
+
+**corporate_actions** - Stock splits, symbol changes, mints, burns
+```sql
+id SERIAL PRIMARY KEY
+action_type TEXT NOT NULL  -- 'stock_split', 'symbol_change', 'mint', 'burn'
+transaction_hash TEXT NOT NULL UNIQUE
+block_number BIGINT NOT NULL
+block_timestamp TIMESTAMP NOT NULL
+details JSONB NOT NULL
+created_at TIMESTAMP DEFAULT NOW()
+
+INDEXES: action_type, block_number
+```
+
+### Contract ABI Location
+The full ABI is available at:
+- `/Users/mylessjs/Desktop/ChainEquity/contracts/out/GatedToken.sol/GatedToken.json`
 
 Extract with:
 ```bash
@@ -44,52 +103,106 @@ cd /Users/mylessjs/Desktop/ChainEquity/contracts
 cat out/GatedToken.sol/GatedToken.json | jq '.abi' > ../backend/src/abis/GatedToken.json
 ```
 
-### **Environment Variables**
-From `/Users/mylessjs/Desktop/ChainEquity/.env`:
+### Environment Variables
+From `/Users/mylessjs/Desktop/ChainEquity/wallet-addresses.txt`:
 ```bash
-# Already available
+# Blockchain
+BASE_SEPOLIA_RPC=https://sepolia.base.org
+CONTRACT_ADDRESS=0xFCc9E74019a2be5808d63A941a84dEbE0fC39964
+CHAIN_ID=84532
+
+# Database (use PUBLIC URL for Railway external connection)
+DATABASE_URL=postgresql://postgres:opjpippLFhoVcIuuMllwtrKcSGTBJgar@yamanote.proxy.rlwy.net:23802/railway
+
+# Admin Wallet (for demo transaction signing)
 ADMIN_PRIVATE_KEY=0x948123033193e7bdf6bc2a2dc4cfc911a99977beebacaed5e545cac418eb5fbe
-DATABASE_URL=postgresql://postgres:ITpPoRYgfwPwGkhtpysPwOBzczfKQDxQ@postgres.railway.internal:5432/railway
+ADMIN_ADDRESS=0x4f10f93e2b0f5faf6b6e5a03e8e48f96921d24c6
+
+# Gnosis Safe (for production multi-sig)
 SAFE_ADDRESS=0x6264F29968e8fd2810cB79fb806aC65dAf9db73d
+
+# Server
+PORT=3000
+NODE_ENV=development
 ```
 
 ---
 
-## Technical Stack
+## 🛠️ Technical Stack
 
 **Runtime**: Node.js v20.x LTS  
 **Language**: TypeScript ^5.3.0  
 **Framework**: Express ^4.18.0  
-**Web3 Library**: viem ^2.7.0 (modern Ethereum interactions)  
+**Web3 Library**: viem ^2.7.0 (modern, type-safe Ethereum interactions)  
 **Database Client**: pg (node-postgres) ^8.11.0  
 **Validation**: zod ^3.22.0  
 **Environment**: dotenv ^16.3.0  
-**Testing**: Vitest ^1.0.0 (optional but recommended)
+**CORS**: cors ^2.8.5  
+**Testing**: Vitest ^1.0.0 (optional)
+
+**Why viem?** Modern alternative to ethers.js with better TypeScript support, smaller bundle size, and built-in support for account abstraction (useful for Gnosis Safe integration if needed).
 
 ---
 
-## API Specifications
+## 🗂️ Project Structure
 
-### **Base URL**: `http://localhost:3000` (development)
+Create the backend in `/Users/mylessjs/Desktop/ChainEquity/backend/`:
 
-Production will be deployed to Railway in Phase 4.
+```
+backend/
+├── src/
+│   ├── index.ts                 # Express server entry point
+│   ├── config/
+│   │   ├── env.ts              # Environment variable validation
+│   │   ├── database.ts         # PostgreSQL connection pool
+│   │   └── viem.ts             # Blockchain client setup
+│   ├── abis/
+│   │   └── GatedToken.json     # Contract ABI
+│   ├── routes/
+│   │   ├── health.ts           # Health check endpoint
+│   │   ├── data.ts             # GET endpoints (cap-table, transfers, etc.)
+│   │   └── transactions.ts     # POST endpoints (submit txns)
+│   ├── services/
+│   │   ├── database.service.ts # Database queries
+│   │   └── blockchain.service.ts # Transaction submission
+│   ├── types/
+│   │   └── index.ts            # TypeScript interfaces
+│   └── middleware/
+│       ├── errorHandler.ts     # Global error handling
+│       └── validation.ts       # Request validation
+├── package.json
+├── tsconfig.json
+├── .env                        # Local environment (copy from root .env)
+└── README.md                   # API documentation
+
+```
 
 ---
 
-### **Endpoint 1: Health Check**
+## 🌐 API Endpoint Specifications
+
+### Base URL
+- **Development**: `http://localhost:3000`
+- **Production**: Will be deployed to Railway (https://[service-name].railway.app)
+
+---
+
+### **1. Health Check**
 ```
-GET /health
+GET /api/health
 ```
+
+**Purpose**: Verify backend is running and can connect to database and blockchain.
 
 **Response** (200):
 ```json
 {
   "status": "ok",
-  "timestamp": "2025-01-06T12:34:56Z",
+  "timestamp": "2025-11-06T12:34:56Z",
   "blockchain": {
     "connected": true,
     "chainId": 84532,
-    "blockNumber": 33313450
+    "blockNumber": 33315200
   },
   "database": {
     "connected": true
@@ -97,362 +210,349 @@ GET /health
 }
 ```
 
----
-
-### **Endpoint 2: Approve Wallet**
-```
-POST /admin/approve
-```
-
-**Request Body**:
+**Error** (503):
 ```json
 {
-  "walletAddress": "0x1234567890123456789012345678901234567890"
+  "status": "error",
+  "message": "Database connection failed",
+  "timestamp": "2025-11-06T12:34:56Z"
 }
 ```
 
-**Validation** (using zod):
-- `walletAddress` must be valid Ethereum address
-- Wallet must NOT already be approved (query contract or DB)
+---
+
+### **2. Cap Table (Current Balances)**
+```
+GET /api/cap-table
+```
+
+**Purpose**: Get current token balances for all holders (read from `balances` table).
+
+**Query Parameters**:
+- `minBalance` (optional): Minimum balance to include (default: 0)
 
 **Response** (200):
 ```json
 {
-  "success": true,
-  "transactionHash": "0xabc...",
-  "status": "pending",
-  "message": "Approval transaction submitted, awaiting Safe signatures (2/3 required)"
+  "capTable": [
+    {
+      "address": "0x4f10f93e2b0f5faf6b6e5a03e8e48f96921d24c6",
+      "balance": "10000000000000000000000000",
+      "balanceFormatted": "10,000,000",
+      "percentage": "100.00",
+      "lastUpdated": "2025-11-06T12:30:00Z"
+    }
+  ],
+  "totalSupply": "10000000000000000000000000",
+  "totalHolders": 1,
+  "timestamp": "2025-11-06T12:34:56Z"
 }
 ```
-
-**Errors**:
-- `400`: Invalid wallet address format
-- `409`: Wallet already approved
-- `500`: Transaction submission failed
 
 **Implementation Notes**:
-- Use `viem` to call contract's `approveWallet()` function
-- Transaction goes through Safe (manual signing for demo)
-- For this phase, submit transaction from admin wallet directly (Safe integration is manual)
+- Query `balances` table for all addresses with balance > 0
+- Calculate percentages based on total supply
+- Format large numbers for readability
 
 ---
 
-### **Endpoint 3: Revoke Wallet**
+### **3. Transfer History**
 ```
-POST /admin/revoke
+GET /api/transfers
 ```
 
-**Request Body**:
+**Purpose**: Get historical transfer events (read from `transfers` table).
+
+**Query Parameters**:
+- `address` (optional): Filter by from or to address
+- `limit` (optional): Max records to return (default: 100, max: 1000)
+- `offset` (optional): Pagination offset (default: 0)
+- `fromBlock` (optional): Start block number
+- `toBlock` (optional): End block number
+
+**Response** (200):
 ```json
 {
-  "walletAddress": "0x1234567890123456789012345678901234567890"
+  "transfers": [
+    {
+      "transactionHash": "0xabc123...",
+      "blockNumber": 33313500,
+      "blockTimestamp": "2025-11-06T10:15:30Z",
+      "from": "0x0000000000000000000000000000000000000000",
+      "to": "0x4f10f93e2b0f5faf6b6e5a03e8e48f96921d24c6",
+      "amount": "10000000000000000000000000",
+      "amountFormatted": "10,000,000",
+      "type": "mint"
+    }
+  ],
+  "count": 1,
+  "limit": 100,
+  "offset": 0,
+  "timestamp": "2025-11-06T12:34:56Z"
 }
 ```
 
-**Response**: Same structure as approve
+**Implementation Notes**:
+- Query `transfers` table with filters
+- Determine transfer type: mint (from=0x0), burn (to=0x0), or transfer
+- Order by block_number DESC (most recent first)
 
 ---
 
-### **Endpoint 4: Mint Tokens**
+### **4. Corporate Actions**
 ```
-POST /admin/mint
+GET /api/corporate-actions
 ```
+
+**Purpose**: Get stock splits, symbol changes, mints, burns (read from `corporate_actions` table).
+
+**Query Parameters**:
+- `type` (optional): Filter by action_type ('stock_split', 'symbol_change', 'mint', 'burn')
+- `limit` (optional): Max records (default: 50, max: 500)
+- `offset` (optional): Pagination offset
+
+**Response** (200):
+```json
+{
+  "actions": [
+    {
+      "id": 1,
+      "actionType": "stock_split",
+      "transactionHash": "0xdef456...",
+      "blockNumber": 33313600,
+      "blockTimestamp": "2025-11-06T11:00:00Z",
+      "details": {
+        "multiplier": 2,
+        "newTotalSupply": "20000000000000000000000000"
+      }
+    }
+  ],
+  "count": 1,
+  "limit": 50,
+  "offset": 0,
+  "timestamp": "2025-11-06T12:34:56Z"
+}
+```
+
+---
+
+### **5. Wallet Information**
+```
+GET /api/wallet/:address
+```
+
+**Purpose**: Get detailed info for a specific wallet (balance, approval status, transaction count).
+
+**Response** (200):
+```json
+{
+  "address": "0x4f10f93e2b0f5faf6b6e5a03e8e48f96921d24c6",
+  "balance": "10000000000000000000000000",
+  "balanceFormatted": "10,000,000",
+  "isApproved": true,
+  "approvedAt": "2025-11-05T09:00:00Z",
+  "transferCount": 5,
+  "firstTransferAt": "2025-11-05T09:30:00Z",
+  "lastTransferAt": "2025-11-06T11:00:00Z",
+  "timestamp": "2025-11-06T12:34:56Z"
+}
+```
+
+**Error** (404):
+```json
+{
+  "error": "Wallet not found",
+  "address": "0x...",
+  "timestamp": "2025-11-06T12:34:56Z"
+}
+```
+
+---
+
+### **6. Submit Transfer**
+```
+POST /api/transfer
+```
+
+**Purpose**: Submit a token transfer transaction to the blockchain.
 
 **Request Body**:
 ```json
 {
-  "to": "0x1234567890123456789012345678901234567890",
-  "amount": "10000"
+  "to": "0x0d9cf1dc3e134a736aafb1296d2b316742b5c13e",
+  "amount": "1000000000000000000000"  // 1000 tokens in wei
 }
 ```
 
 **Validation**:
-- `to` must be approved wallet (check contract's `allowlist` mapping)
-- `amount` must be positive integer string (handles large numbers)
+- `to` must be valid Ethereum address
+- `amount` must be positive integer string
+- Recipient must be approved (check `approvals` table)
 
 **Response** (200):
 ```json
 {
   "success": true,
-  "transactionHash": "0xdef...",
-  "tokensMinted": "10000",
-  "recipient": "0x1234..."
+  "transactionHash": "0x789abc...",
+  "from": "0x4f10f93e2b0f5faf6b6e5a03e8e48f96921d24c6",
+  "to": "0x0d9cf1dc3e134a736aafb1296d2b316742b5c13e",
+  "amount": "1000000000000000000000",
+  "blockExplorerUrl": "https://sepolia.basescan.org/tx/0x789abc...",
+  "message": "Transfer submitted successfully",
+  "timestamp": "2025-11-06T12:34:56Z"
 }
 ```
 
-**Errors**:
-- `400`: Invalid inputs
-- `403`: Recipient not approved
-- `500`: Transaction failed
-
----
-
-### **Endpoint 5: Check Approval Status**
-```
-GET /wallet/:address/status
-```
-
-**Example**: `GET /wallet/0x4f10f93e2b0f5faf6b6e5a03e8e48f96921d24c6/status`
-
-**Response** (200):
+**Error** (400):
 ```json
 {
-  "address": "0x4f10...",
-  "approved": true,
-  "approvedAt": "2025-01-06T10:20:30Z",
-  "approvedAtBlock": 33313320
+  "error": "Recipient wallet is not approved",
+  "to": "0x...",
+  "isApproved": false,
+  "timestamp": "2025-11-06T12:34:56Z"
 }
 ```
 
-**Data Source**: Query `approvals` table in PostgreSQL (populated by Phase 2B Indexer)
+**Implementation Notes**:
+- Check recipient approval in database before submitting transaction
+- Sign transaction with ADMIN_PRIVATE_KEY
+- Submit via viem's `writeContract`
+- Wait for transaction hash (don't wait for confirmation)
+- Return immediately with transaction hash
 
 ---
 
-### **Endpoint 6: Execute Stock Split**
+### **7. Approve Wallet (Admin)**
 ```
-POST /admin/corporate-actions/split
+POST /api/admin/approve-wallet
 ```
+
+**Purpose**: Add a wallet to the allowlist (admin function).
 
 **Request Body**:
 ```json
 {
-  "multiplier": 7
+  "address": "0xefd94a1534959e04630899abdd5d768601f4af5b"
 }
 ```
-
-**Validation**: multiplier must be integer >= 2
 
 **Response** (200):
 ```json
 {
   "success": true,
-  "transactionHash": "0xghi...",
-  "multiplier": 7,
-  "newTotalSupply": "70000",
-  "message": "Stock split executed: all balances multiplied by 7"
+  "transactionHash": "0x111222...",
+  "address": "0xefd94a1534959e04630899abdd5d768601f4af5b",
+  "blockExplorerUrl": "https://sepolia.basescan.org/tx/0x111222...",
+  "message": "Wallet approval submitted",
+  "timestamp": "2025-11-06T12:34:56Z"
 }
 ```
 
+**Implementation Notes**:
+- Call `approveWallet(address)` on contract
+- Sign with ADMIN_PRIVATE_KEY
+- Indexer will update `approvals` table when event is detected
+
 ---
 
-### **Endpoint 7: Change Symbol**
+### **8. Revoke Wallet (Admin)**
 ```
-POST /admin/corporate-actions/symbol
+POST /api/admin/revoke-wallet
 ```
+
+**Purpose**: Remove a wallet from the allowlist (admin function).
 
 **Request Body**:
 ```json
 {
-  "newSymbol": "ACMEX"
+  "address": "0xefd94a1534959e04630899abdd5d768601f4af5b"
 }
 ```
-
-**Validation**: Symbol must be 2-6 alphanumeric characters
 
 **Response** (200):
 ```json
 {
   "success": true,
-  "transactionHash": "0xjkl...",
-  "oldSymbol": "ACME",
-  "newSymbol": "ACMEX"
+  "transactionHash": "0x333444...",
+  "address": "0xefd94a1534959e04630899abdd5d768601f4af5b",
+  "blockExplorerUrl": "https://sepolia.basescan.org/tx/0x333444...",
+  "message": "Wallet revocation submitted",
+  "timestamp": "2025-11-06T12:34:56Z"
 }
 ```
 
 ---
 
-### **Endpoint 8: Get Current Cap-Table**
+### **9. Execute Stock Split (Admin)**
 ```
-GET /cap-table
+POST /api/admin/stock-split
 ```
+
+**Purpose**: Execute a stock split (admin function).
+
+**Request Body**:
+```json
+{
+  "multiplier": 2
+}
+```
+
+**Validation**:
+- `multiplier` must be integer >= 2
 
 **Response** (200):
 ```json
 {
-  "totalSupply": "70000",
-  "holderCount": 8,
-  "blockNumber": 33313500,
-  "timestamp": "2025-01-06T14:30:00Z",
-  "holders": [
-    {
-      "address": "0xAAA...",
-      "balance": "49000",
-      "ownershipPercent": "70.00"
-    },
-    {
-      "address": "0xBBB...",
-      "balance": "21000",
-      "ownershipPercent": "30.00"
-    }
-  ]
+  "success": true,
+  "transactionHash": "0x555666...",
+  "multiplier": 2,
+  "blockExplorerUrl": "https://sepolia.basescan.org/tx/0x555666...",
+  "message": "Stock split submitted (2:1)",
+  "timestamp": "2025-11-06T12:34:56Z"
 }
 ```
 
-**Data Source**: Query `balances` table (populated by indexer)
-
-**SQL Query**:
-```sql
-SELECT
-    address,
-    balance,
-    ownership_percent,
-    last_updated_block
-FROM balances
-WHERE balance > 0
-ORDER BY balance DESC;
-```
+**Implementation Notes**:
+- Call `executeStockSplit(multiplier)` on contract
+- Indexer will update `corporate_actions` table when event detected
 
 ---
 
-### **Endpoint 9: Get Historical Cap-Table**
+### **10. Update Symbol (Admin)**
 ```
-GET /cap-table/historical?blockNumber=33313400
-```
-
-**Query Params**:
-- `blockNumber` (required): Block height for snapshot
-
-**Response**: Same format as current cap-table, calculated at specified block
-
-**SQL Query**:
-```sql
--- Reconstruct balances from transfers up to block N
-WITH historical_transfers AS (
-    SELECT
-        from_address AS address,
-        -SUM(amount) AS net_change
-    FROM transfers
-    WHERE block_number <= $1 AND from_address != '0x0000000000000000000000000000000000000000'
-    GROUP BY from_address
-    UNION ALL
-    SELECT
-        to_address AS address,
-        SUM(amount) AS net_change
-    FROM transfers
-    WHERE block_number <= $1
-    GROUP BY to_address
-)
-SELECT
-    address,
-    SUM(net_change) AS balance
-FROM historical_transfers
-GROUP BY address
-HAVING SUM(net_change) > 0
-ORDER BY balance DESC;
+POST /api/admin/update-symbol
 ```
 
----
+**Purpose**: Change the token symbol (admin function).
 
-### **Endpoint 10: Export Cap-Table**
-```
-GET /cap-table/export?format=csv
-GET /cap-table/export?format=json
-```
-
-**Query Params**:
-- `format`: "csv" or "json"
-- `blockNumber` (optional): Historical snapshot
-
-**Response** (CSV):
-```
-Content-Type: text/csv
-Content-Disposition: attachment; filename="captable_2025-01-06_143045.csv"
-
-Address,Balance,Ownership %
-0xAAA...,49000,70.00
-0xBBB...,21000,30.00
+**Request Body**:
+```json
+{
+  "newSymbol": "CHAINEQUITY-B"
+}
 ```
 
-**Response** (JSON): Same as `/cap-table` endpoint
-
----
-
-### **Endpoint 11: Transaction History**
-```
-GET /transactions?page=1&limit=50&address=0xAAA...
-```
-
-**Query Params**:
-- `page`: Page number (default 1)
-- `limit`: Results per page (default 50, max 100)
-- `address` (optional): Filter by wallet
+**Validation**:
+- `newSymbol` must be 1-11 characters, uppercase letters/numbers/hyphens only
 
 **Response** (200):
 ```json
 {
-  "transactions": [
-    {
-      "hash": "0xabc...",
-      "blockNumber": 33313450,
-      "timestamp": "2025-01-06T12:00:00Z",
-      "type": "transfer",
-      "from": "0xAAA...",
-      "to": "0xBBB...",
-      "amount": "3000"
-    },
-    {
-      "hash": "0xdef...",
-      "blockNumber": 33313420,
-      "timestamp": "2025-01-06T11:50:00Z",
-      "type": "split",
-      "multiplier": 7
-    }
-  ],
-  "pagination": {
-    "currentPage": 1,
-    "totalPages": 5,
-    "totalRecords": 234
-  }
+  "success": true,
+  "transactionHash": "0x777888...",
+  "oldSymbol": "CHAINEQUITY-A",
+  "newSymbol": "CHAINEQUITY-B",
+  "blockExplorerUrl": "https://sepolia.basescan.org/tx/0x777888...",
+  "message": "Symbol update submitted",
+  "timestamp": "2025-11-06T12:34:56Z"
 }
 ```
 
-**Data Source**: Query `transfers` and `corporate_actions` tables
-
 ---
 
-## Project Structure
+## 🏗️ Implementation Guidelines
 
-Create the following structure:
-
-```
-ChainEquity/
-├── backend/
-│   ├── src/
-│   │   ├── index.ts              # Express app entry point
-│   │   ├── config/
-│   │   │   ├── viem.ts           # Viem client setup
-│   │   │   ├── database.ts       # PostgreSQL connection
-│   │   │   └── env.ts            # Environment variable validation
-│   │   ├── abis/
-│   │   │   └── GatedToken.json   # Contract ABI
-│   │   ├── routes/
-│   │   │   ├── health.ts         # Health check endpoint
-│   │   │   ├── admin.ts          # Admin operations (approve, mint, etc.)
-│   │   │   ├── wallet.ts         # Wallet status queries
-│   │   │   ├── capTable.ts       # Cap-table endpoints
-│   │   │   └── transactions.ts   # Transaction history
-│   │   ├── services/
-│   │   │   ├── contractService.ts    # Contract interaction logic
-│   │   │   ├── databaseService.ts    # Database queries
-│   │   │   └── exportService.ts      # CSV/JSON generation
-│   │   ├── middleware/
-│   │   │   ├── validation.ts     # Input validation (zod schemas)
-│   │   │   ├── errorHandler.ts   # Error handling middleware
-│   │   │   └── logger.ts         # Request logging
-│   │   └── types/
-│   │       └── index.ts          # TypeScript type definitions
-│   ├── .env
-│   ├── .env.example
-│   ├── package.json
-│   ├── tsconfig.json
-│   └── README.md
-```
-
----
-
-## Step-by-Step Implementation Guide
-
-### **Step 1: Initialize Backend Project** (10 minutes)
+### 1. Project Initialization
 
 ```bash
 cd /Users/mylessjs/Desktop/ChainEquity
@@ -462,122 +562,84 @@ mkdir backend && cd backend
 npm init -y
 
 # Install dependencies
-npm install express viem pg zod dotenv cors
-npm install -D typescript @types/node @types/express @types/pg ts-node nodemon
+npm install express viem pg dotenv zod cors
+npm install -D typescript @types/express @types/node @types/cors @types/pg ts-node nodemon
 
 # Initialize TypeScript
 npx tsc --init
 ```
 
-**Update `tsconfig.json`**:
+**tsconfig.json** (update generated file):
 ```json
 {
   "compilerOptions": {
     "target": "ES2022",
     "module": "commonjs",
+    "lib": ["ES2022"],
     "outDir": "./dist",
     "rootDir": "./src",
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "moduleResolution": "node"
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules"]
 }
 ```
 
-**Update `package.json` scripts**:
+**package.json** scripts:
 ```json
 {
   "scripts": {
     "dev": "nodemon --exec ts-node src/index.ts",
     "build": "tsc",
-    "start": "node dist/index.js"
+    "start": "node dist/index.js",
+    "test": "vitest"
   }
 }
 ```
 
-### **Step 2: Copy Contract ABI** (2 minutes)
+---
 
-```bash
-mkdir -p src/abis
-cd /Users/mylessjs/Desktop/ChainEquity/contracts
-cat out/GatedToken.sol/GatedToken.json | jq '.abi' > ../backend/src/abis/GatedToken.json
-cd ../backend
-```
-
-### **Step 3: Create Environment Configuration** (5 minutes)
-
-Create `backend/.env`:
-```bash
-# Copy from root .env
-ADMIN_PRIVATE_KEY=0x948123033193e7bdf6bc2a2dc4cfc911a99977beebacaed5e545cac418eb5fbe
-DATABASE_URL=postgresql://postgres:ITpPoRYgfwPwGkhtpysPwOBzczfKQDxQ@postgres.railway.internal:5432/railway
-SAFE_ADDRESS=0x6264F29968e8fd2810cB79fb806aC65dAf9db73d
-BASE_SEPOLIA_RPC=https://sepolia.base.org
-CONTRACT_ADDRESS=0xFCc9E74019a2be5808d63A941a84dEbE0fC39964
-CHAIN_ID=84532
-PORT=3000
-NODE_ENV=development
-```
-
-Create `backend/.env.example`:
-```bash
-ADMIN_PRIVATE_KEY=0xYourPrivateKeyHere
-DATABASE_URL=postgresql://user:pass@host:5432/dbname
-SAFE_ADDRESS=0xYourSafeAddress
-BASE_SEPOLIA_RPC=https://sepolia.base.org
-CONTRACT_ADDRESS=0xYourContractAddress
-CHAIN_ID=84532
-PORT=3000
-NODE_ENV=development
-```
-
-### **Step 4: Implement Configuration Files** (15 minutes)
+### 2. Environment Configuration
 
 **`src/config/env.ts`**:
 ```typescript
+import { config } from 'dotenv';
 import { z } from 'zod';
-import dotenv from 'dotenv';
 
-dotenv.config();
+config(); // Load .env file
 
 const envSchema = z.object({
-  ADMIN_PRIVATE_KEY: z.string().startsWith('0x'),
-  DATABASE_URL: z.string().url(),
-  SAFE_ADDRESS: z.string().startsWith('0x'),
+  // Server
+  PORT: z.string().default('3000'),
+  NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
+  
+  // Blockchain
   BASE_SEPOLIA_RPC: z.string().url(),
-  CONTRACT_ADDRESS: z.string().startsWith('0x'),
-  CHAIN_ID: z.coerce.number(),
-  PORT: z.coerce.number().default(3000),
-  NODE_ENV: z.enum(['development', 'production']).default('development'),
+  CONTRACT_ADDRESS: z.string().regex(/^0x[a-fA-F0-9]{40}$/),
+  CHAIN_ID: z.string().transform(Number),
+  
+  // Database
+  DATABASE_URL: z.string().url(),
+  
+  // Admin (for demo transaction signing)
+  ADMIN_PRIVATE_KEY: z.string().regex(/^0x[a-fA-F0-9]{64}$/),
+  ADMIN_ADDRESS: z.string().regex(/^0x[a-fA-F0-9]{40}$/),
+  
+  // Gnosis Safe (optional, for future multi-sig)
+  SAFE_ADDRESS: z.string().regex(/^0x[a-fA-F0-9]{40}$/).optional(),
 });
 
 export const env = envSchema.parse(process.env);
 ```
 
-**`src/config/viem.ts`**:
-```typescript
-import { createPublicClient, createWalletClient, http } from 'viem';
-import { baseSepolia } from 'viem/chains';
-import { privateKeyToAccount } from 'viem/accounts';
-import { env } from './env';
+---
 
-export const publicClient = createPublicClient({
-  chain: baseSepolia,
-  transport: http(env.BASE_SEPOLIA_RPC),
-});
-
-const account = privateKeyToAccount(env.ADMIN_PRIVATE_KEY as `0x${string}`);
-
-export const walletClient = createWalletClient({
-  account,
-  chain: baseSepolia,
-  transport: http(env.BASE_SEPOLIA_RPC),
-});
-```
+### 3. Database Connection
 
 **`src/config/database.ts`**:
 ```typescript
@@ -586,466 +648,99 @@ import { env } from './env';
 
 export const pool = new Pool({
   connectionString: env.DATABASE_URL,
+  max: 20,
+  idleTimeoutMillis: 30000,
+  connectionTimeoutMillis: 5000,
 });
 
-export async function testDatabaseConnection(): Promise<boolean> {
-  try {
-    const client = await pool.connect();
-    await client.query('SELECT NOW()');
-    client.release();
-    return true;
-  } catch (error) {
-    console.error('Database connection failed:', error);
-    return false;
-  }
-}
-```
-
-### **Step 5: Implement Health Check** (10 minutes)
-
-**`src/routes/health.ts`**:
-```typescript
-import { Router } from 'express';
-import { publicClient } from '../config/viem';
-import { testDatabaseConnection } from '../config/database';
-
-const router = Router();
-
-router.get('/health', async (req, res) => {
-  try {
-    const [blockNumber, dbConnected] = await Promise.all([
-      publicClient.getBlockNumber(),
-      testDatabaseConnection(),
-    ]);
-
-    res.json({
-      status: 'ok',
-      timestamp: new Date().toISOString(),
-      blockchain: {
-        connected: true,
-        chainId: 84532,
-        blockNumber: Number(blockNumber),
-      },
-      database: {
-        connected: dbConnected,
-      },
-    });
-  } catch (error) {
-    res.status(500).json({
-      status: 'error',
-      message: 'Health check failed',
-      error: error instanceof Error ? error.message : 'Unknown error',
-    });
-  }
+// Test connection
+pool.on('connect', () => {
+  console.log('✅ Connected to PostgreSQL database');
 });
 
-export default router;
+pool.on('error', (err) => {
+  console.error('❌ PostgreSQL error:', err);
+});
+
+// Graceful shutdown
+process.on('SIGINT', async () => {
+  await pool.end();
+  console.log('👋 Database connection pool closed');
+  process.exit(0);
+});
 ```
 
-### **Step 6: Implement Contract Service** (30 minutes)
+---
 
-**`src/services/contractService.ts`**:
+### 4. Blockchain Client
+
+**`src/config/viem.ts`**:
 ```typescript
-import { publicClient, walletClient } from '../config/viem';
-import { env } from '../config/env';
-import GatedTokenABI from '../abis/GatedToken.json';
+import { createPublicClient, createWalletClient, http } from 'viem';
+import { baseSepolia } from 'viem/chains';
+import { privateKeyToAccount } from 'viem/accounts';
+import { env } from './env';
 
-const CONTRACT_ADDRESS = env.CONTRACT_ADDRESS as `0x${string}`;
+// Public client for reading blockchain state
+export const publicClient = createPublicClient({
+  chain: baseSepolia,
+  transport: http(env.BASE_SEPOLIA_RPC),
+});
 
-export async function approveWallet(walletAddress: string) {
-  const { request } = await publicClient.simulateContract({
-    address: CONTRACT_ADDRESS,
-    abi: GatedTokenABI,
-    functionName: 'approveWallet',
-    args: [walletAddress as `0x${string}`],
-    account: walletClient.account,
-  });
+// Wallet client for sending transactions
+const account = privateKeyToAccount(env.ADMIN_PRIVATE_KEY as `0x${string}`);
 
-  const hash = await walletClient.writeContract(request);
-  return hash;
-}
+export const walletClient = createWalletClient({
+  account,
+  chain: baseSepolia,
+  transport: http(env.BASE_SEPOLIA_RPC),
+});
 
-export async function revokeWallet(walletAddress: string) {
-  const { request } = await publicClient.simulateContract({
-    address: CONTRACT_ADDRESS,
-    abi: GatedTokenABI,
-    functionName: 'revokeWallet',
-    args: [walletAddress as `0x${string}`],
-    account: walletClient.account,
-  });
-
-  const hash = await walletClient.writeContract(request);
-  return hash;
-}
-
-export async function mintTokens(to: string, amount: bigint) {
-  const { request } = await publicClient.simulateContract({
-    address: CONTRACT_ADDRESS,
-    abi: GatedTokenABI,
-    functionName: 'mint',
-    args: [to as `0x${string}`, amount],
-    account: walletClient.account,
-  });
-
-  const hash = await walletClient.writeContract(request);
-  return hash;
-}
-
-export async function executeSplit(multiplier: number) {
-  const { request } = await publicClient.simulateContract({
-    address: CONTRACT_ADDRESS,
-    abi: GatedTokenABI,
-    functionName: 'executeSplit',
-    args: [BigInt(multiplier)],
-    account: walletClient.account,
-  });
-
-  const hash = await walletClient.writeContract(request);
-  return hash;
-}
-
-export async function changeSymbol(newSymbol: string) {
-  const { request } = await publicClient.simulateContract({
-    address: CONTRACT_ADDRESS,
-    abi: GatedTokenABI,
-    functionName: 'changeSymbol',
-    args: [newSymbol],
-    account: walletClient.account,
-  });
-
-  const hash = await walletClient.writeContract(request);
-  return hash;
-}
-
-export async function isApproved(walletAddress: string): Promise<boolean> {
-  const result = await publicClient.readContract({
-    address: CONTRACT_ADDRESS,
-    abi: GatedTokenABI,
-    functionName: 'allowlist',
-    args: [walletAddress as `0x${string}`],
-  });
-
-  return result as boolean;
-}
-
-export async function getTotalSupply(): Promise<bigint> {
-  const result = await publicClient.readContract({
-    address: CONTRACT_ADDRESS,
-    abi: GatedTokenABI,
-    functionName: 'totalSupply',
-  });
-
-  return result as bigint;
-}
+console.log(`✅ Blockchain client initialized (Admin: ${account.address})`);
 ```
 
-### **Step 7: Implement Database Service** (30 minutes)
+---
 
-**`src/services/databaseService.ts`**:
+### 5. Error Handling Middleware
+
+**`src/middleware/errorHandler.ts`**:
 ```typescript
-import { pool } from '../config/database';
+import { Request, Response, NextFunction } from 'express';
 
-export async function getApprovalStatus(address: string) {
-  const result = await pool.query(
-    'SELECT * FROM approvals WHERE address = $1',
-    [address.toLowerCase()]
-  );
-
-  return result.rows[0] || null;
-}
-
-export async function getCurrentCapTable() {
-  const result = await pool.query(`
-    SELECT
-      address,
-      balance,
-      ownership_percent,
-      last_updated_block,
-      last_updated_at
-    FROM balances
-    WHERE balance > 0
-    ORDER BY balance DESC
-  `);
-
-  return result.rows;
-}
-
-export async function getHistoricalCapTable(blockNumber: number) {
-  const result = await pool.query(`
-    WITH historical_transfers AS (
-      SELECT
-        from_address AS address,
-        -SUM(amount) AS net_change
-      FROM transfers
-      WHERE block_number <= $1 AND from_address != '0x0000000000000000000000000000000000000000'
-      GROUP BY from_address
-      UNION ALL
-      SELECT
-        to_address AS address,
-        SUM(amount) AS net_change
-      FROM transfers
-      WHERE block_number <= $1
-      GROUP BY to_address
-    )
-    SELECT
-      address,
-      SUM(net_change) AS balance
-    FROM historical_transfers
-    GROUP BY address
-    HAVING SUM(net_change) > 0
-    ORDER BY balance DESC
-  `, [blockNumber]);
-
-  return result.rows;
-}
-
-export async function getTransactionHistory(
-  page: number = 1,
-  limit: number = 50,
-  address?: string
+export function errorHandler(
+  error: Error,
+  req: Request,
+  res: Response,
+  next: NextFunction
 ) {
-  const offset = (page - 1) * limit;
+  console.error('❌ Error:', error);
 
-  let query = `
-    SELECT
-      transaction_hash,
-      block_number,
-      block_timestamp,
-      event_type,
-      from_address,
-      to_address,
-      amount
-    FROM transfers
-  `;
+  const statusCode = res.statusCode === 200 ? 500 : res.statusCode;
 
-  const params: any[] = [];
-
-  if (address) {
-    query += ` WHERE from_address = $1 OR to_address = $1`;
-    params.push(address.toLowerCase());
-  }
-
-  query += ` ORDER BY block_number DESC LIMIT $${params.length + 1} OFFSET $${params.length + 2}`;
-  params.push(limit, offset);
-
-  const result = await pool.query(query, params);
-
-  // Get total count
-  const countQuery = address
-    ? 'SELECT COUNT(*) FROM transfers WHERE from_address = $1 OR to_address = $1'
-    : 'SELECT COUNT(*) FROM transfers';
-  const countResult = await pool.query(countQuery, address ? [address.toLowerCase()] : []);
-
-  const totalRecords = parseInt(countResult.rows[0].count);
-  const totalPages = Math.ceil(totalRecords / limit);
-
-  return {
-    transactions: result.rows,
-    pagination: {
-      currentPage: page,
-      totalPages,
-      totalRecords,
-    },
-  };
+  res.status(statusCode).json({
+    error: error.message || 'Internal server error',
+    timestamp: new Date().toISOString(),
+    path: req.path,
+    ...(process.env.NODE_ENV === 'development' && { stack: error.stack }),
+  });
 }
 ```
 
-### **Step 8: Implement Admin Routes** (45 minutes)
+---
 
-**`src/routes/admin.ts`**:
-```typescript
-import { Router } from 'express';
-import { z } from 'zod';
-import * as contractService from '../services/contractService';
-
-const router = Router();
-
-// Validation schemas
-const addressSchema = z.object({
-  walletAddress: z.string().regex(/^0x[a-fA-F0-9]{40}$/),
-});
-
-const mintSchema = z.object({
-  to: z.string().regex(/^0x[a-fA-F0-9]{40}$/),
-  amount: z.string().regex(/^\d+$/),
-});
-
-const splitSchema = z.object({
-  multiplier: z.number().int().min(2),
-});
-
-const symbolSchema = z.object({
-  newSymbol: z.string().regex(/^[A-Z0-9]{2,6}$/),
-});
-
-// POST /admin/approve
-router.post('/admin/approve', async (req, res) => {
-  try {
-    const { walletAddress } = addressSchema.parse(req.body);
-
-    // Check if already approved
-    const isCurrentlyApproved = await contractService.isApproved(walletAddress);
-    if (isCurrentlyApproved) {
-      return res.status(409).json({
-        success: false,
-        message: 'Wallet is already approved',
-      });
-    }
-
-    const hash = await contractService.approveWallet(walletAddress);
-
-    res.json({
-      success: true,
-      transactionHash: hash,
-      status: 'pending',
-      message: 'Approval transaction submitted',
-    });
-  } catch (error) {
-    if (error instanceof z.ZodError) {
-      return res.status(400).json({ error: 'Invalid wallet address format' });
-    }
-    res.status(500).json({
-      error: 'Transaction failed',
-      message: error instanceof Error ? error.message : 'Unknown error',
-    });
-  }
-});
-
-// POST /admin/revoke
-router.post('/admin/revoke', async (req, res) => {
-  try {
-    const { walletAddress } = addressSchema.parse(req.body);
-
-    const hash = await contractService.revokeWallet(walletAddress);
-
-    res.json({
-      success: true,
-      transactionHash: hash,
-      status: 'pending',
-      message: 'Revoke transaction submitted',
-    });
-  } catch (error) {
-    if (error instanceof z.ZodError) {
-      return res.status(400).json({ error: 'Invalid wallet address format' });
-    }
-    res.status(500).json({
-      error: 'Transaction failed',
-      message: error instanceof Error ? error.message : 'Unknown error',
-    });
-  }
-});
-
-// POST /admin/mint
-router.post('/admin/mint', async (req, res) => {
-  try {
-    const { to, amount } = mintSchema.parse(req.body);
-
-    // Check if recipient is approved
-    const isApproved = await contractService.isApproved(to);
-    if (!isApproved) {
-      return res.status(403).json({
-        success: false,
-        message: 'Recipient wallet is not approved',
-      });
-    }
-
-    const amountBigInt = BigInt(amount);
-    const hash = await contractService.mintTokens(to, amountBigInt);
-
-    res.json({
-      success: true,
-      transactionHash: hash,
-      tokensMinted: amount,
-      recipient: to,
-    });
-  } catch (error) {
-    if (error instanceof z.ZodError) {
-      return res.status(400).json({ error: 'Invalid inputs' });
-    }
-    res.status(500).json({
-      error: 'Transaction failed',
-      message: error instanceof Error ? error.message : 'Unknown error',
-    });
-  }
-});
-
-// POST /admin/corporate-actions/split
-router.post('/admin/corporate-actions/split', async (req, res) => {
-  try {
-    const { multiplier } = splitSchema.parse(req.body);
-
-    const hash = await contractService.executeSplit(multiplier);
-    const newTotalSupply = await contractService.getTotalSupply();
-
-    res.json({
-      success: true,
-      transactionHash: hash,
-      multiplier,
-      newTotalSupply: newTotalSupply.toString(),
-      message: `Stock split executed: all balances multiplied by ${multiplier}`,
-    });
-  } catch (error) {
-    if (error instanceof z.ZodError) {
-      return res.status(400).json({ error: 'Multiplier must be an integer >= 2' });
-    }
-    res.status(500).json({
-      error: 'Transaction failed',
-      message: error instanceof Error ? error.message : 'Unknown error',
-    });
-  }
-});
-
-// POST /admin/corporate-actions/symbol
-router.post('/admin/corporate-actions/symbol', async (req, res) => {
-  try {
-    const { newSymbol } = symbolSchema.parse(req.body);
-
-    const hash = await contractService.changeSymbol(newSymbol);
-
-    res.json({
-      success: true,
-      transactionHash: hash,
-      oldSymbol: 'ACME', // Could read from contract
-      newSymbol,
-    });
-  } catch (error) {
-    if (error instanceof z.ZodError) {
-      return res.status(400).json({ error: 'Symbol must be 2-6 alphanumeric characters' });
-    }
-    res.status(500).json({
-      error: 'Transaction failed',
-      message: error instanceof Error ? error.message : 'Unknown error',
-    });
-  }
-});
-
-export default router;
-```
-
-### **Step 9: Implement Remaining Routes** (45 minutes)
-
-Create these route files:
-- `src/routes/wallet.ts` - Wallet status endpoint
-- `src/routes/capTable.ts` - Cap-table endpoints (current, historical, export)
-- `src/routes/transactions.ts` - Transaction history
-
-Follow similar patterns as admin routes.
-
-### **Step 10: Create Main Express App** (20 minutes)
+### 6. Main Server
 
 **`src/index.ts`**:
 ```typescript
 import express from 'express';
 import cors from 'cors';
-import dotenv from 'dotenv';
-import healthRouter from './routes/health';
-import adminRouter from './routes/admin';
-import walletRouter from './routes/wallet';
-import capTableRouter from './routes/capTable';
-import transactionsRouter from './routes/transactions';
 import { env } from './config/env';
+import { errorHandler } from './middleware/errorHandler';
 
-dotenv.config();
+// Import routes (create these next)
+import healthRouter from './routes/health';
+import dataRouter from './routes/data';
+import transactionsRouter from './routes/transactions';
 
 const app = express();
 
@@ -1054,196 +749,421 @@ app.use(cors());
 app.use(express.json());
 
 // Routes
-app.use('/', healthRouter);
-app.use('/', adminRouter);
-app.use('/', walletRouter);
-app.use('/', capTableRouter);
-app.use('/', transactionsRouter);
+app.use('/api', healthRouter);
+app.use('/api', dataRouter);
+app.use('/api', transactionsRouter);
 
 // Error handling
-app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
-  console.error(err.stack);
-  res.status(500).json({ error: 'Internal server error' });
-});
+app.use(errorHandler);
 
 // Start server
-app.listen(env.PORT, () => {
-  console.log(`🚀 Backend API running on http://localhost:${env.PORT}`);
-  console.log(`📊 Health check: http://localhost:${env.PORT}/health`);
-  console.log(`⛓️  Contract: ${env.CONTRACT_ADDRESS}`);
-  console.log(`🔐 Safe: ${env.SAFE_ADDRESS}`);
+const PORT = env.PORT;
+app.listen(PORT, () => {
+  console.log(`🚀 ChainEquity Backend API running on port ${PORT}`);
+  console.log(`📡 Environment: ${env.NODE_ENV}`);
+  console.log(`⛓️  Network: Base Sepolia (Chain ID: ${env.CHAIN_ID})`);
+  console.log(`📜 Contract: ${env.CONTRACT_ADDRESS}`);
 });
 ```
 
-### **Step 11: Test Locally** (15 minutes)
-
-```bash
-# Start development server
-npm run dev
-
-# Test health endpoint
-curl http://localhost:3000/health
-
-# Should see:
-# {
-#   "status": "ok",
-#   "blockchain": { "connected": true, ... },
-#   "database": { "connected": true }
-# }
-```
-
-**Note**: Database queries will fail until Phase 2B (Indexer) creates the tables and populates data.
-
 ---
 
-## Success Criteria
+### 7. Database Service
 
-Your Phase 2A is complete when ALL of the following are true:
-
-- [ ] All 11 API endpoints implemented
-- [ ] Input validation using zod schemas
-- [ ] Contract interactions via viem working
-- [ ] Database queries implemented (will be tested in Phase 4)
-- [ ] Health check endpoint responds correctly
-- [ ] Error handling middleware in place
-- [ ] TypeScript compiles with no errors
-- [ ] Development server runs locally
-- [ ] README.md with API documentation
-- [ ] `.env.example` created
-
----
-
-## Report Template
-
-When you complete Phase 2A, generate this report for the Orchestrator:
-
-```markdown
-# Phase 2A: Backend API Development - COMPLETE
-
-## Status
-✅ Complete
-
-## Deliverables
-
-### 1. API Endpoints Implemented
-- ✅ GET /health
-- ✅ POST /admin/approve
-- ✅ POST /admin/revoke
-- ✅ POST /admin/mint
-- ✅ POST /admin/corporate-actions/split
-- ✅ POST /admin/corporate-actions/symbol
-- ✅ GET /wallet/:address/status
-- ✅ GET /cap-table
-- ✅ GET /cap-table/historical
-- ✅ GET /cap-table/export
-- ✅ GET /transactions
-
-**Total**: 11 endpoints
-
-### 2. Local Testing Results
-- Health check: ✅ Working
-- Contract interactions: ✅ Tested with admin wallet
-- Database queries: ⏳ Pending Phase 2B (indexer must create tables)
-
-### 3. Files Created
-- `backend/src/index.ts` (XX lines)
-- `backend/src/config/` (3 files)
-- `backend/src/routes/` (5 files)
-- `backend/src/services/` (3 files)
-- `backend/package.json`
-- `backend/tsconfig.json`
-- `backend/README.md`
-
-**Total**: ~XXX lines of TypeScript
-
-### 4. Dependencies
-- express ^4.18.0
-- viem ^2.7.0
-- pg ^8.11.0
-- zod ^3.22.0
-- dotenv ^16.3.0
-- cors ^4.0.0
-
-### 5. Next Phase Requirements
-
-**For Phase 2B (Indexer) - Must Create Tables:**
-```sql
-CREATE TABLE transfers (...);
-CREATE TABLE balances (...);
-CREATE TABLE approvals (...);
-CREATE TABLE corporate_actions (...);
-```
-
-**For Phase 3 (Frontend):**
+**`src/services/database.service.ts`**:
 ```typescript
-BACKEND_URL = "http://localhost:3000" // Local dev
-BACKEND_URL = "https://chainequity-backend.up.railway.app" // Production
+import { pool } from '../config/database';
+
+export async function getCapTable() {
+  const result = await pool.query(`
+    SELECT 
+      address,
+      balance,
+      updated_at
+    FROM balances
+    WHERE balance::numeric > 0
+    ORDER BY balance::numeric DESC
+  `);
+  
+  return result.rows;
+}
+
+export async function getTransfers(filters: {
+  address?: string;
+  limit?: number;
+  offset?: number;
+  fromBlock?: number;
+  toBlock?: number;
+}) {
+  let query = 'SELECT * FROM transfers WHERE 1=1';
+  const params: any[] = [];
+  
+  if (filters.address) {
+    params.push(filters.address, filters.address);
+    query += ` AND (from_address = $${params.length - 1} OR to_address = $${params.length})`;
+  }
+  
+  if (filters.fromBlock) {
+    params.push(filters.fromBlock);
+    query += ` AND block_number >= $${params.length}`;
+  }
+  
+  if (filters.toBlock) {
+    params.push(filters.toBlock);
+    query += ` AND block_number <= $${params.length}`;
+  }
+  
+  query += ' ORDER BY block_number DESC, id DESC';
+  
+  const limit = Math.min(filters.limit || 100, 1000);
+  params.push(limit);
+  query += ` LIMIT $${params.length}`;
+  
+  if (filters.offset) {
+    params.push(filters.offset);
+    query += ` OFFSET $${params.length}`;
+  }
+  
+  const result = await pool.query(query, params);
+  return result.rows;
+}
+
+export async function getCorporateActions(filters: {
+  type?: string;
+  limit?: number;
+  offset?: number;
+}) {
+  let query = 'SELECT * FROM corporate_actions WHERE 1=1';
+  const params: any[] = [];
+  
+  if (filters.type) {
+    params.push(filters.type);
+    query += ` AND action_type = $${params.length}`;
+  }
+  
+  query += ' ORDER BY block_number DESC, id DESC';
+  
+  const limit = Math.min(filters.limit || 50, 500);
+  params.push(limit);
+  query += ` LIMIT $${params.length}`;
+  
+  if (filters.offset) {
+    params.push(filters.offset);
+    query += ` OFFSET $${params.length}`;
+  }
+  
+  const result = await pool.query(query, params);
+  return result.rows;
+}
+
+export async function getWalletInfo(address: string) {
+  // Get balance
+  const balanceResult = await pool.query(
+    'SELECT balance, updated_at FROM balances WHERE address = $1',
+    [address.toLowerCase()]
+  );
+  
+  // Get approval status
+  const approvalResult = await pool.query(
+    'SELECT is_approved, approved_at, revoked_at FROM approvals WHERE address = $1',
+    [address.toLowerCase()]
+  );
+  
+  // Get transfer count and dates
+  const transfersResult = await pool.query(`
+    SELECT 
+      COUNT(*) as count,
+      MIN(block_timestamp) as first_transfer,
+      MAX(block_timestamp) as last_transfer
+    FROM transfers
+    WHERE from_address = $1 OR to_address = $1
+  `, [address.toLowerCase()]);
+  
+  return {
+    balance: balanceResult.rows[0] || { balance: '0', updated_at: null },
+    approval: approvalResult.rows[0] || { is_approved: false, approved_at: null, revoked_at: null },
+    transfers: transfersResult.rows[0],
+  };
+}
+
+export async function isWalletApproved(address: string): Promise<boolean> {
+  const result = await pool.query(
+    'SELECT is_approved FROM approvals WHERE address = $1',
+    [address.toLowerCase()]
+  );
+  
+  return result.rows[0]?.is_approved || false;
+}
 ```
 
-### 6. Ready for Railway Deployment
-- [x] Build script configured
-- [x] Start script configured
-- [x] Environment variables documented
-- [x] PORT configurable via env
+---
 
-## Blockers
-None - waiting for Phase 2B to create database tables
+### 8. Blockchain Service
 
-## Notes
-- All admin operations go through contract (Safe ownership verified)
-- Database queries will work once Phase 2B creates tables and indexes events
-- CSV export implemented using built-in JSON-to-CSV conversion
-- Ready for Railway deployment in Phase 4
+**`src/services/blockchain.service.ts`**:
+```typescript
+import { publicClient, walletClient } from '../config/viem';
+import { env } from '../config/env';
+import GatedTokenABI from '../abis/GatedToken.json';
+
+const CONTRACT_ADDRESS = env.CONTRACT_ADDRESS as `0x${string}`;
+
+export async function submitTransfer(to: string, amount: string) {
+  const hash = await walletClient.writeContract({
+    address: CONTRACT_ADDRESS,
+    abi: GatedTokenABI,
+    functionName: 'transfer',
+    args: [to as `0x${string}`, BigInt(amount)],
+  });
+  
+  return hash;
+}
+
+export async function approveWallet(address: string) {
+  const hash = await walletClient.writeContract({
+    address: CONTRACT_ADDRESS,
+    abi: GatedTokenABI,
+    functionName: 'approveWallet',
+    args: [address as `0x${string}`],
+  });
+  
+  return hash;
+}
+
+export async function revokeWallet(address: string) {
+  const hash = await walletClient.writeContract({
+    address: CONTRACT_ADDRESS,
+    abi: GatedTokenABI,
+    functionName: 'revokeWallet',
+    args: [address as `0x${string}`],
+  });
+  
+  return hash;
+}
+
+export async function executeStockSplit(multiplier: number) {
+  const hash = await walletClient.writeContract({
+    address: CONTRACT_ADDRESS,
+    abi: GatedTokenABI,
+    functionName: 'executeStockSplit',
+    args: [BigInt(multiplier)],
+  });
+  
+  return hash;
+}
+
+export async function updateSymbol(newSymbol: string) {
+  const hash = await walletClient.writeContract({
+    address: CONTRACT_ADDRESS,
+    abi: GatedTokenABI,
+    functionName: 'updateSymbol',
+    args: [newSymbol],
+  });
+  
+  return hash;
+}
+
+export async function getCurrentBlockNumber(): Promise<bigint> {
+  return await publicClient.getBlockNumber();
+}
+
+export async function getTokenSymbol(): Promise<string> {
+  const symbol = await publicClient.readContract({
+    address: CONTRACT_ADDRESS,
+    abi: GatedTokenABI,
+    functionName: 'symbol',
+  });
+  
+  return symbol as string;
+}
 ```
 
 ---
 
-## Important Notes
+## 🧪 Testing Requirements
 
-### **Database Tables**
-Phase 2B (Indexer) will create these tables:
-- `transfers` - All transfer events
-- `balances` - Current state per wallet
-- `approvals` - Allowlist state with timestamps
-- `corporate_actions` - Splits, symbol changes
+### Manual Testing Checklist
+- [ ] Health endpoint returns 200 with blockchain and database status
+- [ ] Cap table endpoint returns current balances
+- [ ] Transfer history endpoint returns all transfers
+- [ ] Wallet info endpoint returns balance and approval status
+- [ ] Submit transfer succeeds for approved recipient
+- [ ] Submit transfer fails for non-approved recipient (400 error)
+- [ ] Approve wallet submits transaction successfully
+- [ ] Stock split submits transaction successfully
+- [ ] Update symbol submits transaction successfully
+- [ ] All admin endpoints return transaction hashes and block explorer links
 
-Your queries are ready, but they'll fail until Phase 2B runs.
+### Testing Script
+Create `/backend/test-api.sh`:
+```bash
+#!/bin/bash
+BASE_URL="http://localhost:3000/api"
 
-### **Safe Integration**
-For demo purposes, transactions are submitted from the admin wallet directly. In production, you'd integrate with Safe Transaction Service API for multi-sig proposal/approval workflows.
+echo "🧪 Testing ChainEquity Backend API"
+echo ""
 
-### **Testing Strategy**
-- Test health check immediately
-- Test contract interactions with admin wallet
-- Database endpoints will be tested in Phase 4 after Phase 2B completes
+echo "1. Health Check"
+curl -X GET "$BASE_URL/health" | jq
+echo ""
+
+echo "2. Cap Table"
+curl -X GET "$BASE_URL/cap-table" | jq
+echo ""
+
+echo "3. Transfers"
+curl -X GET "$BASE_URL/transfers?limit=10" | jq
+echo ""
+
+echo "4. Wallet Info"
+curl -X GET "$BASE_URL/wallet/0x4f10f93e2b0f5faf6b6e5a03e8e48f96921d24c6" | jq
+echo ""
+
+echo "✅ Basic tests complete"
+```
 
 ---
 
-## Troubleshooting
+## 🚀 Deployment to Railway
 
-**Issue**: Database connection fails
-- **Solution**: Check DATABASE_URL format, ensure Phase 2B has created tables
+### Prerequisites
+- Phase 2B indexer must be running and database schema must exist
+- Railway CLI installed: `npm install -g @railway/cli`
+- Logged in: `railway login`
 
-**Issue**: Contract interactions fail with "insufficient funds"
-- **Solution**: Check admin wallet balance on Base Sepolia
+### Deploy Steps
+```bash
+cd /Users/mylessjs/Desktop/ChainEquity/backend
 
-**Issue**: TypeScript compilation errors
-- **Solution**: Run `npm install` to ensure all @types packages are installed
+# Link to Railway project
+railway link
+# Select: ChainEquity-Indexer
+# Select: production
+# Create new service: backend
+
+# Set environment variables
+railway variables set NODE_ENV=production
+railway variables set PORT=3000
+railway variables set BASE_SEPOLIA_RPC=https://sepolia.base.org
+railway variables set CONTRACT_ADDRESS=0xFCc9E74019a2be5808d63A941a84dEbE0fC39964
+railway variables set CHAIN_ID=84532
+railway variables set ADMIN_PRIVATE_KEY=0x948123033193e7bdf6bc2a2dc4cfc911a99977beebacaed5e545cac418eb5fbe
+railway variables set ADMIN_ADDRESS=0x4f10f93e2b0f5faf6b6e5a03e8e48f96921d24c6
+railway variables set SAFE_ADDRESS=0x6264F29968e8fd2810cB79fb806aC65dAf9db73d
+
+# Use the PUBLIC database URL (Railway will set DATABASE_URL automatically if using their Postgres)
+# If not auto-set:
+railway variables set DATABASE_URL=postgresql://postgres:opjpippLFhoVcIuuMllwtrKcSGTBJgar@yamanote.proxy.rlwy.net:23802/railway
+
+# Deploy
+railway up
+
+# Check logs
+railway logs
+```
+
+### Create railway.json (Optional)
+```json
+{
+  "$schema": "https://railway.app/railway.schema.json",
+  "build": {
+    "builder": "NIXPACKS"
+  },
+  "deploy": {
+    "startCommand": "npm run build && npm start",
+    "restartPolicyType": "ON_FAILURE",
+    "restartPolicyMaxRetries": 10
+  }
+}
+```
 
 ---
 
-## Resources
+## 📋 Completion Report Format
 
-- **viem Documentation**: https://viem.sh
-- **Express Documentation**: https://expressjs.com
-- **Zod Documentation**: https://zod.dev
-- **PostgreSQL node-postgres**: https://node-postgres.com
+When you finish Phase 2A implementation, provide a report in this format:
+
+### Phase 2A: Backend API - COMPLETION REPORT
+
+#### ✅ Implementation Summary
+- **Status**: Complete / Partial / Blocked
+- **Duration**: [X] hours
+- **API Base URL (local)**: http://localhost:3000/api
+- **API Base URL (Railway)**: https://[service-name].railway.app/api
+
+#### 📊 Endpoints Implemented
+- [ ] GET /api/health
+- [ ] GET /api/cap-table
+- [ ] GET /api/transfers
+- [ ] GET /api/corporate-actions
+- [ ] GET /api/wallet/:address
+- [ ] POST /api/transfer
+- [ ] POST /api/admin/approve-wallet
+- [ ] POST /api/admin/revoke-wallet
+- [ ] POST /api/admin/stock-split
+- [ ] POST /api/admin/update-symbol
+
+#### 🧪 Testing Results
+- Manual testing completed: Yes / No
+- Health check working: Yes / No
+- Database queries working: Yes / No
+- Transaction submission working: Yes / No
+- Error handling tested: Yes / No
+
+#### 📁 Files Created
+List all files created with brief descriptions.
+
+#### 🐛 Known Issues / Limitations
+List any bugs, edge cases not handled, or areas needing improvement.
+
+#### 🚀 Deployment Status
+- Deployed to Railway: Yes / No
+- Railway URL: [URL]
+- Environment variables set: Yes / No
+- Deployment logs checked: Yes / No
+
+#### 📦 Required for Phase 3 (Frontend)
+Provide these values to the frontend developer:
+- **Backend API URL**: [Railway URL]
+- **Contract Address**: 0xFCc9E74019a2be5808d63A941a84dEbE0fC39964
+- **Contract ABI Location**: /Users/mylessjs/Desktop/ChainEquity/contracts/out/GatedToken.sol/GatedToken.json
+- **Available Endpoints**: [List with brief descriptions]
+- **CORS Configuration**: Enabled for all origins (update for production)
+
+#### 🔄 Next Steps
+- Phase 3 (Frontend) can begin immediately
+- Recommended: Test all endpoints with Postman/Insomnia before handing off to frontend
+- Consider: Add rate limiting and authentication for production
+
+#### 💡 Recommendations
+- Any suggestions for improving the API
+- Performance optimizations to consider
+- Security enhancements for production
 
 ---
 
-**BEGIN IMPLEMENTATION NOW!**
+## 🎯 Success Criteria
 
-Start with Step 1 (Initialize Backend Project) and work through each step methodically. Focus on clean code structure and proper error handling. When complete, provide the report template filled out with your actual results.
+Your Phase 2A implementation is complete when:
+- [ ] All 10 API endpoints are implemented and tested
+- [ ] Backend can query database successfully (cap-table, transfers, corporate actions)
+- [ ] Backend can submit transactions to blockchain (transfer, approve wallet, etc.)
+- [ ] Error handling works for common failure cases (unapproved recipient, invalid address, RPC errors)
+- [ ] Backend is deployed to Railway and accessible via HTTPS
+- [ ] Completion report is provided with all required information for Phase 3
 
-Good luck! 🚀
+---
 
+## 🤝 Questions or Issues?
+
+If you encounter blockers:
+1. **Database connection fails**: Verify Phase 2B indexer is running and database tables exist
+2. **Transaction submission fails**: Check ADMIN_PRIVATE_KEY has sufficient testnet ETH
+3. **RPC rate limiting**: Public RPC is sufficient for demo, but consider Alchemy/QuickNode for production
+4. **CORS errors**: Ensure cors middleware is configured correctly
+
+Document all issues in your completion report.
+
+---
+
+**Good luck! You're building the critical backend layer that connects the blockchain to the frontend. Let's make it robust and developer-friendly! 🚀**

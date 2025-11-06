@@ -1,0 +1,35 @@
+# ChainEquity - Railway Database URLs
+# Updated: 2025-11-06 - LATEST DEPLOYMENT (superb-trust project)
+
+## ⚠️ CURRENT ACTIVE CREDENTIALS ⚠️
+
+## Railway Service Names
+# Railway Project: superb-trust (ACTIVE)
+# Indexer Service: chainequity-mlx
+# PostgreSQL Database: Auto-provisioned in superb-trust
+
+## Railway PostgreSQL Database URLs (CURRENT)
+
+### INTERNAL URL (for services running ON Railway - like indexer)
+# Use this for indexer service running on Railway
+DATABASE_URL_INTERNAL=postgresql://postgres:opjpippLFhoVcIuuMllwtrKcSGTBJgar@postgres.railway.internal:5432/railway
+
+### PUBLIC URL (for services running OUTSIDE Railway - like backend on Vercel, local dev)
+DATABASE_URL_PUBLIC=postgresql://postgres:opjpippLFhoVcIuuMllwtrKcSGTBJgar@yamanote.proxy.rlwy.net:23802/railway
+
+## Usage Guide:
+# - Indexer (superb-trust on Railway): Uses DATABASE_URL (auto-provided by Railway)
+# - Backend (on Vercel or separate Railway): Use DATABASE_URL_PUBLIC
+# - Local Development: Use DATABASE_URL_PUBLIC
+
+## Railway Project Info (CURRENT)
+RAILWAY_PROJECT_NAME=superb-trust
+RAILWAY_ENVIRONMENT=production
+DEPLOYMENT_DATE=2025-11-06
+
+## 🚫 DEPRECATED - Old Credentials (DO NOT USE)
+# OLD Project: ChainEquity-Indexer (d7432f9a-4960-4a89-8be7-ad9d828b8c7c)
+# OLD Internal: postgresql://postgres:dYjiuLvfSvaOjsNHXhtAbWHtbwWPFpUW@postgres.railway.internal:5432/railway
+# OLD Public: postgresql://postgres:dYjiuLvfSvaOjsNHXhtAbWHtbwWPFpUW@nozomi.proxy.rlwy.net:25369/railway
+# Status: DEPRECATED - No longer in use
+

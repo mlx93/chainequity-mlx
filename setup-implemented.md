@@ -74,14 +74,18 @@ All manual setup steps have been completed for the ChainEquity tokenized equity 
 ## 4. Database Infrastructure
 
 ### **Railway PostgreSQL**
-- **Project Name**: lucid-strength
+- **Service Name**: lucid-strength (PostgreSQL database service)
+- **Indexer Service Name**: superb-trust (indexer application)
+- **Project**: Both services in same Railway project
 - **Environment**: production
 - **Database**: PostgreSQL 15.x
-- **Connection**: DATABASE_URL configured (see wallet-addresses.txt)
+- **Connection**: DATABASE_URL configured (see wallet-addresses.txt and RAILWAY_DATABASE_URLS.txt)
 - **Purpose**: Query cache for cap-table, transactions, historical data
 - **Status**: ✅ Database provisioned and ready
 
 **Important**: Database is reconstructible from blockchain events (not source of truth).
+
+**Note**: See `RAILWAY_SERVICES.md` for detailed service mapping.
 
 ---
 

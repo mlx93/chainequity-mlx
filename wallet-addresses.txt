@@ -21,10 +21,17 @@ INVESTOR_B_ADDRESS=0xefd94a1534959e04630899abdd5d768601f4af5b
 SAFE_ADDRESS=0x6264F29968e8fd2810cB79fb806aC65dAf9db73d
 BASE_SEPOLIA_RPC=https://sepolia.base.org
 
-## Railway PostgreSQL Database
-DATABASE_URL=postgresql://postgres:ITpPoRYgfwPwGkhtpysPwOBzczfKQDxQ@postgres.railway.internal:5432/railway
-Project: lucid-strength
-Environment: production
+## Railway PostgreSQL Database (Phase 2B Deployment - CURRENT)
+# INTERNAL URL (for services on Railway - indexer)
+DATABASE_URL_INTERNAL=postgresql://postgres:opjpippLFhoVcIuuMllwtrKcSGTBJgar@postgres.railway.internal:5432/railway
+
+# PUBLIC URL (for services outside Railway - backend, local dev)
+DATABASE_URL_PUBLIC=postgresql://postgres:opjpippLFhoVcIuuMllwtrKcSGTBJgar@yamanote.proxy.rlwy.net:23802/railway
+
+Project: superb-trust (CURRENT - ACTIVE)
+Railway Environment: production
+Deployed: 2025-11-06
+Note: OLD project (ChainEquity-Indexer) credentials are DEPRECATED
 
 ## Wallet Balances (Base Sepolia)
 Admin: 0.0125 ETH ✅

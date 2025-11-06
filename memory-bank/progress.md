@@ -1,0 +1,298 @@
+# ChainEquity - Progress Status
+
+## ✅ Phase 1: Smart Contracts (COMPLETE)
+
+### Completed Deliverables
+- ✅ **GatedToken.sol** implemented with all required features
+- ✅ **Full test suite** (10/10 tests passing)
+- ✅ **Gas optimization** (all operations under target)
+- ✅ **Deployed to Base Sepolia** at `0xFCc9E74019a2be5808d63A941a84dEbE0fC39964`
+- ✅ **Ownership transferred** to Gnosis Safe `0x6264F29968e8fd2810cB79fb806aC65dAf9db73d`
+- ✅ **ABI exported** for backend/frontend integration
+
+### Contract Features Verified
+- ✅ Allowlist gating on transfers (only approved wallets can receive)
+- ✅ Virtual stock split via multiplier (gas-efficient)
+- ✅ Mutable token symbol
+- ✅ Mint/burn functions with proper access control
+- ✅ Safe ownership pattern (onlyOwner modifier)
+- ✅ Comprehensive event emission
+
+### Test Coverage
+- ✅ Deployment and initialization
+- ✅ Wallet approval/revocation
+- ✅ Gated transfers (allowed and rejected)
+- ✅ Stock split mechanics
+- ✅ Symbol updates
+- ✅ Minting and burning
+- ✅ Access control enforcement
+- ✅ Edge cases (burn from zero address, split by 1, etc.)
+
+### Gas Benchmarks (All Within Target)
+| Operation | Gas Used | Target | Status |
+|-----------|----------|--------|--------|
+| Deploy | 1,487,231 | <2M | ✅ |
+| Approve Wallet | 48,491 | <100K | ✅ |
+| Transfer (Gated) | 57,137 | <100K | ✅ |
+| Stock Split | 63,719 | <200K | ✅ |
+| Update Symbol | 52,485 | <100K | ✅ |
+| Mint | 51,426 | <100K | ✅ |
+| Burn | 30,553 | <80K | ✅ |
+
+### Key Files Created
+- `/contracts/src/GatedToken.sol` - Main contract
+- `/contracts/test/GatedToken.t.sol` - Test suite
+- `/contracts/script/Deploy.s.sol` - Deployment script
+- `/contracts/out/GatedToken.sol/GatedToken.json` - ABI export
+- `PHASE1_COMPLETION_REPORT.md` - Full phase 1 documentation
+
+### Deployment Details
+- **Network**: Base Sepolia (Chain ID: 84532)
+- **Contract Address**: `0xFCc9E74019a2be5808d63A941a84dEbE0fC39964`
+- **Deployment Block**: `33313307`
+- **Owner**: Gnosis Safe 2-of-3 multi-sig
+- **Initial Supply**: 10,000,000 tokens (10^7 * 10^18 wei)
+- **Admin Wallet Pre-Approved**: Yes
+
+### Known Limitations (Documented)
+- Stock split transfers require amounts divisible by 700 for Safe compatibility
+- Block explorer symbol caching may cause UI lag after symbol updates
+- Contract allows burning from addresses (requires approval like transfers)
+
+---
+
+## ✅ Phase 2B: Event Indexer (COMPLETE)
+
+### Completed Work
+- ✅ **Indexer code implemented** (TypeScript + viem + pg)
+- ✅ **Database schema designed** (4 tables with indexes)
+- ✅ **Event processors written** for all 7 event types
+- ✅ **Backfill logic** to process historical events from deployment block
+- ✅ **Real-time event watching** using viem's `watchEvent`
+- ✅ **Pushed to GitHub** at `https://github.com/mlx93/chainequity-mlx`
+- ✅ **Auto-init code added** to create database schema on startup
+
+### ✅ Deployment Completed
+**Status**: Successfully deployed to Railway project `superb-trust`. All issues resolved:
+
+1. ✅ **Dockerfile Detection**: Fixed with `RAILWAY_DOCKERFILE_PATH=indexer/Dockerfile` environment variable
+2. ✅ **Build Context**: Updated Dockerfile COPY paths for monorepo structure
+3. ✅ **Package Sync**: Regenerated and committed `package-lock.json`
+4. ✅ **Database Connection**: Moved PostgreSQL to same project, internal DNS working
+5. ✅ **Schema Initialization**: Auto-initialized on startup, all 4 tables created successfully
+
+**Final Architecture**:
+- Railway Project: `superb-trust`
+- Indexer Service: `chainequity-mlx` (GitHub connected, auto-deploy)
+- Database: PostgreSQL (auto-provisioned in same project)
+- Status: ✅ Running and monitoring blockchain events 24/7
+
+**Solution Details**: See `docs/railway/COMPLETE_SOLUTION.md` for full deployment guide and `docs/railway/ORCHESTRATOR_SUMMARY.md` for handoff summary.
+
+### Indexer Implementation Details
+
+**Database Schema**:
+```sql
+transfers (id, transaction_hash, block_number, block_timestamp,
+           from_address, to_address, amount, created_at)
+           + indexes on from_address, to_address, block_number
+
+balances (address PRIMARY KEY, balance, updated_at)
+
+approvals (address PRIMARY KEY, is_approved, approved_at,
+           revoked_at, updated_at)
+
+corporate_actions (id, action_type, transaction_hash, block_number,
+                   block_timestamp, details JSONB, created_at)
+                   + indexes on action_type, block_number
+```
+
+**Event Processors Implemented**:
+- Transfer → Update `transfers` table + recalculate `balances`
+- WalletApproved → Update `approvals` (is_approved=true)
+- WalletRevoked → Update `approvals` (is_approved=false)
+- StockSplit → Insert into `corporate_actions` (type='stock_split')
+- SymbolChanged → Insert into `corporate_actions` (type='symbol_change')
+- TokensMinted → Insert into `corporate_actions` (type='mint')
+- TokensBurned → Insert into `corporate_actions` (type='burn')
+
+**Configuration**:
+- Start Block: 33313307 (contract deployment)
+- RPC: https://sepolia.base.org (public endpoint)
+- Database: Railway PostgreSQL (internal URL for production)
+- Build Output: `/indexer/dist/` (TypeScript compiled to JavaScript)
+
+### Files Created
+- `/indexer/src/index.ts` - Main indexer entry point (with auto-init)
+- `/indexer/src/config/env.ts` - Environment configuration
+- `/indexer/src/config/viem.ts` - Blockchain client setup
+- `/indexer/src/db/initSchema.ts` - Database initialization
+- `/indexer/src/db/client.ts` - PostgreSQL connection pool
+- `/indexer/src/services/eventProcessor.ts` - Event handling logic
+- `/indexer/package.json` - Dependencies and scripts
+- `/indexer/tsconfig.json` - TypeScript configuration
+- `/indexer/Dockerfile` - Railway deployment container
+- `PHASE2B_INDEXER_COMPLETION_REPORT.md` - Technical documentation
+- `RAILWAY_FIX_COMPLETE.md` - Troubleshooting and solution guide
+
+### ✅ Phase 2B Complete
+- ✅ Railway database setup completed - PostgreSQL in same project (`superb-trust`)
+- ✅ Indexer logs confirm "✅ Database schema initialized successfully"
+- ✅ Database tables verified: transfers, balances, approvals, corporate_actions
+- ✅ Backfill completed successfully (0 historical events found - normal for new contract)
+- ✅ Real-time event watching active - "📡 Listening for blockchain events..."
+- ✅ PUBLIC database URL available for Phase 2A backend (see `RAILWAY_DATABASE_URLS.txt`)
+
+**Handoff Document**: `docs/railway/ORCHESTRATOR_SUMMARY.md` contains complete status and next steps for Phase 2A.
+
+---
+
+## 🔴 Phase 2A: Backend API (NOT STARTED)
+
+### Planned Features
+- Express.js REST API
+- Endpoints:
+  - `GET /api/cap-table` - Current holder balances
+  - `GET /api/transfers` - Transfer history
+  - `GET /api/corporate-actions` - Stock splits, symbol changes
+  - `GET /api/wallet/:address` - Wallet info
+  - `POST /api/transfer` - Submit transfer transaction
+  - `POST /api/approve-wallet` - Admin: Approve wallet
+  - `POST /api/revoke-wallet` - Admin: Revoke wallet
+  - `POST /api/stock-split` - Admin: Execute split
+  - `POST /api/update-symbol` - Admin: Change symbol
+- Database queries via PostgreSQL (PUBLIC URL)
+- Transaction submission via viem → blockchain
+- CORS configuration for Vercel frontend
+
+### Dependencies
+- **Blocker**: Phase 2B must be complete (database tables must exist)
+- **Required Inputs**:
+  - PUBLIC database URL (for Railway external connection)
+  - Contract ABI (already available)
+  - Contract address (already known)
+  - Admin private key (for transaction signing in demo)
+
+### Files to Create
+- `/backend/src/index.ts` - Express server
+- `/backend/src/routes/` - API endpoint handlers
+- `/backend/src/services/` - Business logic
+- `/backend/src/db/` - Database queries
+- `/backend/src/blockchain/` - Transaction submission logic
+- `/backend/package.json`
+- `/backend/tsconfig.json`
+
+---
+
+## 🔴 Phase 3: Frontend (NOT STARTED)
+
+### Planned Features
+- React + Vite + TypeScript
+- Cap table display (real-time)
+- Transaction history view
+- Wallet connection (wagmi + MetaMask)
+- Transfer form with approval status checking
+- Admin panel for Gnosis Safe operations
+- Corporate action history
+- Responsive UI with Tailwind CSS + shadcn/ui
+
+### Dependencies
+- **Blocker**: Phase 2A must be complete (backend API must be running)
+- **Required Inputs**:
+  - Backend API URL (Railway deployment)
+  - Contract address and ABI
+  - Base Sepolia network configuration
+
+### Files to Create
+- `/frontend/src/App.tsx` - Main app component
+- `/frontend/src/components/` - UI components
+- `/frontend/src/hooks/` - wagmi hooks
+- `/frontend/src/lib/` - Utilities
+- `/frontend/package.json`
+- `/frontend/vite.config.ts`
+
+---
+
+## 🔴 Phase 4: Integration & Testing (NOT STARTED)
+
+### Planned Activities
+- End-to-end testing of full stack
+- Demo scenario walkthroughs
+- Bug fixes and edge case handling
+- Performance testing
+- Demo video recording
+- Documentation finalization
+
+### Success Criteria
+- ✅ Can connect wallet to frontend
+- ✅ Can view cap table with correct balances
+- ✅ Can execute transfer between approved wallets
+- ✅ Transfer rejection to non-approved wallet works
+- ✅ Admin can approve wallet via Gnosis Safe
+- ✅ Admin can execute stock split via Gnosis Safe
+- ✅ Stock split reflects in cap table
+- ✅ Admin can update symbol via Gnosis Safe
+- ✅ Symbol update reflects in frontend (contract query)
+- ✅ All transactions show in history
+- ✅ Corporate actions logged and displayed
+
+---
+
+## Current Status Summary
+
+### What Works
+- ✅ Smart contracts deployed and tested on Base Sepolia
+- ✅ Gnosis Safe configured and owns contract
+- ✅ Indexer code written and pushed to GitHub
+- ✅ Railway project exists with PostgreSQL provisioned
+
+### What's Blocking
+- 🔴 Railway database tables not verified to exist
+- 🔴 Indexer deployment needs reconfiguration (2-service architecture)
+
+### What's Next
+1. **[IMMEDIATE]** Complete Railway setup per `RAILWAY_FIX_COMPLETE.md`
+2. **[IMMEDIATE]** Verify indexer running with database schema ready
+3. **[NEXT]** Implement Phase 2A backend API
+4. **[THEN]** Implement Phase 3 frontend
+5. **[FINAL]** Phase 4 integration testing and demo
+
+### Estimated Time Remaining
+- Phase 2B completion (Railway fix): 30-60 minutes
+- Phase 2A (Backend): 4-6 hours
+- Phase 3 (Frontend): 6-8 hours
+- Phase 4 (Integration): 2-4 hours
+- **Total**: ~14-18 hours of focused work
+
+---
+
+## Key Resources
+
+### Documentation Files
+- `PRD_PRODUCT.md` - Product requirements
+- `PRD_TECHNICAL.md` - Technical specifications
+- `TECHNICAL_DECISIONS.md` - Architecture decisions
+- `DEMO_VIDEO.md` - Demo script
+- `MANUAL_SETUP.md` - External service setup guide
+- `setup-implemented.md` - Setup completion summary
+- `PHASE1_COMPLETION_REPORT.md` - Phase 1 results
+- `PHASE2B_INDEXER_COMPLETION_REPORT.md` - Phase 2B implementation
+- `RAILWAY_FIX_COMPLETE.md` - Railway troubleshooting guide
+- `/memory-bank/` - Persistent knowledge base
+
+### Configuration Files
+- `wallet-addresses.txt` - All addresses and credentials
+- `RAILWAY_DATABASE_URLS.txt` - Database connection strings
+- `.env` - Local environment variables
+
+### GitHub Repository
+- URL: https://github.com/mlx93/chainequity-mlx
+- Branches: main (all work on main)
+- Deployment: Vercel auto-deploys frontend from main
+
+### External Services
+- Railway: https://railway.app/dashboard
+- Vercel: https://vercel.com/dashboard
+- Gnosis Safe: https://app.safe.global
+- Base Sepolia Explorer: https://sepolia.basescan.org
+
