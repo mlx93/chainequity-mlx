@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>CSP Test</title>
+</head>
+<body>
+  <h1>CSP Diagnostic</h1>
+  <div id="csp-info"></div>
+  <script>
+    // Check what CSP the browser is actually using
+    const metaCSP = document.querySelector('meta[http-equiv="Content-Security-Policy"]');
+    const cspInfo = document.getElementById('csp-info');
+    
+    let info = '<h2>Content Security Policy Status</h2>';
+    info += '<p><strong>Meta Tag CSP:</strong> ' + (metaCSP ? metaCSP.getAttribute('content') : 'None found') + '</p>';
+    
+    // Try to detect if eval is blocked
+    try {
+      eval('console.log("eval works")');
+      info += '<p><strong>eval() status:</strong> <span style="color:green">ALLOWED</span></p>';
+    } catch (e) {
+      info += '<p><strong>eval() status:</strong> <span style="color:red">BLOCKED</span> - ' + e.message + '</p>';
+    }
+    
+    // Check HTTP headers via fetch
+    fetch(window.location.href, { method: 'HEAD' })
+      .then(response => {
+        const cspHeader = response.headers.get('content-security-policy');
+        info += '<p><strong>HTTP Header CSP:</strong> ' + (cspHeader || 'None found') + '</p>';
+        cspInfo.innerHTML = info;
+      })
+      .catch(err => {
+        info += '<p><strong>Error fetching headers:</strong> ' + err.message + '</p>';
+        cspInfo.innerHTML = info;
+      });
+  </script>
+</body>
+</html>
+
