@@ -1,16 +1,17 @@
 # ChainEquity Indexer Dockerfile
+# Build context is repo root, Dockerfile path is indexer/Dockerfile
 FROM node:18-alpine
 
 WORKDIR /app
 
-# Copy package files
-COPY package*.json ./
+# Copy package files first (for better layer caching)
+COPY indexer/package*.json ./
 
 # Install all dependencies (needed for TypeScript build)
 RUN npm ci
 
-# Copy source files
-COPY . .
+# Copy rest of source files (excluding node_modules via .dockerignore if present)
+COPY indexer/ ./
 
 # Build TypeScript and copy necessary files
 RUN npm run build
