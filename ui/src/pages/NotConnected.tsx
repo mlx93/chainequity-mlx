@@ -14,7 +14,8 @@ export default function NotConnected() {
     setIsClient(true)
   }, [])
 
-  const metaMaskConnector = connectors.find(c => c.id === 'metaMask')
+  // wagmi uses 'metaMaskSDK' as the connector ID, not 'metaMask'
+  const metaMaskConnector = connectors.find(c => c.id === 'metaMaskSDK' || c.id === 'metaMask')
   const hasMetaMask = typeof window !== 'undefined' && window.ethereum?.isMetaMask
 
   // Debug: Log connector state
