@@ -2,8 +2,10 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { formatAddress } from '@/lib/utils'
 import { getDisplayName } from '@/hooks/useDisplayName'
 import type { CapTableResponse } from '@/types'
-import { ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react'
+import { ArrowUpDown, ArrowUp, ArrowDown, Copy, Check } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { useState } from 'react'
+import { toast } from 'sonner'
 
 interface CapTableGridProps {
   capTable: CapTableResponse
@@ -18,6 +20,19 @@ export default function CapTableGrid({
   sortOrder,
   onSortChange,
 }: CapTableGridProps) {
+  const [copiedAddress, setCopiedAddress] = useState<string | null>(null)
+
+  const copyAddress = async (address: string) => {
+    try {
+      await navigator.clipboard.writeText(address)
+      setCopiedAddress(address)
+      toast.success('Address copied to clipboard', { duration: 2000 })
+      setTimeout(() => setCopiedAddress(null), 2000)
+    } catch (error) {
+      toast.error('Failed to copy address', { duration: 2000 })
+    }
+  }
+
   const sortedCapTable = [...(capTable?.capTable || [])].sort((a, b) => {
     if (sortBy === 'balance') {
       try {
@@ -112,7 +127,21 @@ export default function CapTableGrid({
                     {getDisplayName(entry?.address || '')}
                   </TableCell>
                   <TableCell className="font-mono text-sm">
-                    {formatAddress(entry?.address || '')}
+                    <div className="flex items-center gap-2">
+                      <span>{formatAddress(entry?.address || '')}</span>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => copyAddress(entry?.address || '')}
+                        className="h-6 w-6 p-0"
+                      >
+                        {copiedAddress === entry?.address ? (
+                          <Check className="h-3 w-3 text-green-600" />
+                        ) : (
+                          <Copy className="h-3 w-3" />
+                        )}
+                      </Button>
+                    </div>
                   </TableCell>
                   <TableCell>
                     {balance?.toLocaleString?.() ?? '0'}

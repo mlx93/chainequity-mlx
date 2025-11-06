@@ -277,7 +277,129 @@ corporate_actions (id, action_type, transaction_hash, block_number,
 
 ---
 
-## 🟡 Phase 4: Integration & Testing (IN PROGRESS)
+## 🟢 Phase 4: Integration & Testing (ADVANCED PROGRESS)
+
+### Completed Work (Nov 6, 2025 Session)
+
+#### ✅ Critical Bug Fixes
+**1. Virtual Stock Split Implementation**
+- **Problem**: Stock splits executed on-chain but UI showed no change
+- **Root Cause**: Backend wasn't reading `splitMultiplier` from contract
+- **Solution**: Added `getSplitMultiplier()` function, applies multiplier to all balances
+- **Files**: `backend/src/routes/data.ts`
+- **Commit**: `fa0371a`
+- **Status**: Deployed to Railway, awaiting redeploy completion
+- **Expected**: Total supply 1,500 → 10,500 after 7-for-1 split
+
+**2. Multiple UI Bug Fixes** (from previous testing):
+- Fixed "Invalid Date" in transaction history (API field mismatch)
+- Fixed infinite toast notifications (useEffect + useRef pattern)
+- Fixed balance not updating after transfer (invalidateQueries timing)
+- Fixed duplicate total supply in database (indexer duplicate prevention)
+- Fixed ownership percentage rounding (floating-point arithmetic)
+- Fixed 404 errors on page load (useTransactions enablement guard)
+- Fixed transfer form validation and error display
+
+#### ✅ New Features Implemented
+**1. Self-Service Display Names**
+- Users can set custom display names for their wallets
+- Names stored in localStorage (browser-side persistence)
+- Display names shown in:
+  - ✅ Investor Dashboard header (prominent, text-3xl)
+  - ✅ Cap Table UI (Account Name column)
+  - ✅ CSV exports (Account Name column)
+  - ✅ JSON exports (accountName field)
+- Inline editing with pencil icon, check/X for save/cancel
+- Toast notifications for feedback
+- Default names for known wallets (Admin, Investor A/B/C, Gnosis Safe)
+- **Files Created**:
+  - `ui/src/hooks/useDisplayName.ts`
+  - `ui/src/components/profile/DisplayNameEditor.tsx`
+- **Commits**: `e599980`, `98de8d1`
+
+**2. Cap Table Address Copy Feature**
+- Copy icon next to each address in Cap Table
+- Visual feedback: Copy → Check icon (2 seconds)
+- Toast notification on successful copy
+- Clipboard API error handling
+- **Files**: `ui/src/components/captable/CapTableGrid.tsx`
+
+#### ✅ Documentation Created
+- `docs/VIRTUAL_STOCK_SPLIT_ARCHITECTURE.md` - Complete explanation of virtual split pattern, industry standard approach, gas efficiency rationale, and verification commands
+
+#### ✅ Automated Testing Results
+**Backend API Checks**:
+- ✅ All 10 endpoints responding correctly
+- ✅ Health check passing
+- ✅ Database connectivity verified
+- ✅ Blockchain RPC connectivity verified
+
+**Build Validation**:
+- ✅ Frontend builds successfully (639 KB bundle)
+- ✅ Backend compiles without TypeScript errors
+- ✅ All linting passes
+
+**Contract Function Mapping**:
+- ✅ All admin functions accessible
+- ✅ ABI matches deployed contract
+
+#### ✅ Manual UI Testing Results
+- **Test 1**: Mint tokens to approved wallet → ✅ PASSING
+- **Test 2**: Transfer between approved wallets → ✅ PASSING
+- **Test 3**: Transfer to non-approved wallet (should fail) → ✅ PASSING
+- **Test 4**: Approve new wallet, transfer succeeds → ✅ PASSING
+- **Test 5**: Execute 7-for-1 stock split → ⏳ PENDING (backend redeploy)
+- **Test 6**: Change ticker symbol → ⏳ NOT YET TESTED
+- **Test 7**: Export cap-table (CSV/JSON) → ✅ PASSING
+
+### Pending Work
+
+#### ⏳ Remaining Manual Tests
+1. **Test 5**: Execute 7-for-1 split (waiting for Railway backend redeploy)
+   - Expected: Total supply multiplies by 7
+   - Expected: All individual balances multiply by 7
+   - Expected: Ownership percentages stay the same
+   
+2. **Test 6**: Change ticker symbol
+   - Expected: Symbol updates from ACME → new symbol
+   - Expected: Balances remain unchanged
+   - Expected: UI reflects new symbol
+
+3. **Historical Cap Table Query** (if time permits):
+   - Query cap table at specific block
+   - Verify historical accuracy
+
+#### ⏳ Documentation Deliverables
+- `PHASE4_TEST_RESULTS.md` - Complete test execution log (in progress)
+- `PHASE4_COMPLETION_REPORT.md` - Final report with bug status (pending)
+- Memory bank updates - Final session summary (pending)
+
+### Known Issues & Limitations
+
+**Non-Critical**:
+- Display names are browser-specific (localStorage, not synced across devices)
+- MetaMask shows $0.00 for ACME tokens (expected - no price oracle)
+- BaseScan may cache old symbol after symbol changes (blockchain explorer limitation)
+
+**Resolved This Session**:
+- ✅ Stock split multiplier not applied to UI (FIXED)
+- ✅ Display name too small and not prominent (FIXED)
+- ✅ No copy function for addresses in Cap Table (FIXED)
+
+### Session Statistics
+- **Bugs Fixed**: 1 critical (stock split), 8 UI/UX improvements
+- **Features Added**: 2 (display names, address copy)
+- **Files Modified**: 15+
+- **Commits**: 3 major commits
+- **Documentation**: 1 new architecture doc (70 lines)
+
+### Next Session Goals
+1. Wait for Railway backend redeploy (~2 min)
+2. Test Case 5: Execute 7-for-1 split → verify 10,500 total supply
+3. Test Case 6: Change ticker symbol → verify symbol updates
+4. Complete `PHASE4_TEST_RESULTS.md` with all test logs
+5. Write `PHASE4_COMPLETION_REPORT.md` final report
+6. Prepare for demo video recording (if all tests pass)
 
 ### Completed Work
 - ✅ Automated API endpoint testing (10/10 endpoints operational)

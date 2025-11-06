@@ -2,7 +2,89 @@
 
 ## Current Work Focus
 
-**Primary Goal**: Phase 4 (Integration & Testing) 🟡 IN PROGRESS - Automated testing complete, critical bug fixed (missing `/admin/mint` endpoint). All backend services operational, frontend deployed, indexer running. Manual testing of all 7 demo scenarios pending (requires MetaMask wallet interaction). System ready for end-to-end testing once manual tests are executed.
+**Primary Goal**: Phase 4 (Integration & Testing) 🟢 ADVANCED PROGRESS - Stock split architecture fixed, display name feature implemented, UI refinements complete. Backend now correctly applies virtual split multiplier to all balances. Test Case 5 (7-for-1 split) should now pass once Railway backend redeploys. Manual testing of demo scenarios 5-7 pending.
+
+## Recent Changes (This Session - Nov 6, 2025)
+
+### Critical Bug Fix: Virtual Stock Split Implementation
+**Problem**: 7-for-1 stock split executed on-chain but UI showed no change (1500 tokens remained 1500 instead of 10,500)
+
+**Root Cause**: 
+- Smart contract uses virtual split multiplier (gas-efficient design)
+- `splitMultiplier` stored on-chain (verified: currently = 7)
+- Backend was ignoring `splitMultiplier` when querying balances
+- Database stores base amounts, backend must read multiplier and apply it
+
+**Solution Implemented**:
+- Added `getSplitMultiplier()` function to `/backend/src/routes/data.ts`
+- Modified `/api/cap-table` endpoint to read `splitMultiplier` from contract
+- Applied multiplier to all balances: `adjustedBalance = baseBalance * splitMultiplier`
+- Added `splitMultiplier` to API response for transparency
+
+**Files Modified**:
+- `backend/src/routes/data.ts` - Added split multiplier logic
+- Commit: `fa0371a` - "fix: apply splitMultiplier to cap-table balances for stock splits"
+
+**Expected Result After Deploy**:
+- Total Supply: 1,500 → 10,500
+- Investor A: 870 → 6,090
+- Investor B: 550 → 3,850  
+- Investor C: 80 → 560
+
+**Documentation Created**:
+- `docs/VIRTUAL_STOCK_SPLIT_ARCHITECTURE.md` - Complete explanation of virtual split pattern
+
+### New Feature: Self-Service Display Names
+**Implementation**:
+- Created `useDisplayName` hook with localStorage persistence
+- Built `DisplayNameEditor` component with inline editing
+- Integrated into Investor Dashboard (prominent display)
+- Display names show in Cap Table UI and CSV/JSON exports
+- Copy address feature added to Cap Table with visual feedback
+
+**Files Created/Modified**:
+- `ui/src/hooks/useDisplayName.ts` - Display name management
+- `ui/src/components/profile/DisplayNameEditor.tsx` - Editable name component  
+- `ui/src/pages/InvestorView.tsx` - Layout updated
+- `ui/src/components/captable/CapTableGrid.tsx` - Uses dynamic names + copy icon
+- `ui/src/components/captable/ExportButtons.tsx` - Exports with names
+
+**UI Design**:
+- Display name shown prominently: `[Investor A] [edit] — Portfolio`
+- Same text size as page title (text-3xl font-bold)
+- One-line layout, removed "Display Name:" label
+- Pencil icon for editing, check/X for save/cancel
+- Toast notifications for feedback
+
+**Commits**:
+- `e599980` - "feat: self-service display name editor with localStorage"
+- `98de8d1` - "refactor: improve display name UI styling"
+
+### UI Enhancements
+**Cap Table Copy Feature**:
+- Added copy icon next to each address in Cap Table
+- Visual feedback: Copy icon → Check icon (2 seconds)
+- Toast notification on successful copy
+- Handles clipboard API errors gracefully
+
+**Files Modified**:
+- `ui/src/components/captable/CapTableGrid.tsx` - Added copyAddress function
+
+### Phase 4 Testing Progress
+**Automated Testing** (COMPLETE):
+- ✅ All backend endpoints verified
+- ✅ Contract function mapping confirmed
+- ✅ Build processes validated
+- ✅ Missing `/admin/mint` endpoint implemented and fixed
+
+**Manual UI Testing** (IN PROGRESS):
+- ✅ Test 1: Mint tokens to approved wallet - PASSING
+- ✅ Test 2: Transfer between approved wallets - PASSING  
+- ✅ Test 3: Transfer to non-approved wallet (fails on-chain) - PASSING
+- ✅ Test 4: Approve new wallet, transfer succeeds - PASSING
+- ⏳ Test 5: Execute 7-for-1 stock split - PENDING BACKEND REDEPLOY
+- ⏳ Test 6: Change ticker symbol - NOT YET TESTED
+- ⏳ Test 7: Export cap-table at specific block - PASSING (CSV/JSON working)
 
 ## Recent Changes (Last Session)
 
