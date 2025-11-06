@@ -43,11 +43,11 @@ export default function TransactionHistory({ address }: TransactionHistoryProps)
           {data.transfers.map((transfer) => (
             <TableRow key={transfer.transactionHash}>
               <TableCell className="text-sm">
-                {new Date(transfer.timestamp).toLocaleString()}
+                {new Date(transfer.blockTimestamp).toLocaleString()}
               </TableCell>
               <TableCell>
                 <span className="inline-flex items-center rounded-full bg-secondary px-2 py-1 text-xs font-semibold">
-                  {transfer.eventType}
+                  {transfer.type}
                 </span>
               </TableCell>
               <TableCell className="font-mono text-sm">
@@ -57,7 +57,7 @@ export default function TransactionHistory({ address }: TransactionHistoryProps)
                 {formatAddress(transfer.to)}
               </TableCell>
               <TableCell>
-                {(parseFloat(transfer.amount) / 1e18).toLocaleString()}
+                {transfer.amountFormatted}
               </TableCell>
               <TableCell>
                 <a

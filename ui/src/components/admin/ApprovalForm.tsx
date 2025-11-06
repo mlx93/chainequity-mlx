@@ -37,6 +37,7 @@ export default function ApprovalForm() {
       const result = await approveWallet(data.address)
       toast.success('Wallet approved', {
         description: `Transaction: ${result.transactionHash}`,
+        duration: 6000,
         action: {
           label: 'View',
           onClick: () => window.open(result.blockExplorerUrl, '_blank'),
@@ -48,6 +49,7 @@ export default function ApprovalForm() {
     } catch (error) {
       toast.error('Failed to approve wallet', {
         description: error instanceof Error ? error.message : 'Unknown error',
+        duration: 6000,
       })
     } finally {
       setLoading(false)
@@ -61,6 +63,7 @@ export default function ApprovalForm() {
       const result = await revokeWallet(address)
       toast.success('Wallet revoked', {
         description: `Transaction: ${result.transactionHash}`,
+        duration: 6000,
         action: {
           label: 'View',
           onClick: () => window.open(result.blockExplorerUrl, '_blank'),
@@ -72,6 +75,7 @@ export default function ApprovalForm() {
     } catch (error) {
       toast.error('Failed to revoke wallet', {
         description: error instanceof Error ? error.message : 'Unknown error',
+        duration: 6000,
       })
     } finally {
       setLoading(false)

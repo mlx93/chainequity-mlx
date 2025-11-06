@@ -1,5 +1,6 @@
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useAccount, useWriteContract, useWaitForTransactionReceipt } from 'wagmi'
+import { useQueryClient } from '@tanstack/react-query'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -26,15 +27,18 @@ type TransferFormData = z.infer<typeof transferSchema>
 
 export default function TransferForm() {
   const { address } = useAccount()
+  const queryClient = useQueryClient()
   const [toAddress, setToAddress] = useState<string>('')
   const { data: recipientApproved } = useApprovalStatus(toAddress as `0x${string}` | undefined)
-  const { data: balance } = useBalance(address)
+  const { data: balance, refetch: refetchBalance } = useBalance(address)
+  const hasShownToast = useRef(false)
   
   const {
     writeContract,
     data: hash,
     isPending,
     error,
+    reset: resetWrite,
   } = useWriteContract()
 
   const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({
@@ -58,10 +62,47 @@ export default function TransferForm() {
       : undefined
     : undefined
 
+  // Handle successful transfer
+  useEffect(() => {
+    if (isConfirmed && hash && !hasShownToast.current) {
+      hasShownToast.current = true
+      toast.success('Transfer successful', {
+        description: `Transaction confirmed`,
+        duration: 6000,
+        action: {
+          label: 'View',
+          onClick: () => window.open(getBlockExplorerUrl(hash, 84532), '_blank'),
+        },
+      })
+      
+      // Refresh balance, transaction history, and reset form
+      setTimeout(() => {
+        refetchBalance()
+        // Invalidate transaction queries to refresh the history
+        queryClient.invalidateQueries({ queryKey: ['transactions'] })
+        reset()
+        setToAddress('')
+        resetWrite()
+        hasShownToast.current = false
+      }, 1000)
+    }
+  }, [isConfirmed, hash, refetchBalance, reset, resetWrite, queryClient])
+
+  // Handle errors
+  useEffect(() => {
+    if (error) {
+      toast.error('Transfer failed', {
+        description: error.message,
+        duration: 6000,
+      })
+    }
+  }, [error])
+
   const onSubmit = async (data: TransferFormData) => {
     if (!recipientApproved) {
       toast.error('Recipient not approved', {
         description: 'The recipient wallet is not approved to receive tokens',
+        duration: 6000,
       })
       return
     }
@@ -69,6 +110,7 @@ export default function TransferForm() {
     if (amountError) {
       toast.error('Invalid amount', {
         description: amountError,
+        duration: 6000,
       })
       return
     }
@@ -84,6 +126,7 @@ export default function TransferForm() {
     } catch (err) {
       toast.error('Transfer failed', {
         description: err instanceof Error ? err.message : 'Unknown error',
+        duration: 6000,
       })
     }
   }
@@ -95,28 +138,6 @@ export default function TransferForm() {
     } else {
       setToAddress('')
     }
-  }
-
-  // Handle successful transfer
-  if (isConfirmed && hash) {
-    toast.success('Transfer successful', {
-      description: `Transaction confirmed`,
-      action: {
-        label: 'View',
-        onClick: () => window.open(getBlockExplorerUrl(hash, 84532), '_blank'),
-      },
-    })
-    setTimeout(() => {
-      reset()
-      setToAddress('')
-    }, 1000)
-  }
-
-  // Handle errors
-  if (error) {
-    toast.error('Transfer failed', {
-      description: error.message,
-    })
   }
 
   return (

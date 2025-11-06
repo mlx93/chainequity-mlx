@@ -1,6 +1,6 @@
 import GatedTokenABI from '../abis/GatedToken.json'
 
-export const CONTRACT_ADDRESS = import.meta.env.VITE_CONTRACT_ADDRESS || '0xFCc9E74019a2be5808d63A941a84dEbE0fC39964'
+export const CONTRACT_ADDRESS = import.meta.env.VITE_CONTRACT_ADDRESS || '0xd7EbbDcD16dec53DfD7B327E8cd8791f00E77A5e'
 export const SAFE_ADDRESS = import.meta.env.VITE_SAFE_ADDRESS || '0x6264F29968e8fd2810cB79fb806aC65dAf9db73d'
 
 export const ADMIN_ADDRESSES = [

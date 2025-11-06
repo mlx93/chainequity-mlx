@@ -39,6 +39,7 @@ export default function MintForm() {
     if (!isApproved) {
       toast.error('Recipient not approved', {
         description: 'Please approve the wallet before minting tokens',
+        duration: 6000,
       })
       return
     }
@@ -49,6 +50,7 @@ export default function MintForm() {
       const result = await mintTokens(data.to, amountInWei)
       toast.success('Tokens minted', {
         description: `Minted ${data.amount} tokens to ${data.to}`,
+        duration: 6000,
         action: {
           label: 'View',
           onClick: () => window.open(result.blockExplorerUrl, '_blank'),
@@ -59,6 +61,7 @@ export default function MintForm() {
     } catch (error) {
       toast.error('Failed to mint tokens', {
         description: error instanceof Error ? error.message : 'Unknown error',
+        duration: 6000,
       })
     } finally {
       setLoading(false)

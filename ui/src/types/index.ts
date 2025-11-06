@@ -15,11 +15,12 @@ export interface CapTableResponse {
 export interface Transfer {
   transactionHash: string
   blockNumber: number
-  timestamp: string
+  blockTimestamp: string
   from: string
   to: string
   amount: string
-  eventType: 'mint' | 'transfer' | 'burn'
+  amountFormatted: string
+  type: 'mint' | 'transfer' | 'burn'
 }
 
 export interface TransfersResponse {

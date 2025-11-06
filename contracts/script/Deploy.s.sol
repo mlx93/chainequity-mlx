@@ -8,20 +8,20 @@ import {console} from "forge-std/console.sol";
 contract DeployGatedToken is Script {
     function run() external returns (GatedToken) {
         uint256 deployerPrivateKey = vm.envUint("ADMIN_PRIVATE_KEY");
-        address safeAddress = vm.envAddress("SAFE_ADDRESS");
+        address adminAddress = vm.addr(deployerPrivateKey);
         
         console.log("Deploying GatedToken with the following parameters:");
         console.log("- Name: ACME Corp Equity");
         console.log("- Symbol: ACME");
-        console.log("- Owner (Safe Address):", safeAddress);
-        console.log("- Deployer:", vm.addr(deployerPrivateKey));
+        console.log("- Owner (Admin Address):", adminAddress);
+        console.log("- Deployer:", adminAddress);
         
         vm.startBroadcast(deployerPrivateKey);
         
         GatedToken token = new GatedToken(
             "ACME Corp Equity",
             "ACME",
-            safeAddress
+            adminAddress
         );
         
         vm.stopBroadcast();

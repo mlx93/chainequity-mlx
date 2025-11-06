@@ -56,6 +56,7 @@ export default function CorporateActions() {
       const result = await executeStockSplit(data.multiplier)
       toast.success('Stock split executed', {
         description: `All balances multiplied by ${data.multiplier}`,
+        duration: 6000,
         action: {
           label: 'View',
           onClick: () => window.open(result.blockExplorerUrl, '_blank'),
@@ -65,6 +66,7 @@ export default function CorporateActions() {
     } catch (error) {
       toast.error('Failed to execute stock split', {
         description: error instanceof Error ? error.message : 'Unknown error',
+        duration: 6000,
       })
     } finally {
       setSplitLoading(false)
@@ -77,6 +79,7 @@ export default function CorporateActions() {
       const result = await updateSymbol(data.newSymbol.toUpperCase())
       toast.success('Symbol updated', {
         description: `Symbol changed to ${data.newSymbol.toUpperCase()}`,
+        duration: 6000,
         action: {
           label: 'View',
           onClick: () => window.open(result.blockExplorerUrl, '_blank'),
@@ -86,6 +89,7 @@ export default function CorporateActions() {
     } catch (error) {
       toast.error('Failed to update symbol', {
         description: error instanceof Error ? error.message : 'Unknown error',
+        duration: 6000,
       })
     } finally {
       setSymbolLoading(false)

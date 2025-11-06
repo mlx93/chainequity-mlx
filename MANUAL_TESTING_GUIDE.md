@@ -21,6 +21,16 @@
    - **Investor A**: `0x0d9cf1dc3e134a736aafb1296d2b316742b5c13e`
    - **Investor B**: `0xefd94a1534959e04630899abdd5d768601f4af5b`
 
+## ⚠️ Important: MetaMask Connection
+
+**Connect ONE account at a time** - MetaMask only connects one account per connection.
+
+- When you click "Connect Wallet", MetaMask will show a list of your accounts
+- **Select only the account you want to use** for that test (e.g., Admin wallet)
+- The frontend will use whichever account is currently active in MetaMask
+- To switch accounts: Change the active account in MetaMask, and the frontend will detect it automatically
+- **Don't try to select all 3 accounts** - that's not how MetaMask works
+
 ---
 
 ## Testing Workflow
@@ -28,15 +38,19 @@
 ### Step 1: Connect Admin Wallet & Approve Investors
 
 1. Open frontend in **Chrome** (or primary browser)
-2. Click "Connect Wallet" → Select MetaMask → Choose **Admin wallet**
-3. Verify you're on **Base Sepolia** network (MetaMask should prompt if not)
-4. Navigate to **Admin Dashboard**
-5. **Approve Investor A**:
+2. Click "Connect Wallet" → Select MetaMask
+3. **In MetaMask popup**: Select **ONLY the Admin wallet** (the first account)
+   - MetaMask will show a list of your accounts
+   - Click on the Admin wallet address: `0x4f10f93e2b0f5faf6b6e5a03e8e48f96921d24c6`
+   - Click "Next" → "Connect"
+4. Verify you're on **Base Sepolia** network (MetaMask should prompt if not)
+5. Navigate to **Admin Dashboard**
+6. **Approve Investor A**:
    - Find "Approve Wallet" section
    - Enter Investor A address: `0x0d9cf1dc3e134a736aafb1296d2b316742b5c13e`
    - Click "Approve Wallet" → Confirm in MetaMask
    - Wait for transaction confirmation
-6. **Approve Investor B**:
+7. **Approve Investor B**:
    - Enter Investor B address: `0xefd94a1534959e04630899abdd5d768601f4af5b`
    - Click "Approve Wallet" → Confirm in MetaMask
    - Wait for transaction confirmation
@@ -67,8 +81,8 @@
 ### Step 3: Test Transfer Between Approved Wallets
 
 1. **Switch to Investor A wallet**:
-   - Open frontend in **Safari** (or incognito window)
-   - Connect **Investor A** wallet in MetaMask
+   - **Option A (Same Browser)**: In MetaMask, click the account icon → Switch to **Investor A** account → Frontend will auto-detect the change
+   - **Option B (Different Browser)**: Open frontend in **Safari** (or incognito window) → Click "Connect Wallet" → Select **ONLY Investor A** wallet
    - Navigate to **Investor View**
 2. **Verify Balance**:
    - Should see: "Balance: 10,000 ACME (100%)"
@@ -245,7 +259,10 @@ All events should be captured by the indexer and appear in the database within 1
 
 ## Testing Tips
 
-1. **Use Multiple Browsers**: Chrome for Admin, Safari/Incognito for investors
+1. **MetaMask Account Switching**:
+   - **Same Browser**: Switch accounts in MetaMask → Frontend auto-detects change
+   - **Different Browsers**: Use Chrome for Admin, Safari/Incognito for investors (cleaner separation)
+   - **Always select ONE account** when connecting - MetaMask doesn't support multi-account connections
 2. **Keep Basescan Open**: Monitor transactions in real-time
 3. **Check Transaction History**: Verify all transactions appear in UI
 4. **Test Error Cases**: Try invalid addresses, insufficient balances, etc.
