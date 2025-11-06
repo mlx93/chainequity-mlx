@@ -113,7 +113,7 @@ export default function CapTableGrid({
                     {balance?.toLocaleString?.() ?? '0'}
                   </TableCell>
                   <TableCell>
-                    {ownership?.toFixed?.(4) ?? '0.0000'}%
+                    {ownership?.toFixed?.(2) ?? '0.00'}%
                   </TableCell>
                 </TableRow>
               )

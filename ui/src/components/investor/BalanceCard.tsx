@@ -55,7 +55,7 @@ export default function BalanceCard() {
           {capTable && balanceValue > 0 && (
             <div>
               <p className="text-xs text-muted-foreground">
-                Ownership: {ownershipPercent.toFixed(4)}%
+                Ownership: {ownershipPercent.toFixed(2)}%
               </p>
             </div>
           )}
