@@ -32,15 +32,15 @@ export default function Dashboard() {
     <div className="space-y-6">
       <div className="flex items-start justify-between">
         <div className="flex-1">
-          <h1 className="text-4xl font-bold mb-1">Admin Dashboard</h1>
-          <p className="text-sm text-muted-foreground">Manage approvals, minting,</p>
-          <p className="text-sm text-muted-foreground">and corporate actions</p>
+          <h1 className="text-4xl font-bold mb-2">Admin Dashboard</h1>
+          <p className="text-base text-muted-foreground">Manage approvals, minting,</p>
+          <p className="text-base text-muted-foreground">and corporate actions</p>
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-6 mr-8">
           <div className="border-2 border-black px-4 py-2 rounded">
             <span className="text-2xl font-bold">{symbol || 'ACME'}</span>
           </div>
-          <BurnAllButton />
+          <BurnAllButton symbol={symbol || 'ACME'} />
         </div>
       </div>
 

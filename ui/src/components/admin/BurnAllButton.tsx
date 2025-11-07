@@ -15,7 +15,11 @@ import { toast } from 'sonner'
 import { burnAllTokens } from '@/lib/api'
 import { useQueryClient } from '@tanstack/react-query'
 
-export default function BurnAllButton() {
+interface BurnAllButtonProps {
+  symbol: string
+}
+
+export default function BurnAllButton({ symbol }: BurnAllButtonProps) {
   const [loading, setLoading] = useState(false)
   const queryClient = useQueryClient()
 
@@ -61,15 +65,20 @@ export default function BurnAllButton() {
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-          <AlertDialogDescription>
-            This action cannot be undone. This will burn all tokens from all current holders on the cap table, effectively resetting the total supply to zero.
+          <AlertDialogTitle>Are you sure you want to burn all {symbol} tokens?</AlertDialogTitle>
+          <AlertDialogDescription className="space-y-2">
+            <p>This operation is not reversible if you burn all tokens.</p>
+            <p className="text-sm">This will burn all tokens from all current holders on the cap table, effectively resetting the total supply to zero.</p>
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
-          <AlertDialogAction onClick={handleBurnAll} disabled={loading}>
-            {loading ? 'Burning...' : 'Yes, Burn All Tokens'}
+          <AlertDialogCancel className="border-2 border-black">Cancel</AlertDialogCancel>
+          <AlertDialogAction 
+            onClick={handleBurnAll} 
+            disabled={loading}
+            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+          >
+            {loading ? 'Burning...' : 'Burn'}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

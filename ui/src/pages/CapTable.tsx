@@ -167,7 +167,7 @@ export default function CapTable() {
                 }
               </CardDescription>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-8 mr-4">
               <div className="flex items-center gap-2">
                 <Label htmlFor="snapshot-select" className="text-sm text-muted-foreground whitespace-nowrap">
                   Version:
