@@ -234,7 +234,7 @@ router.post(
 router.post('/admin/burn-all', async (req: Request, res: Response) => {
   try {
     const { getCapTable } = require('../services/database.service');
-    const { burnTokens } = require('../services/blockchain.service');
+    const { burnTokens, getBalanceOf } = require('../services/blockchain.service');
     
     // Get all holders from cap table
     const holders = await getCapTable();
@@ -254,10 +254,12 @@ router.post('/admin/burn-all', async (req: Request, res: Response) => {
     
     for (const holder of holders) {
       try {
-        const balance = holder.balance;
-        if (BigInt(balance) > 0) {
-          console.log(`Burning ${balance} tokens from ${holder.address}`);
-          const txHash = await burnTokens(holder.address, balance);
+        // Get actual on-chain balance (includes split multiplier)
+        const onChainBalance = await getBalanceOf(holder.address);
+        
+        if (onChainBalance > 0n) {
+          console.log(`Burning ${onChainBalance.toString()} tokens from ${holder.address}`);
+          const txHash = await burnTokens(holder.address, onChainBalance.toString());
           transactions.push(txHash);
           
           // Wait 2 seconds between transactions to avoid nonce issues

@@ -96,6 +96,17 @@ export async function getTokenSymbol(): Promise<string> {
   return symbol as string;
 }
 
+export async function getBalanceOf(address: string): Promise<bigint> {
+  const balance = await publicClient.readContract({
+    address: CONTRACT_ADDRESS,
+    abi: GatedTokenABI as any,
+    functionName: 'balanceOf',
+    args: [address as `0x${string}`],
+  });
+  
+  return balance as bigint;
+}
+
 // Helper function to format large numbers
 export function formatTokenAmount(amount: string, decimals: number = 18): string {
   const num = BigInt(amount);
