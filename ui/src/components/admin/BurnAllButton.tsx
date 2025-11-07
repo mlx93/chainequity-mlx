@@ -3,22 +3,21 @@ import { Button } from '@/components/ui/button'
 import { burnAllTokens } from '@/lib/api'
 import { toast } from 'sonner'
 import { Flame } from 'lucide-react'
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from '@/components/ui/alert-dialog'
 
 export default function BurnAllButton() {
   const [loading, setLoading] = useState(false)
 
   const handleBurnAll = async () => {
+    // Browser native confirmation dialog
+    const confirmed = window.confirm(
+      'Burn All Tokens?\n\n' +
+      'This will burn ALL tokens from ALL holders, resetting the total supply to 0.\n\n' +
+      'This action is IRREVERSIBLE and will be recorded on the blockchain.\n\n' +
+      'Are you sure you want to continue?'
+    )
+
+    if (!confirmed) return
+
     setLoading(true)
     try {
       const result = await burnAllTokens()
@@ -41,31 +40,16 @@ export default function BurnAllButton() {
   }
 
   return (
-    <AlertDialog>
-      <AlertDialogTrigger asChild>
-        <Button variant="destructive" size="sm" className="gap-2">
-          <Flame className="h-4 w-4" />
-          Burn All Tokens
-        </Button>
-      </AlertDialogTrigger>
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>Burn All Tokens?</AlertDialogTitle>
-          <AlertDialogDescription>
-            This will burn ALL tokens from ALL holders, resetting the total supply to 0.
-            This action is <strong>irreversible</strong> and will be recorded on the blockchain.
-            <br /><br />
-            Are you sure you want to continue?
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
-          <AlertDialogAction onClick={handleBurnAll} disabled={loading} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-            {loading ? 'Burning...' : 'Yes, Burn All Tokens'}
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
+    <Button 
+      variant="destructive" 
+      size="sm" 
+      className="gap-2"
+      onClick={handleBurnAll}
+      disabled={loading}
+    >
+      <Flame className="h-4 w-4" />
+      {loading ? 'Burning...' : 'Burn All Tokens'}
+    </Button>
   )
 }
 
