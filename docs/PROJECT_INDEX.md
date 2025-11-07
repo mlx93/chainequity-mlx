@@ -131,7 +131,7 @@ Located in `/docs/railway/`
 ## 🔑 Critical Information Quick Reference
 
 ### Contract
-- **Address**: `0xFCc9E74019a2be5808d63A941a84dEbE0fC39964`
+- **Address**: `0xd7EbbDcD16dec53DfD7B327E8cd8791f00E77A5e`
 - **Network**: Base Sepolia (Chain ID: 84532)
 - **Owner**: Gnosis Safe `0x6264F29968e8fd2810cB79fb806aC65dAf9db73d`
 - **ABI**: `/contracts/out/GatedToken.sol/GatedToken.json`

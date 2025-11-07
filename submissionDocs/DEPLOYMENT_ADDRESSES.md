@@ -9,12 +9,12 @@
 
 ### GatedToken Contract
 
-- **Address**: `0xFCc9E74019a2be5808d63A941a84dEbE0fC39964`
+- **Address**: `0xd7EbbDcD16dec53DfD7B327E8cd8791f00E77A5e`
 - **Network**: Base Sepolia
 - **Chain ID**: 84532
 - **Deployment Block**: `33313307`
 - **Deployment Transaction**: Available on Basescan
-- **Explorer**: https://sepolia.basescan.org/address/0xFCc9E74019a2be5808d63A941a84dEbE0fC39964
+- **Explorer**: https://sepolia.basescan.org/address/0xd7EbbDcD16dec53DfD7B327E8cd8791f00E77A5e
 - **Contract Name**: GatedToken
 - **Token Name**: ACME Corp Equity
 - **Token Symbol**: ACME
@@ -134,14 +134,14 @@
 
 ```bash
 # Check contract owner
-cast call 0xFCc9E74019a2be5808d63A941a84dEbE0fC39964 \
+cast call 0xd7EbbDcD16dec53DfD7B327E8cd8791f00E77A5e \
   "owner()" \
   --rpc-url https://sepolia.base.org
 
 # Expected: 0x6264F29968e8fd2810cB79fb806aC65dAf9db73d (Gnosis Safe)
 
 # Check token symbol
-cast call 0xFCc9E74019a2be5808d63A941a84dEbE0fC39964 \
+cast call 0xd7EbbDcD16dec53DfD7B327E8cd8791f00E77A5e \
   "symbol()" \
   --rpc-url https://sepolia.base.org
 
@@ -182,7 +182,7 @@ curl -I https://chainequity-mlx.vercel.app/
 
 ## Quick Links
 
-- **Contract Explorer**: https://sepolia.basescan.org/address/0xFCc9E74019a2be5808d63A941a84dEbE0fC39964
+- **Contract Explorer**: https://sepolia.basescan.org/address/0xd7EbbDcD16dec53DfD7B327E8cd8791f00E77A5e
 - **Gnosis Safe**: https://app.safe.global
 - **Frontend**: https://chainequity-mlx.vercel.app/
 - **Backend API**: https://tender-achievement-production-3aa5.up.railway.app/api

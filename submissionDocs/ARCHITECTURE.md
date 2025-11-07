@@ -236,7 +236,7 @@ ChainEquity/
 - `TokensBurned(from, amount, burner)`
 
 **Deployment**:
-- Address: `0xFCc9E74019a2be5808d63A941a84dEbE0fC39964`
+- Address: `0xd7EbbDcD16dec53DfD7B327E8cd8791f00E77A5e`
 - Network: Base Sepolia (Chain ID: 84532)
 - Deployment Block: `33313307`
 - Owner: **Admin Wallet** `0x4f10f93e2b0f5faf6b6e5a03e8e48f96921d24c6` (Demo Setup)

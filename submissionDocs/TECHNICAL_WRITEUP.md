@@ -280,11 +280,11 @@
 ### Base Sepolia Testnet
 
 **Smart Contract**:
-- Address: `0xFCc9E74019a2be5808d63A941a84dEbE0fC39964`
+- Address: `0xd7EbbDcD16dec53DfD7B327E8cd8791f00E77A5e`
 - Network: Base Sepolia (Chain ID: 84532)
 - Deployment Block: `33313307`
 - Owner: **Admin Wallet** `0x4f10f93e2b0f5faf6b6e5a03e8e48f96921d24c6` (Demo Setup - Single Signature)
-- Explorer: https://sepolia.basescan.org/address/0xFCc9E74019a2be5808d63A941a84dEbE0fC39964
+- Explorer: https://sepolia.basescan.org/address/0xd7EbbDcD16dec53DfD7B327E8cd8791f00E77A5e
 
 **Gnosis Safe** (Created but not used as owner in demo):
 - Address: `0x6264F29968e8fd2810cB79fb806aC65dAf9db73d`
@@ -426,7 +426,7 @@ git push origin main
 
 **Check Contract Deployment**:
 ```bash
-cast call 0xFCc9E74019a2be5808d63A941a84dEbE0fC39964 "symbol()" --rpc-url $BASE_SEPOLIA_RPC
+cast call 0xd7EbbDcD16dec53DfD7B327E8cd8791f00E77A5e "symbol()" --rpc-url $BASE_SEPOLIA_RPC
 # Should return: "ACME"
 ```
 

@@ -83,7 +83,7 @@ Railway Project: superb-trust
 ```bash
 RAILWAY_DOCKERFILE_PATH=indexer/Dockerfile
 BASE_SEPOLIA_RPC=https://sepolia.base.org
-CONTRACT_ADDRESS=0xFCc9E74019a2be5808d63A941a84dEbE0fC39964
+CONTRACT_ADDRESS=0xd7EbbDcD16dec53DfD7B327E8cd8791f00E77A5e
 START_BLOCK=33313307
 CHAIN_ID=84532
 NODE_ENV=production
@@ -129,7 +129,7 @@ DATABASE_URL=<Railway auto-provides internal URL>
 NODE_ENV=production
 PORT=3001
 BASE_SEPOLIA_RPC=https://sepolia.base.org
-CONTRACT_ADDRESS=0xFCc9E74019a2be5808d63A941a84dEbE0fC39964
+CONTRACT_ADDRESS=0xd7EbbDcD16dec53DfD7B327E8cd8791f00E77A5e
 CHAIN_ID=84532
 ADMIN_PRIVATE_KEY=0x948123033193e7bdf6bc2a2dc4cfc911a99977beebacaed5e545cac418eb5fbe
 ADMIN_ADDRESS=0x4f10f93e2b0f5faf6b6e5a03e8e48f96921d24c6
@@ -158,7 +158,7 @@ DATABASE_URL=postgresql://postgres:opjpippLFhoVcIuuMllwtrKcSGTBJgar@yamanote.pro
 ```
 ┌─────────────────────────────────────┐
 │   Base Sepolia Blockchain           │
-│   Contract: 0xFCc9E74019a2be...     │
+│   Contract: 0xd7EbbDcD16dec53DfD7B327E8cd8791f00E77A5e     │
 └──────────────┬──────────────────────┘
                │ (Events)
                │

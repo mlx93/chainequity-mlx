@@ -229,7 +229,7 @@
 ### Transactions Failing
 - Verify wallet has testnet ETH (for gas)
 - Check recipient is approved (for transfers)
-- Verify contract address is correct: `0xFCc9E74019a2be5808d63A941a84dEbE0fC39964`
+- Verify contract address is correct: `0xd7EbbDcD16dec53DfD7B327E8cd8791f00E77A5e`
 
 ### Balances Not Updating
 - Wait 10-15 seconds for indexer to process events

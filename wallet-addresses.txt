@@ -7,6 +7,15 @@ Admin Address:      0x4f10f93e2b0f5faf6b6e5a03e8e48f96921d24c6
 Investor A Address: 0x0d9cf1dc3e134a736aafb1296d2b316742b5c13e
 Investor B Address: 0xefd94a1534959e04630899abdd5d768601f4af5b
 
+## Smart Contract (GatedToken)
+Contract Address: 0xd7EbbDcD16dec53DfD7B327E8cd8791f00E77A5e
+Network: Base Sepolia
+Chain ID: 84532
+Deployment Block: 33313307
+Explorer: https://sepolia.basescan.org/address/0xd7EbbDcD16dec53DfD7B327E8cd8791f00E77A5e
+Owner: Gnosis Safe (see below)
+Deployed: 2025-11-06
+
 ## Gnosis Safe (2-of-3 Multi-Sig)
 Safe Address: 0x6264F29968e8fd2810cB79fb806aC65dAf9db73d
 Network: Base Sepolia
@@ -19,6 +28,7 @@ ADMIN_PRIVATE_KEY=0x948123033193e7bdf6bc2a2dc4cfc911a99977beebacaed5e545cac418eb
 INVESTOR_A_ADDRESS=0x0d9cf1dc3e134a736aafb1296d2b316742b5c13e
 INVESTOR_B_ADDRESS=0xefd94a1534959e04630899abdd5d768601f4af5b
 SAFE_ADDRESS=0x6264F29968e8fd2810cB79fb806aC65dAf9db73d
+CONTRACT_ADDRESS=0xd7EbbDcD16dec53DfD7B327E8cd8791f00E77A5e
 BASE_SEPOLIA_RPC=https://sepolia.base.org
 
 ## Railway PostgreSQL Database (Phase 2B Deployment - CURRENT)

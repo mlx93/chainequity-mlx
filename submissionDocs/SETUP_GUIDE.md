@@ -96,7 +96,7 @@ SAFE_ADDRESS=0x6264F29968e8fd2810cB79fb806aC65dAf9db73d
 ```bash
 DATABASE_URL=postgresql://user:pass@host:5432/dbname  # Use PUBLIC URL for local
 BASE_SEPOLIA_RPC=https://sepolia.base.org
-CONTRACT_ADDRESS=0xFCc9E74019a2be5808d63A941a84dEbE0fC39964
+CONTRACT_ADDRESS=0xd7EbbDcD16dec53DfD7B327E8cd8791f00E77A5e
 START_BLOCK=33313307
 CHAIN_ID=84532
 NODE_ENV=development
@@ -106,7 +106,7 @@ NODE_ENV=development
 ```bash
 ADMIN_PRIVATE_KEY=0xYourPrivateKeyHere
 BASE_SEPOLIA_RPC=https://sepolia.base.org
-CONTRACT_ADDRESS=0xFCc9E74019a2be5808d63A941a84dEbE0fC39964
+CONTRACT_ADDRESS=0xd7EbbDcD16dec53DfD7B327E8cd8791f00E77A5e
 SAFE_ADDRESS=0x6264F29968e8fd2810cB79fb806aC65dAf9db73d
 DATABASE_URL=postgresql://user:pass@host:5432/dbname  # Use PUBLIC URL
 PORT=3000
@@ -116,7 +116,7 @@ CHAIN_ID=84532
 
 **`ui/.env`**:
 ```bash
-VITE_CONTRACT_ADDRESS=0xFCc9E74019a2be5808d63A941a84dEbE0fC39964
+VITE_CONTRACT_ADDRESS=0xd7EbbDcD16dec53DfD7B327E8cd8791f00E77A5e
 VITE_SAFE_ADDRESS=0x6264F29968e8fd2810cB79fb806aC65dAf9db73d
 VITE_BASE_SEPOLIA_RPC=https://sepolia.base.org
 VITE_CHAIN_ID=84532
@@ -217,7 +217,7 @@ railway link
 # Set environment variables
 railway variables set DATABASE_URL=<internal-url>
 railway variables set BASE_SEPOLIA_RPC=https://sepolia.base.org
-railway variables set CONTRACT_ADDRESS=0xFCc9E74019a2be5808d63A941a84dEbE0fC39964
+railway variables set CONTRACT_ADDRESS=0xd7EbbDcD16dec53DfD7B327E8cd8791f00E77A5e
 railway variables set START_BLOCK=33313307
 railway variables set CHAIN_ID=84532
 
@@ -285,12 +285,12 @@ npm run init-db
 
 ```bash
 # Check contract owner
-cast call 0xFCc9E74019a2be5808d63A941a84dEbE0fC39964 \
+cast call 0xd7EbbDcD16dec53DfD7B327E8cd8791f00E77A5e \
   "owner()" \
   --rpc-url https://sepolia.base.org
 
 # Check token symbol
-cast call 0xFCc9E74019a2be5808d63A941a84dEbE0fC39964 \
+cast call 0xd7EbbDcD16dec53DfD7B327E8cd8791f00E77A5e \
   "symbol()" \
   --rpc-url https://sepolia.base.org
 ```

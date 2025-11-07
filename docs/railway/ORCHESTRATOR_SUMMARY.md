@@ -29,7 +29,7 @@ Successfully initialized with 4 tables:
 - `corporate_actions` - Stock splits and symbol changes
 
 ### Indexer Status
-- ✅ Connected to contract: `0xFCc9E74019a2be5808d63A941a84dEbE0fC39964`
+- ✅ Connected to contract: `0xd7EbbDcD16dec53DfD7B327E8cd8791f00E77A5e`
 - ✅ Monitoring Base Sepolia (Chain ID: 84532)
 - ✅ Historical events backfilled (starting from block 33313307)
 - ✅ Actively listening for new blockchain events
@@ -73,7 +73,7 @@ Successfully initialized with 4 tables:
 ```
 RAILWAY_DOCKERFILE_PATH=indexer/Dockerfile
 BASE_SEPOLIA_RPC=https://sepolia.base.org
-CONTRACT_ADDRESS=0xFCc9E74019a2be5808d63A941a84dEbE0fC39964
+CONTRACT_ADDRESS=0xd7EbbDcD16dec53DfD7B327E8cd8791f00E77A5e
 START_BLOCK=33313307
 CHAIN_ID=84532
 NODE_ENV=production

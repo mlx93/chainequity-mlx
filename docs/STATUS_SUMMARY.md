@@ -6,7 +6,7 @@
 
 After troubleshooting Railway deployment issues (Dockerfile detection, build paths, package sync, database connectivity), the ChainEquity Event Indexer is now:
 - ✅ **Running 24/7** on Railway (project: `superb-trust`)
-- ✅ **Monitoring blockchain** events from contract `0xFCc9E74019a2be5808d63A941a84dEbE0fC39964`
+- ✅ **Monitoring blockchain** events from contract `0xd7EbbDcD16dec53DfD7B327E8cd8791f00E77A5e`
 - ✅ **Database initialized** with 4 tables (transfers, balances, approvals, corporate_actions)
 - ✅ **Processing events** in real-time (backfill complete, 0 historical events as expected)
 
@@ -98,7 +98,7 @@ postgresql://postgres:dYjiuLvfSvaOjsNHXhtAbWHtbwWPFpUW@nozomi.proxy.rlwy.net:253
 - `corporate_actions` - Splits, symbols, mints, burns
 
 ### Contract Information
-- **Address**: `0xFCc9E74019a2be5808d63A941a84dEbE0fC39964`
+- **Address**: `0xd7EbbDcD16dec53DfD7B327E8cd8791f00E77A5e`
 - **Network**: Base Sepolia (Chain ID: 84532)
 - **Deployment Block**: `33313307`
 - **Owner**: Gnosis Safe `0x6264F29968e8fd2810cB79fb806aC65dAf9db73d`
