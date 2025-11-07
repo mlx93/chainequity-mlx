@@ -33,7 +33,8 @@ export default function BalanceCard() {
   }
 
   const balanceValue = balance ? BigInt(balance.toString()) : BigInt(0)
-  const formattedBalance = formatBalance(balanceValue)
+  // Convert to number and add comma formatting
+  const formattedBalance = (Number(balanceValue) / 1e18).toLocaleString('en-US', { maximumFractionDigits: 0 })
   
   const ownershipPercent = capTable && capTable.totalSupply && balanceValue > 0
     ? (Number(balanceValue) / Number(BigInt(capTable.totalSupply))) * 100

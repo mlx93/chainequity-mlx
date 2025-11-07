@@ -1,38 +1,51 @@
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { burnAllTokens } from '@/lib/api'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog'
 import { toast } from 'sonner'
-import { Flame } from 'lucide-react'
+import { burnAllTokens } from '@/lib/api'
+import { useQueryClient } from '@tanstack/react-query'
 
 export default function BurnAllButton() {
   const [loading, setLoading] = useState(false)
+  const queryClient = useQueryClient()
 
   const handleBurnAll = async () => {
-    // Browser native confirmation dialog
-    const confirmed = window.confirm(
-      'Burn All Tokens?\n\n' +
-      'This will burn ALL tokens from ALL holders, resetting the total supply to 0.\n\n' +
-      'This action is IRREVERSIBLE and will be recorded on the blockchain.\n\n' +
-      'Are you sure you want to continue?'
-    )
-
-    if (!confirmed) return
-
     setLoading(true)
     try {
       const result = await burnAllTokens()
-      toast.success('All tokens burned successfully', {
-        description: `${result.transactions.length} transactions executed`,
-        duration: 8000,
-        action: result.transactions.length > 0 ? {
-          label: 'View First',
-          onClick: () => window.open(`https://sepolia.basescan.org/tx/${result.transactions[0]}`, '_blank'),
-        } : undefined,
-      })
+      if (result.success) {
+        toast.success('All tokens burned successfully', {
+          description: `${result.transactions.length} transactions executed`,
+          duration: 8000,
+          action: result.transactions.length > 0 ? {
+            label: 'View First Tx',
+            onClick: () => window.open(`https://sepolia.basescan.org/tx/${result.transactions[0]}`, '_blank'),
+          } : undefined,
+        })
+        // Invalidate relevant queries to refresh UI
+        queryClient.invalidateQueries({ queryKey: ['cap-table'] })
+        queryClient.invalidateQueries({ queryKey: ['balances'] })
+        queryClient.invalidateQueries({ queryKey: ['transactions'] })
+      } else {
+        toast.error('Failed to burn all tokens', {
+          description: result.message || 'Unknown error',
+          duration: 8000,
+        })
+      }
     } catch (error) {
-      toast.error('Failed to burn tokens', {
+      toast.error('Failed to burn all tokens', {
         description: error instanceof Error ? error.message : 'Unknown error',
-        duration: 6000,
+        duration: 8000,
       })
     } finally {
       setLoading(false)
@@ -40,16 +53,27 @@ export default function BurnAllButton() {
   }
 
   return (
-    <Button 
-      variant="destructive" 
-      size="sm" 
-      className="gap-2"
-      onClick={handleBurnAll}
-      disabled={loading}
-    >
-      <Flame className="h-4 w-4" />
-      {loading ? 'Burning...' : 'Burn All Tokens'}
-    </Button>
+    <AlertDialog>
+      <AlertDialogTrigger asChild>
+        <Button variant="destructive" size="sm" disabled={loading}>
+          {loading ? 'Burning...' : 'Burn All Tokens'}
+        </Button>
+      </AlertDialogTrigger>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+          <AlertDialogDescription>
+            This action cannot be undone. This will burn all tokens from all current holders on the cap table, effectively resetting the total supply to zero.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogAction onClick={handleBurnAll} disabled={loading}>
+            {loading ? 'Burning...' : 'Yes, Burn All Tokens'}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   )
 }
 
