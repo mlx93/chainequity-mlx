@@ -6,11 +6,13 @@ import ApprovalForm from '@/components/admin/ApprovalForm'
 import MintForm from '@/components/admin/MintForm'
 import CorporateActions from '@/components/admin/CorporateActions'
 import { useCapTable } from '@/hooks/useCapTable'
+import { useTokenInfo } from '@/hooks/useTokenInfo'
 
 export default function Dashboard() {
   const { address } = useAccount()
   const isAdmin = useIsAdmin()
   const { data: capTable } = useCapTable()
+  const { symbol } = useTokenInfo()
 
   // If not admin, show message (routing handles redirect)
   if (!isAdmin && address) {
@@ -27,9 +29,16 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold">Admin Dashboard</h1>
-        <p className="text-muted-foreground">Manage approvals, minting, and corporate actions</p>
+      <div className="flex items-center gap-4">
+        <div className="flex items-baseline gap-2">
+          <span className="text-4xl font-bold">{symbol || 'ACME'}</span>
+          <span className="text-sm text-muted-foreground">stock</span>
+        </div>
+        <span className="text-2xl text-muted-foreground">—</span>
+        <div>
+          <h1 className="text-3xl font-bold">Admin Dashboard</h1>
+          <p className="text-muted-foreground">Manage approvals, minting, and corporate actions</p>
+        </div>
       </div>
 
       {/* Stats */}

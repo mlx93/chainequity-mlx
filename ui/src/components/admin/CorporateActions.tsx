@@ -7,8 +7,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { executeStockSplit, updateSymbol } from '@/lib/api'
 import { toast } from 'sonner'
-import { useReadContract } from 'wagmi'
-import { CONTRACT_ADDRESS, GatedTokenABI } from '@/config/contracts'
+import { useTokenInfo } from '@/hooks/useTokenInfo'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
 const splitSchema = z.object({
@@ -25,12 +24,7 @@ type SymbolFormData = z.infer<typeof symbolSchema>
 export default function CorporateActions() {
   const [splitLoading, setSplitLoading] = useState(false)
   const [symbolLoading, setSymbolLoading] = useState(false)
-
-  const { data: currentSymbol } = useReadContract({
-    address: CONTRACT_ADDRESS,
-    abi: GatedTokenABI,
-    functionName: 'symbol',
-  })
+  const { symbol: currentSymbol, refetchSymbol } = useTokenInfo()
 
   const {
     register: registerSplit,
@@ -86,6 +80,10 @@ export default function CorporateActions() {
         },
       })
       resetSymbol()
+      // Refetch symbol from contract after a short delay
+      setTimeout(() => {
+        refetchSymbol()
+      }, 2000)
     } catch (error) {
       toast.error('Failed to update symbol', {
         description: error instanceof Error ? error.message : 'Unknown error',
@@ -130,7 +128,7 @@ export default function CorporateActions() {
       <TabsContent value="symbol" className="space-y-3 mt-3">
         <div>
           <p className="text-xs text-muted-foreground">
-            Current: <span className="font-mono font-semibold">{currentSymbol as string || 'Loading...'}</span>
+            Current: <span className="font-mono font-semibold">{currentSymbol || 'Loading...'}</span>
           </p>
         </div>
         <form onSubmit={handleSymbolSubmit(onSymbolSubmit)} className="space-y-3">

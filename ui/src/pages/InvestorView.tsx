@@ -33,18 +33,22 @@ export default function InvestorView() {
 
   return (
     <div className="space-y-6">
-      {/* Header with name and status badge */}
+      {/* Header with name centered and status badge */}
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <DisplayNameEditor />
-          <span className="text-muted-foreground">—</span>
+        <div className="flex-1">
           <h2 className="text-xl text-muted-foreground">Portfolio</h2>
+          <p className="text-sm text-muted-foreground">Manage your token holdings</p>
         </div>
-        {isApproved ? (
-          <Badge variant="default">✓ Approved</Badge>
-        ) : (
-          <Badge variant="secondary">Pending Approval</Badge>
-        )}
+        <div className="flex-1 flex justify-center">
+          <DisplayNameEditor />
+        </div>
+        <div className="flex-1 flex justify-end">
+          {isApproved ? (
+            <Badge variant="default">✓ Approved</Badge>
+          ) : (
+            <Badge variant="secondary">Pending Approval</Badge>
+          )}
+        </div>
       </div>
 
       {/* Top Row: Balance and Transfer side by side */}
