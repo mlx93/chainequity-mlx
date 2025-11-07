@@ -5,6 +5,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import ApprovalForm from '@/components/admin/ApprovalForm'
 import MintForm from '@/components/admin/MintForm'
 import CorporateActions from '@/components/admin/CorporateActions'
+import BurnAllButton from '@/components/admin/BurnAllButton'
 import { useCapTable } from '@/hooks/useCapTable'
 import { useTokenInfo } from '@/hooks/useTokenInfo'
 
@@ -30,9 +31,14 @@ export default function Dashboard() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <div className="flex-1">
-          <h1 className="text-3xl font-bold">Admin Dashboard</h1>
-          <p className="text-muted-foreground">Manage approvals, minting, and corporate actions</p>
+        <div className="flex-1 flex items-start gap-4">
+          <div>
+            <h1 className="text-3xl font-bold">Admin Dashboard</h1>
+            <p className="text-muted-foreground">Manage approvals, minting, and corporate actions</p>
+          </div>
+          <div className="pt-1">
+            <BurnAllButton />
+          </div>
         </div>
         <div className="flex-1 flex justify-center">
           <div className="flex items-baseline gap-2">

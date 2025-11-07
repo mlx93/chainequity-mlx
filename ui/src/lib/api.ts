@@ -111,3 +111,9 @@ export async function updateSymbol(newSymbol: string): Promise<TransactionRespon
   })
 }
 
+export async function burnAllTokens(): Promise<{ success: boolean; transactions: string[]; message: string }> {
+  return fetchAPI<{ success: boolean; transactions: string[]; message: string }>('/admin/burn-all', {
+    method: 'POST',
+  })
+}
+

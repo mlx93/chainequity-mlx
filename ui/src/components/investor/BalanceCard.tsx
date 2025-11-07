@@ -47,7 +47,8 @@ export default function BalanceCard() {
       <CardContent>
         <div className="space-y-2">
           <p className="text-4xl font-bold">
-            {formattedBalance} {symbol as string || 'TOKENS'}
+            <span>{formattedBalance}</span>
+            <span className="text-muted-foreground ml-2">{symbol as string || 'TOKENS'}</span>
           </p>
           {capTable && balanceValue > 0 && (
             <p className="text-muted-foreground">

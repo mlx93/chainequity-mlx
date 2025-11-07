@@ -230,5 +230,64 @@ router.post(
   }
 );
 
+// POST /api/admin/burn-all - Burn tokens from all cap table holders
+router.post('/admin/burn-all', async (req: Request, res: Response) => {
+  try {
+    const { getCapTable } = require('../services/database.service');
+    const { burnTokens } = require('../services/blockchain.service');
+    
+    // Get all holders from cap table
+    const holders = await getCapTable();
+    
+    if (holders.length === 0) {
+      return res.json({
+        success: true,
+        transactions: [],
+        message: 'No tokens to burn (cap table is empty)',
+        timestamp: new Date().toISOString(),
+      });
+    }
+    
+    // Burn from each holder
+    const transactions: string[] = [];
+    const errors: any[] = [];
+    
+    for (const holder of holders) {
+      try {
+        const balance = holder.balance;
+        if (BigInt(balance) > 0) {
+          console.log(`Burning ${balance} tokens from ${holder.address}`);
+          const txHash = await burnTokens(holder.address, balance);
+          transactions.push(txHash);
+          
+          // Wait 2 seconds between transactions to avoid nonce issues
+          await new Promise(resolve => setTimeout(resolve, 2000));
+        }
+      } catch (error) {
+        console.error(`Failed to burn from ${holder.address}:`, error);
+        errors.push({
+          address: holder.address,
+          error: error instanceof Error ? error.message : 'Unknown error',
+        });
+      }
+    }
+    
+    res.json({
+      success: true,
+      transactions,
+      burned: transactions.length,
+      errors: errors.length > 0 ? errors : undefined,
+      message: `Burned tokens from ${transactions.length} holders`,
+      timestamp: new Date().toISOString(),
+    });
+  } catch (error) {
+    console.error('Burn all tokens error:', error);
+    res.status(500).json({
+      error: error instanceof Error ? error.message : 'Failed to burn tokens',
+      timestamp: new Date().toISOString(),
+    });
+  }
+});
+
 export default router;
 

@@ -137,7 +137,7 @@ export default function CorporateActions() {
             <Input
               id="newSymbol"
               {...registerSymbol('newSymbol')}
-              placeholder="CHAINEQUITY-B"
+              placeholder="CHEQ"
               className="uppercase h-9 text-sm"
             />
             {symbolErrors.newSymbol && (
