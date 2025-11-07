@@ -252,7 +252,7 @@ export async function getCapTableSnapshots() {
     WITH significant_events AS (
       -- Get all transfers (mints, burns, and regular transfers)
       SELECT DISTINCT
-        block_number,
+        block_number::text as block_number,
         block_timestamp,
         CASE 
           WHEN from_address = '0x0000000000000000000000000000000000000000' THEN 'mint'
