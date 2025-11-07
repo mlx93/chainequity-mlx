@@ -179,9 +179,9 @@ export async function getHistoricalBalances(blockNumber: number) {
 export async function getHistoricalSplitMultiplier(blockNumber: number): Promise<bigint> {
   // Check if a stock split occurred before or at the specified block
   const result = await pool.query<{ multiplier: string }>(`
-    SELECT (details->>'multiplier')::text as multiplier
+    SELECT (action_data->>'multiplier')::text as multiplier
     FROM corporate_actions
-    WHERE action_type = 'stock_split'
+    WHERE action_type = 'split'
       AND block_number::numeric <= $1
     ORDER BY block_number DESC
     LIMIT 1
@@ -238,5 +238,71 @@ export async function getTransfersCount(filters: {
   
   const result = await pool.query<{ count: string }>(query, params);
   return parseInt(result.rows[0].count, 10);
+}
+
+export async function getCapTableSnapshots() {
+  // Get significant events that represent cap table changes
+  // Include: ALL transfers (mints, burns, regular transfers), splits, symbol changes
+  const result = await pool.query<{
+    block_number: string;
+    block_timestamp: Date;
+    event_type: string;
+    description: string;
+  }>(`
+    WITH significant_events AS (
+      -- Get all transfers (mints, burns, and regular transfers)
+      SELECT DISTINCT
+        block_number,
+        block_timestamp,
+        CASE 
+          WHEN from_address = '0x0000000000000000000000000000000000000000' THEN 'mint'
+          WHEN to_address = '0x0000000000000000000000000000000000000000' THEN 'burn'
+          ELSE 'transfer'
+        END as event_type,
+        CASE 
+          WHEN from_address = '0x0000000000000000000000000000000000000000' THEN 'Token Mint'
+          WHEN to_address = '0x0000000000000000000000000000000000000000' THEN 'Token Burn'
+          ELSE 'Token Transfer'
+        END as description
+      FROM transfers
+      
+      UNION ALL
+      
+      -- Get stock splits
+      SELECT
+        block_number::text as block_number,
+        block_timestamp,
+        'split' as event_type,
+        'Stock Split (' || (action_data->>'multiplier') || ':1)' as description
+      FROM corporate_actions
+      WHERE action_type = 'split'
+      
+      UNION ALL
+      
+      -- Get symbol changes
+      SELECT
+        block_number::text as block_number,
+        block_timestamp,
+        'symbol_change' as event_type,
+        'Symbol Change' as description
+      FROM corporate_actions
+      WHERE action_type = 'symbol_change'
+    )
+    SELECT 
+      block_number,
+      block_timestamp,
+      event_type,
+      description
+    FROM significant_events
+    ORDER BY block_number::numeric DESC, block_timestamp DESC
+    LIMIT 50
+  `);
+  
+  return result.rows.map(row => ({
+    blockNumber: parseInt(row.block_number, 10),
+    timestamp: row.block_timestamp.toISOString(),
+    eventType: row.event_type,
+    description: row.description,
+  }));
 }
 

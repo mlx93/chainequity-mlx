@@ -179,6 +179,25 @@ router.get('/corporate-actions', async (req: Request, res: Response) => {
   }
 });
 
+// GET /api/cap-table/snapshots - Get available historical snapshots
+router.get('/cap-table/snapshots', async (req: Request, res: Response) => {
+  try {
+    const { getCapTableSnapshots } = require('../services/database.service');
+    const snapshots = await getCapTableSnapshots();
+    
+    res.json({
+      snapshots,
+      timestamp: new Date().toISOString(),
+    });
+  } catch (error) {
+    console.error('Snapshots error:', error);
+    res.status(500).json({
+      error: error instanceof Error ? error.message : 'Failed to fetch snapshots',
+      timestamp: new Date().toISOString(),
+    });
+  }
+});
+
 // GET /api/cap-table/historical?blockNumber=X
 router.get('/cap-table/historical', async (req: Request, res: Response) => {
   try {

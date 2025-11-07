@@ -24,6 +24,13 @@ export interface HistoricalCapTableResponse {
   capTable: CapTableEntry[]
 }
 
+export interface CapTableSnapshot {
+  blockNumber: number
+  timestamp: string
+  eventType: string
+  description: string
+}
+
 export interface Transfer {
   transactionHash: string
   blockNumber: number

@@ -2,6 +2,7 @@ import { API_BASE } from '@/config/api'
 import type {
   CapTableResponse,
   HistoricalCapTableResponse,
+  CapTableSnapshot,
   TransfersResponse,
   CorporateActionsResponse,
   WalletInfo,
@@ -32,6 +33,10 @@ export async function getHealth(): Promise<HealthResponse> {
 
 export async function getCapTable(): Promise<CapTableResponse> {
   return fetchAPI<CapTableResponse>('/cap-table')
+}
+
+export async function getCapTableSnapshots(): Promise<{ snapshots: CapTableSnapshot[] }> {
+  return fetchAPI<{ snapshots: CapTableSnapshot[] }>('/cap-table/snapshots')
 }
 
 export async function getHistoricalCapTable(blockNumber: number): Promise<HistoricalCapTableResponse> {
