@@ -18,7 +18,7 @@ ChainEquity provides a complete system for managing tokenized equity with:
 
 - **Frontend**: https://chainequity-mlx.vercel.app/
 - **Backend API**: https://tender-achievement-production-3aa5.up.railway.app/api
-- **Contract**: [0xFCc9E74019a2be5808d63A941a84dEbE0fC39964](https://sepolia.basescan.org/address/0xFCc9E74019a2be5808d63A941a84dEbE0fC39964)
+- **Contract**: [0xd7EbbDcD16dec53DfD7B327E8cd8791f00E77A5e](https://sepolia.basescan.org/address/0xd7EbbDcD16dec53DfD7B327E8cd8791f00E77A5e)
 
 ---
 
