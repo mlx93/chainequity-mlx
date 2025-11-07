@@ -351,31 +351,86 @@ ui/
 
 **Commits**: `7dc79ac`, `ff2d330`, `543cd10`
 
-#### ✅ UI Polish & Refinements
-**1. Balance Formatting**:
-- Investor Dashboard balance now shows commas: `341,040`
-- Uses `toLocaleString('en-US', { maximumFractionDigits: 0 })`
-- **Files**: `ui/src/components/investor/BalanceCard.tsx`
+#### ✅ UI/UX Compact & Minimalist Redesign (Nov 7, 2025)
+**Goal**: Create sleek, professional, minimalist UI across all pages
 
-**2. Ticker Symbol Styling**:
+**Header Improvements**:
+- Removed "CE" logo badge for cleaner, minimalist look
+- Active tab highlighting with `bg-primary` styling (NavLink)
+- Added icons: LayoutDashboard (Dashboard), User (Investor), Table2 (Cap Table)
+- Sticky positioning with backdrop blur effect
+- Responsive classes: hide network badge and "Disconnect" text on small screens
+- Dashboard link only renders for admin users (prevents confusion for non-admins)
+- **Files**: `ui/src/components/layout/Header.tsx`
+- **Commit**: `8b426df`
+
+**Admin Dashboard Compact Styling**:
+- Three-column grid layout (md:grid-cols-3) for Wallet Approval, Mint Tokens, Corporate Actions
+- All action cards in one row (sleek, minimalist feel)
+- Smaller card headers: text-base titles, text-xs descriptions, pb-3 padding
+- Compact stats cards with descriptive labels ("tokens", "approved wallets", "Base Sepolia")
+- flex flex-col layout for equal-height cards
+- **Files**: `ui/src/pages/Dashboard.tsx`
+- **Commit**: `5a4c690`, `8b426df`
+
+**Admin Forms Compact Styling**:
+- Smaller inputs: h-9 height, text-sm sizing throughout
+- Compact labels: text-xs for all form labels
+- Reduced spacing: space-y-3 for forms, space-y-1.5 for form fields
+- Compact badges: text-xs sizing
+- Minimalist error messages (replaced Alert components with simple text)
+- **Files**: `ui/src/components/admin/ApprovalForm.tsx`, `MintForm.tsx`, `CorporateActions.tsx`
+- **Commit**: `5a4c690`
+
+**Investor Page Compact Styling**:
+- Matching compact styling to Admin Dashboard
+- Smaller badges: text-xs for approval status
+- Reduced spacing: gap-4 instead of gap-6
+- Compact card headers: text-base titles, text-xs descriptions, pb-3 padding
+- Smaller inputs: h-9 height, text-sm sizing for transfer form
+- flex flex-col layout for equal-height Balance and Transfer cards
+- **Files**: `ui/src/pages/InvestorView.tsx`, `ui/src/components/investor/BalanceCard.tsx`, `TransferForm.tsx`
+- **Commit**: `8b426df`
+
+**Balance Display Improvements**:
+- Added comma formatting: `341,040` instead of `341040`
+- Used `toLocaleString('en-US', { maximumFractionDigits: 0 })`
 - Symbol color changed to dark grey (`text-muted-foreground`)
 - Better visual contrast: `341,040` (black) `ACME` (grey)
+- Ownership percentage in text-xs
 - **Files**: `ui/src/components/investor/BalanceCard.tsx`
 
-**3. Admin Dashboard Layout**:
-- Three-column header: Title (left) | Ticker (center) | Burn (right)
-- Removed flame icon from burn button
-- Cleaner, more professional appearance
-- **Files**: `ui/src/pages/Dashboard.tsx`
+**Other UI Refinements**:
+- Three-column header on Admin Dashboard: Title (left) | Ticker (center) | Burn (right)
+- Removed flame icon from burn button (cleaner look)
+- Symbol change placeholder updated: `CHAINEQUITY-B` → `CHEQ` (more realistic)
+- **Files**: `ui/src/pages/Dashboard.tsx`, `ui/src/components/admin/CorporateActions.tsx`
 
-**4. Placeholder Text**:
-- Symbol change example: `CHAINEQUITY-B` → `CHEQ`
-- More realistic demo example
-- **Files**: `ui/src/components/admin/CorporateActions.tsx`
+**Result**: Consistent, sleek, professional UI with better density and modern minimalist feel
+
+#### ✅ Error Handling & Bug Fixes (Nov 7, 2025)
+**toLocaleString() Errors Fixed**:
+- Added null/undefined checks and optional chaining to `capTable.blockNumber`, `capTable.totalSupply`, `capTable.totalHolders`
+- Fixed `CapTableGrid.tsx` with comprehensive error handling:
+  - isNaN/isFinite checks before parseFloat/BigInt operations
+  - try-catch blocks for BigInt parsing
+  - Fallback values: 'N/A', '0', '0.0000' for missing data
+  - Optional chaining on all entry properties
+- **Files**: `ui/src/pages/CapTable.tsx`, `Dashboard.tsx`, `ui/src/components/captable/CapTableGrid.tsx`
+- **Commit**: `274356d`
+
+**TypeScript Compilation Fixes**:
+- Removed unused imports: `useLocation` (Header.tsx), `Alert`/`AlertDescription` (MintForm.tsx, TransferForm.tsx)
+- Fixed API response type mismatch: `totalHolders` (backend) vs `holderCount` (frontend types)
+- Updated `CapTableResponse` interface: made `blockNumber` optional, changed to `totalHolders`
+- **Files**: `ui/src/types/index.ts`, `ui/src/components/layout/Header.tsx`, `ui/src/components/admin/MintForm.tsx`, `ui/src/components/investor/TransferForm.tsx`
+- **Commit**: `274356d`
+
+**Build Status**: ✅ TypeScript compilation successful, all linting passing, no errors
 
 #### ✅ shadcn/ui Component Installation
 - Installed `AlertDialog` component package
-- Replaced native `window.confirm()` with styled modal
+- Replaced native `window.confirm()` with styled modal for Burn All Tokens
 - Consistent with app design system
 - **Command**: `npx shadcn@latest add alert-dialog`
 
@@ -544,16 +599,53 @@ ui/
 - ✅ Backend health check verified (database + blockchain connected)
 - ✅ Frontend deployment verified (accessible on Vercel)
 - ✅ Code review of all integration points
-- ✅ Critical bug fixed: Missing `/admin/mint` endpoint added
+- ✅ Admin mint endpoint confirmed working (`POST /api/admin/mint` with MintForm UI)
 - ✅ Test results documented (`PHASE4_TEST_RESULTS.md`)
 - ✅ Completion report created (`PHASE4_COMPLETION_REPORT.md`)
+- ✅ All 7 manual demo scenarios tested and confirmed passing
+- ✅ Wallet revoke functionality tested and verified working
+- ✅ UI/UX improvements completed (compact, minimalist design)
+- ✅ Error handling improvements (toLocaleString fixes, null checks)
 
-### Pending Work
-- ⏳ Manual testing of all 7 demo scenarios (MetaMask connection now working ✅)
-- ⏳ Transaction execution verification
-- ⏳ Frontend-Blockchain integration testing
-- ⏳ Indexer event capture verification
-- ⏳ Bug fixes for any issues discovered during manual testing
+### Remaining Work (Per PRDs)
+Two features explicitly required by PRD_PRODUCT.md and PRD_TECHNICAL.md are not yet implemented:
+
+#### ⏳ Historical Cap Table Queries (US-4.3, FR-3.4, FR-4.11, NFR-4)
+**Purpose**: Allow admins and auditors to view ownership distribution at any past block number
+
+**Required Implementation**:
+- Backend: New endpoint `GET /api/cap-table/historical?blockNumber=X`
+  - Reconstruct balances from transfers table up to specified block
+  - Apply splitMultiplier if stock split occurred before that block
+  - Calculate ownership percentages
+  - Return response with timestamp, total supply, holder count, cap table array
+- Frontend: Version selector dropdown on Cap Table page
+  - Options: "Current" (default) or "Enter Block Number..."
+  - Display historical timestamp when viewing snapshot
+  - Export buttons support historical CSV/JSON with block number in filename
+- Performance: Must complete in <2 seconds per NFR-4
+
+**Status**: SQL query logic documented in PRD_TECHNICAL.md, not implemented  
+**Implementation Plan**: See `IMPLEMENTATION_PLAN_HISTORICAL_CAPTABLE.md`
+
+#### ⏳ Transaction Pagination (15+ transactions)
+**Purpose**: Improve performance and UX when transaction history exceeds 15 entries
+
+**Required Implementation**:
+- Backend: Add pagination to `GET /api/transfers` endpoint
+  - Query params: `page` (default 1), `limit` (default 15, max 100)
+  - Response includes pagination metadata: currentPage, totalPages, totalRecords, hasNext, hasPrevious
+- Frontend: Pagination controls in TransactionHistory component
+  - Previous/Next buttons
+  - "Page X of Y" display
+  - "Showing 16-30 of 73" counter
+  - Reset to page 1 when filters change
+  - No pagination shown if <15 transactions
+
+**Status**: Not implemented  
+**Implementation Plan**: See `IMPLEMENTATION_PLAN_HISTORICAL_CAPTABLE.md`
+
+**Estimated Time**: 3-4 hours total (1.5h backend, 1.5-2h frontend, 30-45min testing)
 
 ### Success Criteria
 - ✅ Backend API endpoints operational
