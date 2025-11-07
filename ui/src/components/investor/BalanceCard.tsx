@@ -5,7 +5,6 @@ import { useReadContract } from 'wagmi'
 import { CONTRACT_ADDRESS, GatedTokenABI } from '@/config/contracts'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
-import { formatBalance } from '@/lib/utils'
 
 export default function BalanceCard() {
   const { address } = useAccount()
