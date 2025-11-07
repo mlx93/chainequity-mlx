@@ -157,15 +157,51 @@ POST /api/update-symbol       → Admin: Change symbol
 
 **Database Connection**: Uses PUBLIC Railway PostgreSQL URL (external connection)
 
-### Frontend (Phase 3 - Not Started)
-**Location**: `/frontend/`
+### Frontend (Phase 3 - COMPLETE)
+**Location**: `/ui/`
 
 **Responsibilities**:
 - Display cap table and transaction history
 - Connect wallet via wagmi/MetaMask
 - Show user's token balance and approval status
-- Submit transactions via Backend API
-- Display Gnosis Safe interface for admin operations
+- Submit transactions via Backend API (admin) or direct contract calls (investor transfers)
+- Display admin dashboard for wallet approval, minting, corporate actions
+- Real-time data updates via React Query (5-second refresh for cap table)
+
+**Technology Stack**:
+- React 19 + Vite + TypeScript
+- wagmi 2.19.2 for Web3 integration
+- shadcn/ui + Tailwind CSS for styling
+- React Router for navigation
+- React Query for data fetching and caching
+
+**Key Components**:
+- **Pages**: Dashboard (admin), InvestorView, CapTable, NotConnected
+- **Admin Components**: ApprovalForm, MintForm, CorporateActions, BurnAllButton
+- **Investor Components**: BalanceCard, TransferForm
+- **Shared Components**: TransactionHistory, CapTableGrid, ExportButtons
+- **Layout**: Header (wallet connection), Layout (network validation)
+
+**Custom Hooks**:
+- `useBalance()` - Query token balance via wagmi
+- `useApprovalStatus()` - Check wallet approval
+- `useCapTable()` - Fetch cap-table with auto-refresh
+- `useTransactions()` - Fetch transfer history
+- `useIsAdmin()` - Check admin privileges
+- `useWalletInfo()` - Fetch wallet details from API
+
+**API Integration**:
+- Base URL: `https://tender-achievement-production-3aa5.up.railway.app/api`
+- All 10 backend endpoints wrapped in `lib/api.ts`
+- Direct contract calls for investor transfers (better UX)
+
+**Deployment**:
+- Platform: Vercel
+- URL: https://chainequity-mlx.vercel.app/
+- Root Directory: `ui/`
+- Build Command: `npm run build`
+- Output Directory: `dist/`
+- Environment Variables: VITE_* prefixed (exposed to client)
 
 ## Key Technical Decisions
 

@@ -34,15 +34,20 @@
 - **CORS**: cors middleware
 - **Logging**: winston or pino (TBD)
 
-### Frontend (Pending Implementation)
-- **Framework**: React 18
-- **Build Tool**: Vite
-- **Language**: TypeScript
-- **Wallet Integration**: wagmi + viem
-- **UI Components**: shadcn/ui (Radix primitives + Tailwind)
-- **Styling**: Tailwind CSS
-- **Routing**: React Router
-- **State Management**: React Context or zustand (TBD)
+### Frontend (Phase 3 - COMPLETE)
+- **Framework**: React 19.1.1
+- **Build Tool**: Vite 7.1.7
+- **Language**: TypeScript 5.9.3 (strict mode)
+- **Wallet Integration**: wagmi 2.19.2 + @wagmi/connectors + viem 2.38.6
+- **UI Components**: shadcn/ui (Radix UI primitives + Tailwind CSS 3.4.17)
+- **Styling**: Tailwind CSS with custom theme
+- **Routing**: React Router 7.9.5
+- **Data Fetching**: @tanstack/react-query 5.90.7
+- **Forms**: react-hook-form 7.66.0 + zod 4.1.12
+- **Icons**: Lucide React 0.552.0
+- **Notifications**: Sonner (toast notifications)
+- **Location**: `/ui/` directory
+- **Deployment**: Vercel (https://chainequity-mlx.vercel.app/)
 
 ## Development Setup
 
@@ -118,12 +123,13 @@ npm run dev          # Start dev server with hot reload
 npm run build        # Production build
 ```
 
-**Frontend** (when implemented):
+**Frontend**:
 ```bash
-cd frontend
+cd ui
 npm install
-npm run dev          # Start Vite dev server
-npm run build        # Production build
+npm run dev          # Start Vite dev server (http://localhost:5173)
+npm run build        # Production build (outputs to dist/)
+npm run preview      # Preview production build locally
 ```
 
 ## External Services
@@ -227,12 +233,14 @@ npm run build        # Production build
 3. Deploy to Railway (separate service)
 4. Configure CORS for Vercel frontend
 
-### Frontend (Phase 3)
-1. Build React app in `/frontend/`
-2. Configure wagmi with Base Sepolia
-3. Test locally with `npm run dev`
-4. Push to GitHub (auto-deploys to Vercel)
-5. Configure environment variables on Vercel
+### Frontend (Phase 3 - COMPLETE)
+1. ✅ Built React app in `/ui/` (45+ source files)
+2. ✅ Configured wagmi with Base Sepolia + MetaMask
+3. ✅ Tested locally with `npm run dev`
+4. ✅ Pushed to GitHub (auto-deploys to Vercel)
+5. ✅ Configured environment variables on Vercel
+6. ✅ MetaMask connection working (connector ID fix applied)
+7. ✅ All 14 functional requirements from PRD implemented
 
 ## Debugging Tools
 
@@ -256,9 +264,11 @@ npm run build        # Production build
 
 ### Frontend
 - React DevTools - Component inspection
-- MetaMask - Transaction debugging
-- Browser console - JavaScript errors
+- MetaMask - Transaction debugging (Base Sepolia network)
+- Browser console - JavaScript errors, wagmi connector logs
 - Network tab - API request/response inspection
+- Vercel deployment logs - Build and runtime errors
+- React Query DevTools - Data fetching inspection (optional)
 
 ## Known Issues & Limitations
 

@@ -33,7 +33,8 @@ export default function Dashboard() {
       <div className="flex items-center justify-between">
         <div className="flex-1">
           <h1 className="text-3xl font-bold">Admin Dashboard</h1>
-          <p className="text-muted-foreground">Manage approvals, minting, and corporate actions</p>
+          <p className="text-muted-foreground">Manage approvals, minting,</p>
+          <p className="text-muted-foreground">and corporate actions</p>
         </div>
         <div className="flex-1 flex justify-center">
           <div className="flex items-baseline gap-2">

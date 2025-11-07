@@ -227,6 +227,28 @@ corporate_actions (id, action_type, transaction_hash, block_number,
 - ✅ Toast notifications for user feedback
 - ✅ Loading states and error handling
 
+### Technology Stack
+**Core Framework**:
+- React 19.1.1 + Vite 7.1.7 + TypeScript 5.9.3
+- React Router 7.9.5 (client-side routing)
+
+**Web3 Integration**:
+- wagmi 2.19.2 (React hooks for Ethereum)
+- @wagmi/connectors 2.19.2 (MetaMask connector)
+- viem 2.38.6 (underlying Ethereum library)
+
+**UI Framework**:
+- shadcn/ui components (Radix UI primitives)
+- Tailwind CSS 3.4.17 (styling)
+- Lucide React 0.552.0 (icons)
+- Sonner (toast notifications)
+
+**Forms & Validation**:
+- react-hook-form 7.66.0 + zod 4.1.12
+
+**Data Fetching**:
+- @tanstack/react-query 5.90.7 (caching and queries)
+
 ### Build Status
 - ✅ TypeScript compilation: Successful
 - ✅ Vite build: Successful (639 KB main bundle)
@@ -240,16 +262,43 @@ corporate_actions (id, action_type, transaction_hash, block_number,
 - ✅ **Environment variables**: Configured in Vercel dashboard
 - ✅ **MetaMask connection**: Working (connector ID fix applied)
 
+### Project Structure
+```
+ui/
+├── src/
+│   ├── main.tsx                    # Entry point with providers
+│   ├── App.tsx                      # Root component with routing
+│   ├── config/                      # wagmi, contracts, API config
+│   ├── pages/                       # Dashboard, InvestorView, CapTable, NotConnected
+│   ├── components/
+│   │   ├── admin/                   # ApprovalForm, MintForm, CorporateActions
+│   │   ├── investor/                # BalanceCard, TransferForm
+│   │   ├── captable/                # CapTableGrid, ExportButtons
+│   │   ├── transactions/            # TransactionHistory
+│   │   ├── layout/                  # Header, Layout
+│   │   └── ui/                      # shadcn/ui components (10 components)
+│   ├── hooks/                       # 6 custom hooks (useBalance, useApprovalStatus, etc.)
+│   ├── lib/                         # utils.ts, api.ts (backend client)
+│   ├── types/                       # TypeScript interfaces
+│   └── abis/                        # GatedToken.json
+├── package.json
+├── vite.config.ts
+├── tailwind.config.js
+└── components.json                   # shadcn/ui config
+```
+
 ### Key Files Created
-- `/ui/src/` - 38 source files (pages, components, hooks, config)
+- `/ui/src/` - 45+ source files (pages, components, hooks, config)
 - `/ui/src/pages/` - Dashboard, InvestorView, CapTable, NotConnected
 - `/ui/src/components/admin/` - ApprovalForm, MintForm, CorporateActions
 - `/ui/src/components/investor/` - BalanceCard, TransferForm
 - `/ui/src/components/captable/` - CapTableGrid, ExportButtons
 - `/ui/src/components/transactions/` - TransactionHistory
-- `/ui/src/hooks/` - 6 custom hooks (useBalance, useApprovalStatus, etc.)
+- `/ui/src/hooks/` - 6 custom hooks (useBalance, useApprovalStatus, useCapTable, useTransactions, useIsAdmin, useWalletInfo)
 - `/ui/src/lib/api.ts` - Backend API client (10+ functions)
-- `PHASE3_FRONTEND_COMPLETION_REPORT.md` - Complete completion report
+- `/ui/src/config/wagmi.ts` - wagmi configuration (Base Sepolia, MetaMask)
+- `/ui/src/config/contracts.ts` - Contract address, ABI, Safe address, admin addresses
+- `PHASE3_FRONTEND_COMPLETION_REPORT.md` - Complete completion report (674 lines)
 
 ### MetaMask Connection Issue Resolution
 **Problem**: MetaMask connection modal not appearing on first click, requiring fallback direct connection.
