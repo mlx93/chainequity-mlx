@@ -4,8 +4,8 @@ import type { Address } from 'viem'
 
 export function useTransactions(params?: {
   address?: Address
+  page?: number
   limit?: number
-  offset?: number
   fromBlock?: number
   toBlock?: number
 }) {
@@ -13,8 +13,8 @@ export function useTransactions(params?: {
     queryKey: ['transactions', params],
     queryFn: () => getTransfers(params ? {
       address: params.address,
-      limit: params.limit,
-      offset: params.offset,
+      page: params.page || 1,
+      limit: params.limit || 15,
       fromBlock: params.fromBlock,
       toBlock: params.toBlock,
     } : undefined),

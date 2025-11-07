@@ -5,17 +5,36 @@ import type { CapTableResponse } from '@/types'
 
 interface ExportButtonsProps {
   capTable: CapTableResponse
+  isHistorical?: boolean
+  blockNumber?: number
 }
 
-export default function ExportButtons({ capTable }: ExportButtonsProps) {
+export default function ExportButtons({ capTable, isHistorical = false, blockNumber }: ExportButtonsProps) {
+  const getFilename = (extension: string) => {
+    if (isHistorical && blockNumber) {
+      const date = capTable.timestamp ? new Date(capTable.timestamp).toISOString().split('T')[0] : 'unknown'
+      return `captable_block_${blockNumber}_${date}.${extension}`
+    }
+    return `captable_${Date.now()}.${extension}`
+  }
+
   const downloadCSV = () => {
-    const headers = ['Account Name', 'Address', 'Balance', 'Ownership %']
-    const rows = capTable.capTable.map(entry => [
-      getDisplayName(entry.address),
-      entry.address,
-      entry.balanceFormatted,
-      entry.percentage + '%',
-    ])
+    const headers = isHistorical 
+      ? ['Account Name', 'Address', 'Balance', 'Ownership %', 'Block Number']
+      : ['Account Name', 'Address', 'Balance', 'Ownership %']
+    
+    const rows = capTable.capTable.map(entry => {
+      const row = [
+        getDisplayName(entry.address),
+        entry.address,
+        entry.balanceFormatted,
+        entry.percentage + '%',
+      ]
+      if (isHistorical && blockNumber) {
+        row.push(blockNumber.toString())
+      }
+      return row
+    })
     
     const csvContent = [
       headers.join(','),
@@ -26,15 +45,16 @@ export default function ExportButtons({ capTable }: ExportButtonsProps) {
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    a.download = `captable_${Date.now()}.csv`
+    a.download = getFilename('csv')
     a.click()
     URL.revokeObjectURL(url)
   }
 
   const downloadJSON = () => {
-    // Add account names to JSON export as well
+    // Add account names to JSON export
     const enrichedCapTable = {
       ...capTable,
+      ...(isHistorical && blockNumber ? { historicalBlockNumber: blockNumber } : {}),
       capTable: capTable.capTable.map(entry => ({
         accountName: getDisplayName(entry.address),
         ...entry,
@@ -46,7 +66,7 @@ export default function ExportButtons({ capTable }: ExportButtonsProps) {
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    a.download = `captable_${Date.now()}.json`
+    a.download = getFilename('json')
     a.click()
     URL.revokeObjectURL(url)
   }

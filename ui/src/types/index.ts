@@ -3,7 +3,7 @@ export interface CapTableEntry {
   balance: string
   balanceFormatted: string
   percentage: string
-  lastUpdated: string
+  lastUpdated?: string
 }
 
 export interface CapTableResponse {
@@ -11,6 +11,16 @@ export interface CapTableResponse {
   totalHolders: number
   blockNumber?: number
   timestamp: string
+  capTable: CapTableEntry[]
+  splitMultiplier?: number
+}
+
+export interface HistoricalCapTableResponse {
+  blockNumber: number
+  timestamp: string
+  totalSupply: string
+  holderCount: number
+  splitMultiplier: number
   capTable: CapTableEntry[]
 }
 
@@ -25,13 +35,19 @@ export interface Transfer {
   type: 'mint' | 'transfer' | 'burn'
 }
 
+export interface PaginationInfo {
+  currentPage: number
+  totalPages: number
+  totalRecords: number
+  limit: number
+  hasNext: boolean
+  hasPrevious: boolean
+}
+
 export interface TransfersResponse {
   transfers: Transfer[]
-  pagination: {
-    total: number
-    limit: number
-    offset: number
-  }
+  pagination: PaginationInfo
+  timestamp: string
 }
 
 export interface CorporateAction {

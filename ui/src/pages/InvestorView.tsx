@@ -36,7 +36,7 @@ export default function InvestorView() {
       {/* Header with Portfolio on left, name centered, badge on right */}
       <div className="flex items-start justify-between">
         <div className="flex-1">
-          <h1 className="text-3xl font-bold text-foreground">Portfolio</h1>
+          <h1 className="text-4xl font-bold text-foreground">Portfolio</h1>
           <p className="text-sm text-muted-foreground">Manage your token holdings</p>
         </div>
         <div className="flex-1 flex justify-center items-start pt-1">

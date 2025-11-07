@@ -1,6 +1,7 @@
 import { API_BASE } from '@/config/api'
 import type {
   CapTableResponse,
+  HistoricalCapTableResponse,
   TransfersResponse,
   CorporateActionsResponse,
   WalletInfo,
@@ -33,17 +34,21 @@ export async function getCapTable(): Promise<CapTableResponse> {
   return fetchAPI<CapTableResponse>('/cap-table')
 }
 
+export async function getHistoricalCapTable(blockNumber: number): Promise<HistoricalCapTableResponse> {
+  return fetchAPI<HistoricalCapTableResponse>(`/cap-table/historical?blockNumber=${blockNumber}`)
+}
+
 export async function getTransfers(params?: {
   address?: string
+  page?: number
   limit?: number
-  offset?: number
   fromBlock?: number
   toBlock?: number
 }): Promise<TransfersResponse> {
   const searchParams = new URLSearchParams()
   if (params?.address) searchParams.append('address', params.address)
+  if (params?.page) searchParams.append('page', params.page.toString())
   if (params?.limit) searchParams.append('limit', params.limit.toString())
-  if (params?.offset) searchParams.append('offset', params.offset.toString())
   if (params?.fromBlock) searchParams.append('fromBlock', params.fromBlock.toString())
   if (params?.toBlock) searchParams.append('toBlock', params.toBlock.toString())
 
