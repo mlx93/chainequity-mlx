@@ -55,8 +55,8 @@ export default function TransactionHistory({ address }: TransactionHistoryProps)
               <TableHead>Type</TableHead>
               <TableHead>From</TableHead>
               <TableHead>To</TableHead>
-              <TableHead className="text-center">Amount</TableHead>
-              <TableHead>Hash</TableHead>
+              <TableHead className="text-right pl-12">Amount</TableHead>
+              <TableHead className="pl-8">Hash</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -85,10 +85,10 @@ export default function TransactionHistory({ address }: TransactionHistoryProps)
                 <TableCell className="font-mono text-sm">
                   {formatAddress(transfer.to)}
                 </TableCell>
-                <TableCell className="text-right font-medium">
+                <TableCell className="text-right font-medium pl-12">
                   {transfer.amountFormatted}
                 </TableCell>
-                <TableCell>
+                <TableCell className="pl-8">
                   <a
                     href={getBlockExplorerUrl(transfer.transactionHash, 84532)}
                     target="_blank"
