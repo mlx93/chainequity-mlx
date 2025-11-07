@@ -149,3 +149,94 @@ export async function isWalletApproved(address: string): Promise<boolean> {
   return result.rows[0]?.approved || false;
 }
 
+export async function getHistoricalBalances(blockNumber: number) {
+  // Reconstruct balances from historical transfers up to the specified block
+  const result = await pool.query<{ address: string; balance: string }>(`
+    WITH historical_transfers AS (
+      SELECT from_address AS address, -SUM(amount::numeric) AS net_change
+      FROM transfers
+      WHERE block_number::numeric <= $1
+        AND from_address != '0x0000000000000000000000000000000000000000'
+      GROUP BY from_address
+      UNION ALL
+      SELECT to_address AS address, SUM(amount::numeric) AS net_change
+      FROM transfers
+      WHERE block_number::numeric <= $1
+      GROUP BY to_address
+    )
+    SELECT 
+      address,
+      SUM(net_change)::text AS balance
+    FROM historical_transfers
+    GROUP BY address
+    HAVING SUM(net_change) > 0
+    ORDER BY SUM(net_change) DESC
+  `, [blockNumber]);
+  
+  return result.rows;
+}
+
+export async function getHistoricalSplitMultiplier(blockNumber: number): Promise<bigint> {
+  // Check if a stock split occurred before or at the specified block
+  const result = await pool.query<{ multiplier: string }>(`
+    SELECT (details->>'multiplier')::text as multiplier
+    FROM corporate_actions
+    WHERE action_type = 'stock_split'
+      AND block_number::numeric <= $1
+    ORDER BY block_number DESC
+    LIMIT 1
+  `, [blockNumber]);
+  
+  if (result.rows.length > 0 && result.rows[0].multiplier) {
+    return BigInt(result.rows[0].multiplier);
+  }
+  
+  return BigInt(1); // No split occurred before this block
+}
+
+export async function getBlockTimestamp(blockNumber: number): Promise<string | null> {
+  const result = await pool.query<{ block_timestamp: Date }>(`
+    SELECT block_timestamp
+    FROM transfers
+    WHERE block_number::numeric = $1
+    LIMIT 1
+  `, [blockNumber]);
+  
+  if (result.rows.length > 0) {
+    return result.rows[0].block_timestamp.toISOString();
+  }
+  
+  return null;
+}
+
+export async function getTransfersCount(filters: {
+  address?: string;
+  fromBlock?: number;
+  toBlock?: number;
+}): Promise<number> {
+  let query = 'SELECT COUNT(*) as count FROM transfers WHERE 1=1';
+  const params: any[] = [];
+  let paramIndex = 1;
+  
+  if (filters.address) {
+    params.push(filters.address.toLowerCase(), filters.address.toLowerCase());
+    query += ` AND (from_address = $${paramIndex} OR to_address = $${paramIndex + 1})`;
+    paramIndex += 2;
+  }
+  
+  if (filters.fromBlock !== undefined) {
+    params.push(filters.fromBlock.toString());
+    query += ` AND block_number >= $${paramIndex}`;
+    paramIndex++;
+  }
+  
+  if (filters.toBlock !== undefined) {
+    params.push(filters.toBlock.toString());
+    query += ` AND block_number <= $${paramIndex}`;
+    paramIndex++;
+  }
+  
+  const result = await pool.query<{ count: string }>(query, params);
+  return parseInt(result.rows[0].count, 10);
+}
+

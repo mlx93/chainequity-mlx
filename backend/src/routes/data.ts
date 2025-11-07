@@ -95,11 +95,18 @@ router.get('/cap-table', async (req: Request, res: Response) => {
 router.get('/transfers', async (req: Request, res: Response) => {
   try {
     const address = req.query.address as string | undefined;
-    const limit = req.query.limit ? parseInt(req.query.limit as string, 10) : 100;
-    const offset = req.query.offset ? parseInt(req.query.offset as string, 10) : 0;
+    const page = req.query.page ? parseInt(req.query.page as string, 10) : 1;
+    const limit = req.query.limit ? Math.min(parseInt(req.query.limit as string, 10), 100) : 15;
+    const offset = (page - 1) * limit;
     const fromBlock = req.query.fromBlock ? parseInt(req.query.fromBlock as string, 10) : undefined;
     const toBlock = req.query.toBlock ? parseInt(req.query.toBlock as string, 10) : undefined;
     
+    // Get total count for pagination
+    const { getTransfersCount } = require('../services/database.service');
+    const totalRecords = await getTransfersCount({ address, fromBlock, toBlock });
+    const totalPages = Math.ceil(totalRecords / limit);
+    
+    // Get paginated transfers
     const transfers = await getTransfers({
       address,
       limit,
@@ -121,9 +128,14 @@ router.get('/transfers', async (req: Request, res: Response) => {
     
     res.json({
       transfers: formattedTransfers,
-      count: formattedTransfers.length,
-      limit,
-      offset,
+      pagination: {
+        currentPage: page,
+        totalPages,
+        totalRecords,
+        limit,
+        hasNext: page < totalPages,
+        hasPrevious: page > 1,
+      },
       timestamp: new Date().toISOString(),
     });
   } catch (error) {
@@ -162,6 +174,93 @@ router.get('/corporate-actions', async (req: Request, res: Response) => {
   } catch (error) {
     res.status(500).json({
       error: error instanceof Error ? error.message : 'Failed to fetch corporate actions',
+      timestamp: new Date().toISOString(),
+    });
+  }
+});
+
+// GET /api/cap-table/historical?blockNumber=X
+router.get('/cap-table/historical', async (req: Request, res: Response) => {
+  try {
+    const blockNumberParam = req.query.blockNumber as string | undefined;
+    
+    if (!blockNumberParam) {
+      return res.status(400).json({
+        error: 'blockNumber query parameter is required',
+        timestamp: new Date().toISOString(),
+      });
+    }
+    
+    const blockNumber = parseInt(blockNumberParam, 10);
+    
+    if (isNaN(blockNumber) || blockNumber < 0) {
+      return res.status(400).json({
+        error: 'blockNumber must be a positive integer',
+        timestamp: new Date().toISOString(),
+      });
+    }
+    
+    // Validate block number range
+    const CONTRACT_DEPLOYMENT_BLOCK = 33313307;
+    const currentBlock = await publicClient.getBlockNumber();
+    
+    if (blockNumber < CONTRACT_DEPLOYMENT_BLOCK) {
+      return res.status(400).json({
+        error: `blockNumber must be >= contract deployment block (${CONTRACT_DEPLOYMENT_BLOCK})`,
+        timestamp: new Date().toISOString(),
+      });
+    }
+    
+    if (blockNumber > Number(currentBlock)) {
+      return res.status(400).json({
+        error: `blockNumber must be <= current block (${currentBlock})`,
+        timestamp: new Date().toISOString(),
+      });
+    }
+    
+    // Reconstruct historical balances from transfers
+    const { getHistoricalBalances, getHistoricalSplitMultiplier } = require('../services/database.service');
+    const historicalBalances = await getHistoricalBalances(blockNumber);
+    const splitMultiplier = await getHistoricalSplitMultiplier(blockNumber);
+    
+    // Calculate total supply
+    let totalSupply = BigInt(0);
+    historicalBalances.forEach((b: any) => {
+      const balance = BigInt(b.balance);
+      totalSupply += balance;
+    });
+    
+    // Get block timestamp
+    const { getBlockTimestamp } = require('../services/database.service');
+    const timestamp = await getBlockTimestamp(blockNumber);
+    
+    // Format response
+    const capTable = historicalBalances.map((b: any) => {
+      const balance = BigInt(b.balance);
+      const percentage = totalSupply > 0
+        ? ((Number(balance) / Number(totalSupply)) * 100).toFixed(2)
+        : '0.00';
+      
+      return {
+        address: b.address,
+        balance: balance.toString(),
+        balanceFormatted: formatTokenAmount(balance.toString()),
+        percentage,
+      };
+    });
+    
+    res.json({
+      blockNumber,
+      timestamp: timestamp || new Date().toISOString(),
+      totalSupply: totalSupply.toString(),
+      holderCount: capTable.length,
+      splitMultiplier: Number(splitMultiplier),
+      capTable,
+    });
+  } catch (error) {
+    console.error('Historical cap table error:', error);
+    res.status(500).json({
+      error: error instanceof Error ? error.message : 'Failed to fetch historical cap table',
       timestamp: new Date().toISOString(),
     });
   }
