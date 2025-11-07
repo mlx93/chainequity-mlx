@@ -60,7 +60,7 @@ postgresql://postgres:PASSWORD@junction.proxy.rlwy.net:PORT/railway
 # Set all required environment variables
 railway variables set DATABASE_URL=<INTERNAL_URL_FROM_POSTGRESQL>
 railway variables set BASE_SEPOLIA_RPC=https://sepolia.base.org
-railway variables set CONTRACT_ADDRESS=0xFCc9E74019a2be5808d63A941a84dEbE0fC39964
+railway variables set CONTRACT_ADDRESS=0xd7EbbDcD16dec53DfD7B327E8cd8791f00E77A5e
 railway variables set START_BLOCK=33313307
 railway variables set CHAIN_ID=84532
 railway variables set NODE_ENV=production

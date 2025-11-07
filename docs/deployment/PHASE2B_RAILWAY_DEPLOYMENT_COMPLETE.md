@@ -50,7 +50,7 @@ All configured via `railway variables`:
 ```bash
 DATABASE_URL=postgresql://postgres:dYjiuLvfSvaOjsNHXhtAbWHtbwWPFpUW@postgres.railway.internal:5432/railway
 BASE_SEPOLIA_RPC=https://sepolia.base.org
-CONTRACT_ADDRESS=0xFCc9E74019a2be5808d63A941a84dEbE0fC39964
+CONTRACT_ADDRESS=0xd7EbbDcD16dec53DfD7B327E8cd8791f00E77A5e
 START_BLOCK=33313307
 CHAIN_ID=84532
 NODE_ENV=production
@@ -124,7 +124,7 @@ railway logs
 **Expected output**:
 ```
 🚀 ChainEquity Event Indexer Starting...
-📜 Contract: 0xFCc9E74019a2be5808d63A941a84dEbE0fC39964
+📜 Contract: 0xd7EbbDcD16dec53DfD7B327E8cd8791f00E77A5e
 📊 Starting from block: 33313307
 ⏪ Backfilling historical events...
 ✅ Backfill complete
@@ -167,7 +167,7 @@ SELECT * FROM balances;
 
 | Item | Value |
 |------|-------|
-| **Contract Address** | 0xFCc9E74019a2be5808d63A941a84dEbE0fC39964 |
+| **Contract Address** | 0xd7EbbDcD16dec53DfD7B327E8cd8791f00E77A5e |
 | **Deployment Block** | 33313307 |
 | **Safe Address** | 0x6264F29968e8fd2810cB79fb806aC65dAf9db73d |
 | **Railway Project** | ChainEquity-Indexer |
