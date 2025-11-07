@@ -244,50 +244,75 @@ export async function getTransfersCount(filters: {
 export async function getCapTableSnapshots() {
   // Get significant events that represent cap table changes
   // Include: ALL transfers (mints, burns, regular transfers), splits, symbol changes
+  // EXCLUDE: All events before the most recent "burn all" (cap table reset)
   const result = await pool.query<{
     block_number: string;
     block_timestamp: Date;
     event_type: string;
     description: string;
   }>(`
-    WITH significant_events AS (
-      -- Get all transfers (mints, burns, and regular transfers)
+    WITH burn_all_block AS (
+      -- Find the most recent block where total supply became zero (burn all event)
+      SELECT MAX(block_number::numeric) as reset_block
+      FROM (
+        SELECT 
+          block_number,
+          SUM(CASE 
+            WHEN to_address = '0x0000000000000000000000000000000000000000' THEN -amount::numeric
+            WHEN from_address = '0x0000000000000000000000000000000000000000' THEN amount::numeric
+            ELSE 0
+          END) OVER (ORDER BY block_number::numeric, transaction_hash) as running_supply
+        FROM transfers
+        ORDER BY block_number::numeric
+      ) supply_tracking
+      WHERE running_supply = 0
+    ),
+    significant_events AS (
+      -- Get all transfers (mints, burns, and regular transfers) AFTER the reset
       SELECT DISTINCT
-        block_number::text as block_number,
-        block_timestamp,
+        t.block_number::text as block_number,
+        t.block_timestamp,
         CASE 
-          WHEN from_address = '0x0000000000000000000000000000000000000000' THEN 'mint'
-          WHEN to_address = '0x0000000000000000000000000000000000000000' THEN 'burn'
+          WHEN t.from_address = '0x0000000000000000000000000000000000000000' THEN 'mint'
+          WHEN t.to_address = '0x0000000000000000000000000000000000000000' THEN 'burn'
           ELSE 'transfer'
         END as event_type,
         CASE 
-          WHEN from_address = '0x0000000000000000000000000000000000000000' THEN 'Token Mint'
-          WHEN to_address = '0x0000000000000000000000000000000000000000' THEN 'Token Burn'
+          WHEN t.from_address = '0x0000000000000000000000000000000000000000' THEN 'Token Mint'
+          WHEN t.to_address = '0x0000000000000000000000000000000000000000' THEN 'Token Burn'
           ELSE 'Token Transfer'
         END as description
-      FROM transfers
+      FROM transfers t, burn_all_block b
+      WHERE (b.reset_block IS NULL OR t.block_number::numeric > b.reset_block)
+        -- Exclude the burn all event itself (when supply becomes zero)
+        AND NOT (
+          t.to_address = '0x0000000000000000000000000000000000000000'
+          AND t.block_number::numeric = b.reset_block
+        )
       
       UNION ALL
       
-      -- Get stock splits
+      -- Get stock splits AFTER the reset
       SELECT
-        block_number::text as block_number,
-        block_timestamp,
+        ca.block_number::text as block_number,
+        ca.block_timestamp,
         'split' as event_type,
-        'Stock Split (' || (action_data->>'multiplier') || ':1)' as description
-      FROM corporate_actions
-      WHERE action_type = 'split'
+        'Stock Split (' || (ca.action_data->>'multiplier') || ':1)' as description
+      FROM corporate_actions ca, burn_all_block b
+      WHERE ca.action_type = 'split'
+        AND (b.reset_block IS NULL OR ca.block_number::numeric > b.reset_block)
       
       UNION ALL
       
-      -- Get symbol changes
+      -- Get symbol changes AFTER the reset
       SELECT
-        block_number::text as block_number,
-        block_timestamp,
+        ca.block_number::text as block_number,
+        ca.block_timestamp,
         'symbol_change' as event_type,
         'Symbol Change' as description
-      FROM corporate_actions
-      WHERE action_type = 'symbol_change'
+      FROM corporate_actions ca, burn_all_block b
+      WHERE ca.action_type = 'symbol_change'
+        AND (b.reset_block IS NULL OR ca.block_number::numeric > b.reset_block)
     )
     SELECT 
       block_number,
