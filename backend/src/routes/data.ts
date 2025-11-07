@@ -116,16 +116,51 @@ router.get('/transfers', async (req: Request, res: Response) => {
       toBlock,
     });
     
-    const formattedTransfers = transfers.map((t: TransferRow) => ({
-      transactionHash: t.transaction_hash,
-      blockNumber: parseInt(t.block_number, 10),
-      blockTimestamp: t.block_timestamp.toISOString(),
-      from: t.from_address,
-      to: t.to_address,
-      amount: t.amount,
-      amountFormatted: formatTokenAmount(t.amount),
-      type: getTransferType(t.from_address, t.to_address),
+    // Get ALL splits to calculate the correct multiplier at each transfer's block
+    const splitsResult = await pool.query<{ block_number: string; multiplier: string }>(`
+      SELECT block_number, (action_data->>'multiplier')::text as multiplier
+      FROM corporate_actions
+      WHERE action_type = 'split'
+      ORDER BY block_number ASC
+    `);
+    
+    const splits = splitsResult.rows.map((s: { block_number: string; multiplier: string }) => ({
+      blockNumber: parseInt(s.block_number, 10),
+      multiplier: parseInt(s.multiplier, 10)
     }));
+    
+    // Helper to calculate cumulative multiplier at a given block
+    function getMultiplierAtBlock(transferBlock: number): bigint {
+      let cumulative = BigInt(1);
+      for (const split of splits) {
+        if (split.blockNumber <= transferBlock) {
+          cumulative *= BigInt(split.multiplier);
+        }
+      }
+      return cumulative;
+    }
+    
+    const formattedTransfers = transfers.map((t: TransferRow) => {
+      const transferBlock = parseInt(t.block_number, 10);
+      const baseAmount = BigInt(t.amount);
+      
+      // Calculate the multiplier that was active at this transfer's block
+      const multiplierAtBlock = getMultiplierAtBlock(transferBlock);
+      
+      // Display amount = base amount * multiplier at that point in time
+      const displayAmount = baseAmount * multiplierAtBlock;
+      
+      return {
+        transactionHash: t.transaction_hash,
+        blockNumber: transferBlock,
+        blockTimestamp: t.block_timestamp.toISOString(),
+        from: t.from_address,
+        to: t.to_address,
+        amount: displayAmount.toString(),
+        amountFormatted: formatTokenAmount(displayAmount.toString()),
+        type: getTransferType(t.from_address, t.to_address),
+      };
+    });
     
     res.json({
       transfers: formattedTransfers,
