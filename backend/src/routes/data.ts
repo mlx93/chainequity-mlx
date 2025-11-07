@@ -300,25 +300,26 @@ router.get('/cap-table/historical', async (req: Request, res: Response) => {
     // Calculate the cumulative multiplier at the query block
     const queryBlockMultiplier = getMultiplierAtBlock(blockNumber);
     
-    // Build balances by adjusting each transfer amount based on multiplier differences
+    // Build balances by summing all transfers (database already stores BASE amounts)
     const balanceMap = new Map<string, bigint>();
     
     for (const transfer of transfersResult.rows) {
-      const transferBlock = parseInt(transfer.block_number, 10);
-      const transferMultiplier = getMultiplierAtBlock(transferBlock);
-      const baseAmount = BigInt(transfer.amount);
+      const storedAmount = BigInt(transfer.amount);
       
-      // Convert the transfer amount to the query block's context
-      // If transfer happened at multiplier=1 and query is at multiplier=7, multiply by 7
-      // If transfer happened at multiplier=7 and query is at multiplier=7, no change
-      const adjustedAmount = baseAmount * queryBlockMultiplier / transferMultiplier;
-      
+      // The database stores BASE amounts (Transfer events emit post-division amounts)
+      // We just need to sum them up
       const currentBalance = balanceMap.get(transfer.address) || BigInt(0);
-      balanceMap.set(transfer.address, currentBalance + adjustedAmount);
+      balanceMap.set(transfer.address, currentBalance + storedAmount);
+    }
+    
+    // Now multiply all base balances by the query block multiplier to get displayed amounts
+    const adjustedBalanceMap = new Map<string, bigint>();
+    for (const [address, baseBalance] of balanceMap.entries()) {
+      adjustedBalanceMap.set(address, baseBalance * queryBlockMultiplier);
     }
     
     // Filter out zero and negative balances, convert to array
-    const historicalBalances = Array.from(balanceMap.entries())
+    const historicalBalances = Array.from(adjustedBalanceMap.entries())
       .filter(([_, balance]) => balance > 0)
       .map(([address, balance]) => ({ address, balance: balance.toString() }))
       .sort((a, b) => Number(BigInt(b.balance) - BigInt(a.balance)));
