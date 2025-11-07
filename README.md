@@ -243,9 +243,9 @@ ChainEquity/
 ## 🔗 Deployment Addresses
 
 ### Smart Contract
-- **Address**: `0xFCc9E74019a2be5808d63A941a84dEbE0fC39964`
+- **Address**: `0xd7EbbDcD16dec53DfD7B327E8cd8791f00E77A5e`
 - **Network**: Base Sepolia (Chain ID: 84532)
-- **Explorer**: https://sepolia.basescan.org/address/0xFCc9E74019a2be5808d63A941a84dEbE0fC39964
+- **Explorer**: https://sepolia.basescan.org/address/0xd7EbbDcD16dec53DfD7B327E8cd8791f00E77A5e
 
 ### Services
 - **Frontend**: https://chainequity-mlx.vercel.app/
@@ -331,7 +331,7 @@ See `LICENSE` file for details.
 
 - **GitHub**: https://github.com/mlx93/chainequity-mlx
 - **Frontend**: https://chainequity-mlx.vercel.app/
-- **Contract Explorer**: https://sepolia.basescan.org/address/0xFCc9E74019a2be5808d63A941a84dEbE0fC39964
+- **Contract Explorer**: https://sepolia.basescan.org/address/0xd7EbbDcD16dec53DfD7B327E8cd8791f00E77A5e
 - **Gnosis Safe**: https://app.safe.global
 
 ---
