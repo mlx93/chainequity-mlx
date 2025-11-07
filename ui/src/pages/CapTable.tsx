@@ -141,7 +141,7 @@ export default function CapTable() {
         </Card>
         <Card>
           <CardHeader>
-            <CardTitle>Block Number</CardTitle>
+            <CardTitle className="text-base leading-tight">Base Sepolia Testnet Block</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-2xl font-bold">{capTable.blockNumber?.toLocaleString() ?? 'N/A'}</p>
@@ -195,18 +195,11 @@ export default function CapTable() {
                   </SelectContent>
                 </Select>
               </div>
-              <div className="flex flex-col items-end gap-1">
-                <ExportButtons 
-                  capTable={capTable!} 
-                  isHistorical={isHistorical}
-                  blockNumber={selectedBlock ?? undefined}
-                />
-                {isHistorical && selectedSnapshot && (
-                  <span className="text-xs text-muted-foreground">
-                    Block {selectedSnapshot.blockNumber.toLocaleString()}
-                  </span>
-                )}
-              </div>
+              <ExportButtons 
+                capTable={capTable!} 
+                isHistorical={isHistorical}
+                blockNumber={selectedBlock ?? undefined}
+              />
             </div>
           </div>
         </CardHeader>

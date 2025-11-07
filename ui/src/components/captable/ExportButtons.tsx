@@ -24,15 +24,23 @@ export default function ExportButtons({ capTable, isHistorical = false, blockNum
       headers.push('Block Number')
     }
     
+    // Helper to escape CSV values (wrap in quotes if contains comma, quote, or newline)
+    const escapeCSV = (value: string) => {
+      if (value.includes(',') || value.includes('"') || value.includes('\n')) {
+        return `"${value.replace(/"/g, '""')}"`
+      }
+      return value
+    }
+    
     const rows = capTable.capTable.map(entry => {
       const row = [
-        getDisplayName(entry.address),
-        entry.address,
-        entry.balanceFormatted,
-        entry.percentage + '%',
+        escapeCSV(getDisplayName(entry.address)),
+        escapeCSV(entry.address),
+        escapeCSV(entry.balanceFormatted),
+        escapeCSV(entry.percentage + '%'),
       ]
       if (isHistorical && blockNumber) {
-        row.push(blockNumber.toString())
+        row.push(escapeCSV(blockNumber.toString()))
       }
       return row
     })
