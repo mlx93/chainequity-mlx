@@ -55,7 +55,7 @@ export default function TransactionHistory({ address }: TransactionHistoryProps)
               <TableHead>Type</TableHead>
               <TableHead>From</TableHead>
               <TableHead>To</TableHead>
-              <TableHead className="text-right">Amount</TableHead>
+              <TableHead className="text-center">Amount</TableHead>
               <TableHead>Hash</TableHead>
             </TableRow>
           </TableHeader>
@@ -85,7 +85,7 @@ export default function TransactionHistory({ address }: TransactionHistoryProps)
                 <TableCell className="font-mono text-sm">
                   {formatAddress(transfer.to)}
                 </TableCell>
-                <TableCell className="text-right font-medium">
+                <TableCell className="text-center font-medium">
                   {transfer.amountFormatted}
                 </TableCell>
                 <TableCell>

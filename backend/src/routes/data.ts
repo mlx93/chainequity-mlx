@@ -150,14 +150,26 @@ router.get('/transfers', async (req: Request, res: Response) => {
       // Display amount = base amount * multiplier at that point in time
       const displayAmount = baseAmount * multiplierAtBlock;
       
+      // Convert to human-readable format (divide by 10^18) and round to nearest whole number
+      const divisor = BigInt(10 ** 18);
+      const wholeTokens = displayAmount / divisor;
+      const remainder = displayAmount % divisor;
+      
+      // Round up if remainder >= 0.5 tokens
+      const halfToken = divisor / BigInt(2);
+      const roundedAmount = remainder >= halfToken ? wholeTokens + BigInt(1) : wholeTokens;
+      
+      // Convert back to wei for consistent storage format
+      const roundedDisplayAmount = roundedAmount * divisor;
+      
       return {
         transactionHash: t.transaction_hash,
         blockNumber: transferBlock,
         blockTimestamp: t.block_timestamp.toISOString(),
         from: t.from_address,
         to: t.to_address,
-        amount: displayAmount.toString(),
-        amountFormatted: formatTokenAmount(displayAmount.toString()),
+        amount: roundedDisplayAmount.toString(),
+        amountFormatted: roundedAmount.toLocaleString('en-US'), // Format as whole number with commas
         type: getTransferType(t.from_address, t.to_address),
       };
     });
