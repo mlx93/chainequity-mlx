@@ -277,7 +277,73 @@ corporate_actions (id, action_type, transaction_hash, block_number,
 
 ---
 
-## 🟢 Phase 4: Integration & Testing (ADVANCED PROGRESS)
+## 🟢 Phase 4: Integration & Testing (NEARING COMPLETION)
+
+### Completed Work (Nov 7, 2025 Session)
+
+#### ✅ Burn All Tokens Feature (Demo Reset Tool)
+**Purpose**: Quick reset between demo scenarios without redeploying contract
+
+**Implementation**:
+- Backend endpoint: `POST /api/admin/burn-all`
+- Queries cap table, burns tokens from all holders sequentially
+- 2-second delay between burns (nonce management)
+- Returns transaction hashes for verification
+- Frontend: AlertDialog confirmation modal
+- Button placement: Admin Dashboard (far right, aligned with ticker)
+- Auto-refreshes UI after burn (cap table, balances, transactions)
+
+**Files Created/Modified**:
+- `backend/src/services/blockchain.service.ts` - `burnTokens()` function
+- `backend/src/routes/transactions.ts` - `/admin/burn-all` endpoint
+- `ui/src/components/admin/BurnAllButton.tsx` - UI component
+- `ui/src/lib/api.ts` - `burnAllTokens()` API call
+- `ui/src/pages/Dashboard.tsx` - Layout integration
+
+**Commits**: `7dc79ac`, `ff2d330`, `543cd10`
+
+#### ✅ UI Polish & Refinements
+**1. Balance Formatting**:
+- Investor Dashboard balance now shows commas: `341,040`
+- Uses `toLocaleString('en-US', { maximumFractionDigits: 0 })`
+- **Files**: `ui/src/components/investor/BalanceCard.tsx`
+
+**2. Ticker Symbol Styling**:
+- Symbol color changed to dark grey (`text-muted-foreground`)
+- Better visual contrast: `341,040` (black) `ACME` (grey)
+- **Files**: `ui/src/components/investor/BalanceCard.tsx`
+
+**3. Admin Dashboard Layout**:
+- Three-column header: Title (left) | Ticker (center) | Burn (right)
+- Removed flame icon from burn button
+- Cleaner, more professional appearance
+- **Files**: `ui/src/pages/Dashboard.tsx`
+
+**4. Placeholder Text**:
+- Symbol change example: `CHAINEQUITY-B` → `CHEQ`
+- More realistic demo example
+- **Files**: `ui/src/components/admin/CorporateActions.tsx`
+
+#### ✅ shadcn/ui Component Installation
+- Installed `AlertDialog` component package
+- Replaced native `window.confirm()` with styled modal
+- Consistent with app design system
+- **Command**: `npx shadcn@latest add alert-dialog`
+
+#### ✅ Technical Clarifications
+**Stock Split Transaction History**:
+- Confirmed: Historical transaction amounts remain unchanged after splits
+- Example: Pre-split transfer of 100 tokens stays as 100 (not retroactively 700)
+- Industry standard for securities compliance and blockchain truth
+- Current balances DO update (virtual multiplier applied)
+- No per-holder "you received split tokens" transaction rows needed
+
+**Burn Mechanics Architecture**:
+- On-chain: `burn()` decrements balance, emits `Transfer(holder → 0x000...000)`
+- Indexer: Catches event, updates database (INSERT into transfers, UPDATE balances)
+- Database: Performance cache, can rebuild from blockchain
+- Historical data: Preserved (burns recorded as transactions, not deleted)
+- Source of truth: Blockchain (database mirrors it)
 
 ### Completed Work (Nov 6, 2025 Session)
 
@@ -343,63 +409,86 @@ corporate_actions (id, action_type, transaction_hash, block_number,
 - ✅ All admin functions accessible
 - ✅ ABI matches deployed contract
 
-#### ✅ Manual UI Testing Results
-- **Test 1**: Mint tokens to approved wallet → ✅ PASSING
-- **Test 2**: Transfer between approved wallets → ✅ PASSING
-- **Test 3**: Transfer to non-approved wallet (should fail) → ✅ PASSING
-- **Test 4**: Approve new wallet, transfer succeeds → ✅ PASSING
-- **Test 5**: Execute 7-for-1 stock split → ⏳ PENDING (backend redeploy)
-- **Test 6**: Change ticker symbol → ⏳ NOT YET TESTED
-- **Test 7**: Export cap-table (CSV/JSON) → ✅ PASSING
+#### ✅ Manual UI Testing Results (ALL TESTS PASSING)
+- **Test 1**: Mint tokens to approved wallet → ✅ PASSING (user confirmed)
+- **Test 2**: Transfer between approved wallets → ✅ PASSING (user confirmed)
+- **Test 3**: Transfer to non-approved wallet (should fail) → ✅ PASSING (user confirmed)
+- **Test 4**: Approve new wallet, transfer succeeds → ✅ PASSING (user confirmed)
+- **Test 5**: Execute 7-for-1 stock split → ✅ PASSING (user confirmed after backend fix)
+- **Test 6**: Change ticker symbol → ✅ PASSING (user confirmed, dynamic UI update)
+- **Test 7**: Export cap-table (CSV/JSON) → ✅ PASSING (user confirmed, includes names)
 
-### Pending Work
+**🎉 All 7 demo scenarios from DEMO_VIDEO.md are confirmed working by the user!**
 
-#### ⏳ Remaining Manual Tests
-1. **Test 5**: Execute 7-for-1 split (waiting for Railway backend redeploy)
-   - Expected: Total supply multiplies by 7
-   - Expected: All individual balances multiply by 7
-   - Expected: Ownership percentages stay the same
-   
-2. **Test 6**: Change ticker symbol
-   - Expected: Symbol updates from ACME → new symbol
-   - Expected: Balances remain unchanged
-   - Expected: UI reflects new symbol
+### Key Features Delivered
 
-3. **Historical Cap Table Query** (if time permits):
-   - Query cap table at specific block
-   - Verify historical accuracy
+#### ✅ Admin Dashboard Features
+1. **Wallet Approval/Revocation** - Conditional button (Approve/Revoke)
+2. **Token Minting** - Form validation, approved-only
+3. **Stock Splits** - Virtual multiplier (gas-efficient)
+4. **Symbol Changes** - Dynamic UI updates
+5. **Burn All Tokens** - NEW: Demo reset tool
+6. **Cap Table Stats** - Total supply, holders, current block
 
-#### ⏳ Documentation Deliverables
-- `PHASE4_TEST_RESULTS.md` - Complete test execution log (in progress)
-- `PHASE4_COMPLETION_REPORT.md` - Final report with bug status (pending)
-- Memory bank updates - Final session summary (pending)
+#### ✅ Investor Dashboard Features
+1. **Balance Display** - Comma formatting (e.g., 341,040)
+2. **Ownership Percentage** - Accurate to 0.01%
+3. **Token Transfers** - Validation, error handling
+4. **Transaction History** - All events with BaseScan links
+5. **Display Name Editor** - Self-service, localStorage
+6. **Approval Status Badge** - Visual indicator
 
-### Known Issues & Limitations
+#### ✅ Cap Table Features
+1. **Sortable Grid** - By address or balance
+2. **Account Names Column** - Friendly names
+3. **Copy Address** - Icon with visual feedback
+4. **Ownership %** - Rounded to 2 decimals
+5. **CSV Export** - With account names
+6. **JSON Export** - Complete data with names
 
-**Non-Critical**:
-- Display names are browser-specific (localStorage, not synced across devices)
-- MetaMask shows $0.00 for ACME tokens (expected - no price oracle)
-- BaseScan may cache old symbol after symbol changes (blockchain explorer limitation)
+### Known Limitations (Documented, Non-Blocking)
 
-**Resolved This Session**:
-- ✅ Stock split multiplier not applied to UI (FIXED)
-- ✅ Display name too small and not prominent (FIXED)
-- ✅ No copy function for addresses in Cap Table (FIXED)
+**Architectural (By Design)**:
+- Display names stored in localStorage (browser-specific, not cross-device synced)
+- Historical transaction amounts don't retroactively update after splits (industry standard)
+- Stock split requires divisible amounts for Safe compatibility (documented in `docs/KNOWN_LIMITATIONS.md`)
 
-### Session Statistics
-- **Bugs Fixed**: 1 critical (stock split), 8 UI/UX improvements
-- **Features Added**: 2 (display names, address copy)
-- **Files Modified**: 15+
-- **Commits**: 3 major commits
-- **Documentation**: 1 new architecture doc (70 lines)
+**External (Not Under Our Control)**:
+- MetaMask shows $0.00 for ACME tokens (no price oracle for testnet)
+- BaseScan may cache old symbol briefly after symbol changes (blockchain explorer caching)
 
-### Next Session Goals
-1. Wait for Railway backend redeploy (~2 min)
-2. Test Case 5: Execute 7-for-1 split → verify 10,500 total supply
-3. Test Case 6: Change ticker symbol → verify symbol updates
-4. Complete `PHASE4_TEST_RESULTS.md` with all test logs
-5. Write `PHASE4_COMPLETION_REPORT.md` final report
-6. Prepare for demo video recording (if all tests pass)
+**Resolved (No Longer Issues)**:
+- ✅ Stock split multiplier not applied (FIXED - backend now reads and applies)
+- ✅ Ownership percentages truncated (FIXED - float arithmetic)
+- ✅ Balance not updating after transfer (FIXED - query invalidation)
+- ✅ Duplicate database entries (FIXED - transaction hash check)
+- ✅ Display names not prominent (FIXED - large text, centered)
+- ✅ No copy function for addresses (FIXED - copy icon added)
+
+### Next Steps (Phase 4 Completion)
+
+#### ⏳ Final Documentation
+1. Update `PHASE4_TEST_RESULTS.md` with all test logs
+2. Create `PHASE4_COMPLETION_REPORT.md` final report
+3. Update `.cursor/rules/` if new patterns discovered
+
+#### ⏳ Demo Video Preparation (Next Phase)
+1. Reset tokens using "Burn All Tokens" button
+2. Mint fresh tokens to Investor A and B
+3. Record demo video following `DEMO_VIDEO.md` script
+4. Upload to project repository
+
+### Session Summary (Nov 7, 2025)
+
+**Features Added**: 1 (Burn All Tokens)
+**UI Improvements**: 4 (balance formatting, symbol color, layout, placeholder)
+**Components Installed**: 1 (AlertDialog)
+**Technical Clarifications**: 2 (stock split history, burn mechanics)
+**Files Modified**: 8
+**Commits**: 3
+**Test Status**: 7/7 passing ✅
+
+---
 
 ### Completed Work
 - ✅ Automated API endpoint testing (10/10 endpoints operational)

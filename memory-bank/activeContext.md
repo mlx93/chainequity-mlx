@@ -2,9 +2,74 @@
 
 ## Current Work Focus
 
-**Primary Goal**: Phase 4 (Integration & Testing) 🟢 ADVANCED PROGRESS - Stock split architecture fixed, display name feature implemented, UI refinements complete. Backend now correctly applies virtual split multiplier to all balances. Test Case 5 (7-for-1 split) should now pass once Railway backend redeploys. Manual testing of demo scenarios 5-7 pending.
+**Primary Goal**: Phase 4 (Integration & Testing) 🟢 NEARING COMPLETION - All 7 demo test cases confirmed passing by user. Stock split architecture fully working. Display name feature implemented. Burn All Tokens feature added for demo resets. UI refinements complete (balance formatting, button layouts, ticker display). Final documentation updates pending.
 
-## Recent Changes (This Session - Nov 6, 2025)
+## Recent Changes (This Session - Nov 7, 2025)
+
+### Burn All Tokens Feature
+**Purpose**: Enable quick demo resets by burning tokens from all cap table holders
+
+**Implementation**:
+- Added `burnTokens()` function to `backend/src/services/blockchain.service.ts`
+- New `/api/admin/burn-all` endpoint in `backend/src/routes/transactions.ts`
+- Queries cap table, iterates through holders, burns entire balance
+- 2-second delay between burns to avoid nonce conflicts
+- Returns array of transaction hashes
+- **Files Created**:
+  - `ui/src/components/admin/BurnAllButton.tsx` - Button with AlertDialog confirmation
+  - `ui/src/lib/api.ts` - Added `burnAllTokens()` API call
+- **UI Integration**:
+  - Button on Admin Dashboard (far right, aligned with ACME ticker)
+  - AlertDialog confirmation: "Are you absolutely sure?"
+  - Success toast with link to first transaction on BaseScan
+  - Auto-refreshes cap table, balances, transactions after burn
+- **Commits**: `7dc79ac`, `ff2d330`, `543cd10`
+
+### UI Polish & Refinements
+**1. Balance Formatting (Investor Dashboard)**:
+- Added comma formatting: `341,040` instead of `341040`
+- Used `toLocaleString('en-US')` for proper number display
+- **Files**: `ui/src/components/investor/BalanceCard.tsx`
+
+**2. Ticker Symbol Color**:
+- Changed symbol color to dark grey (`text-muted-foreground`)
+- Better visual separation from balance number
+- Example: `341,040 ACME` (number black, symbol grey)
+
+**3. Admin Dashboard Layout**:
+- Three-column header: `[Admin Dashboard] [ACME stock] [Burn All Tokens]`
+- Title on left, ticker centered, burn button on right
+- Removed flame icon from burn button (cleaner look)
+- **Files**: `ui/src/pages/Dashboard.tsx`
+
+**4. Placeholder Text Updates**:
+- Changed symbol change placeholder from `CHAINEQUITY-B` to `CHEQ`
+- More realistic example for demo
+- **Files**: `ui/src/components/admin/CorporateActions.tsx`
+
+### shadcn/ui Component Installation
+- Installed `AlertDialog` component via `npx shadcn@latest add alert-dialog`
+- Replaced native `window.confirm()` with styled modal
+- Better UX consistency with app design system
+- **Files Created**: `ui/@/components/ui/alert-dialog.tsx`
+
+### Technical Clarifications Documented
+**Stock Split Transaction History**:
+- Confirmed transaction amounts remain at historical values (not retroactively updated)
+- Example: Pre-split transfer of 100 tokens shows as 100, not 700 after 7x split
+- This is industry standard (securities compliance, blockchain truth)
+- Current balances DO reflect multiplier, historical transactions do NOT
+- No need for per-holder "split transaction" rows (% ownership unchanged)
+
+**Burn Mechanics**:
+- `burnTokens()` calls on-chain `burn()` function
+- Decrements holder balance on-chain
+- Emits `Transfer` event (holder → `0x000...000`)
+- Indexer catches event, updates database automatically
+- Database = performance cache of blockchain state (can rebuild from chain)
+- Historical data preserved (burns recorded as transactions, not deleted)
+
+## Recent Changes (Previous Session - Nov 6, 2025)
 
 ### Critical Bug Fix: Virtual Stock Split Implementation
 **Problem**: 7-for-1 stock split executed on-chain but UI showed no change (1500 tokens remained 1500 instead of 10,500)
