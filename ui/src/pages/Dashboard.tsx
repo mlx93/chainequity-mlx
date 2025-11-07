@@ -29,16 +29,18 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-4">
-        <div className="flex items-baseline gap-2">
-          <span className="text-4xl font-bold">{symbol || 'ACME'}</span>
-          <span className="text-sm text-muted-foreground">stock</span>
-        </div>
-        <span className="text-2xl text-muted-foreground">—</span>
-        <div>
+      <div className="flex items-center justify-between">
+        <div className="flex-1">
           <h1 className="text-3xl font-bold">Admin Dashboard</h1>
           <p className="text-muted-foreground">Manage approvals, minting, and corporate actions</p>
         </div>
+        <div className="flex-1 flex justify-center">
+          <div className="flex items-baseline gap-2">
+            <span className="text-4xl font-bold">{symbol || 'ACME'}</span>
+            <span className="text-sm text-muted-foreground">stock</span>
+          </div>
+        </div>
+        <div className="flex-1"></div>
       </div>
 
       {/* Stats */}
