@@ -6,6 +6,7 @@ import {
   getWalletInfo,
 } from '../services/database.service';
 import { formatTokenAmount } from '../services/blockchain.service';
+import { pool } from '../config/database';
 import { TransferRow, CorporateActionRow } from '../types';
 import { publicClient } from '../config/viem';
 import { env } from '../config/env';
@@ -238,10 +239,91 @@ router.get('/cap-table/historical', async (req: Request, res: Response) => {
     }
     
     // Reconstruct historical balances from transfers
-    const { getHistoricalBalances } = require('../services/database.service');
-    const historicalBalances = await getHistoricalBalances(blockNumber);
+    const { getHistoricalBalances, getHistoricalSplitMultiplier } = require('../services/database.service');
     
-    // Calculate total supply (do NOT apply split multiplier - balances are already correct)
+    // Get ALL splits that occurred up to and including the query block
+    const splitsResult = await pool.query<{ block_number: string; multiplier: string }>(`
+      SELECT block_number, (action_data->>'multiplier')::text as multiplier
+      FROM corporate_actions
+      WHERE action_type = 'split'
+        AND block_number::numeric <= $1
+      ORDER BY block_number ASC
+    `, [blockNumber]);
+    
+    const splits = splitsResult.rows.map((s: { block_number: string; multiplier: string }) => ({
+      blockNumber: parseInt(s.block_number, 10),
+      multiplier: parseInt(s.multiplier, 10)
+    }));
+    
+    // Get all transfers up to the query block with their block numbers
+    const transfersResult = await pool.query<{ 
+      address: string; 
+      amount: string; 
+      block_number: string;
+      from_or_to: string;
+    }>(`
+      WITH transfer_details AS (
+        SELECT 
+          from_address AS address, 
+          -amount::numeric AS amount,
+          block_number,
+          'from' as from_or_to
+        FROM transfers
+        WHERE block_number::numeric <= $1
+          AND from_address != '0x0000000000000000000000000000000000000000'
+        UNION ALL
+        SELECT 
+          to_address AS address, 
+          amount::numeric AS amount,
+          block_number,
+          'to' as from_or_to
+        FROM transfers
+        WHERE block_number::numeric <= $1
+          AND to_address != '0x0000000000000000000000000000000000000000'
+      )
+      SELECT address, amount, block_number, from_or_to
+      FROM transfer_details
+      ORDER BY block_number ASC
+    `, [blockNumber]);
+    
+    // Calculate the cumulative multiplier at each transfer's block
+    function getMultiplierAtBlock(transferBlock: number): bigint {
+      let cumulative = BigInt(1);
+      for (const split of splits) {
+        if (split.blockNumber <= transferBlock) {
+          cumulative *= BigInt(split.multiplier);
+        }
+      }
+      return cumulative;
+    }
+    
+    // Calculate the cumulative multiplier at the query block
+    const queryBlockMultiplier = getMultiplierAtBlock(blockNumber);
+    
+    // Build balances by adjusting each transfer amount based on multiplier differences
+    const balanceMap = new Map<string, bigint>();
+    
+    for (const transfer of transfersResult.rows) {
+      const transferBlock = parseInt(transfer.block_number, 10);
+      const transferMultiplier = getMultiplierAtBlock(transferBlock);
+      const baseAmount = BigInt(transfer.amount);
+      
+      // Convert the transfer amount to the query block's context
+      // If transfer happened at multiplier=1 and query is at multiplier=7, multiply by 7
+      // If transfer happened at multiplier=7 and query is at multiplier=7, no change
+      const adjustedAmount = baseAmount * queryBlockMultiplier / transferMultiplier;
+      
+      const currentBalance = balanceMap.get(transfer.address) || BigInt(0);
+      balanceMap.set(transfer.address, currentBalance + adjustedAmount);
+    }
+    
+    // Filter out zero and negative balances, convert to array
+    const historicalBalances = Array.from(balanceMap.entries())
+      .filter(([_, balance]) => balance > 0)
+      .map(([address, balance]) => ({ address, balance: balance.toString() }))
+      .sort((a, b) => Number(BigInt(b.balance) - BigInt(a.balance)));
+    
+    // Calculate total supply
     let totalSupply = BigInt(0);
     historicalBalances.forEach((b: any) => {
       const balance = BigInt(b.balance);
@@ -252,7 +334,7 @@ router.get('/cap-table/historical', async (req: Request, res: Response) => {
     const { getBlockTimestamp } = require('../services/database.service');
     const timestamp = await getBlockTimestamp(blockNumber);
     
-    // Format response (do NOT apply split multiplier)
+    // Format response
     const capTable = historicalBalances.map((b: any) => {
       const balance = BigInt(b.balance);
       const percentage = totalSupply > 0
@@ -272,7 +354,7 @@ router.get('/cap-table/historical', async (req: Request, res: Response) => {
       timestamp: timestamp || new Date().toISOString(),
       totalSupply: totalSupply.toString(),
       holderCount: capTable.length,
-      splitMultiplier: 1, // Not used for historical queries
+      splitMultiplier: Number(queryBlockMultiplier),
       capTable,
     });
   } catch (error) {
