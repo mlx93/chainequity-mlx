@@ -167,7 +167,7 @@ export default function CapTable() {
                 }
               </CardDescription>
             </div>
-            <div className="flex items-center gap-8 mr-4">
+            <div className="flex items-center gap-6 mr-4">
               <div className="flex items-center gap-2">
                 <Label htmlFor="snapshot-select" className="text-sm text-muted-foreground whitespace-nowrap">
                   Version:
@@ -176,7 +176,7 @@ export default function CapTable() {
                   value={selectedSnapshotId} 
                   onValueChange={setSelectedSnapshotId}
                 >
-                  <SelectTrigger id="snapshot-select" className="h-9 w-[240px]">
+                  <SelectTrigger id="snapshot-select" className="h-9 w-[320px]">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent side="bottom" className="max-h-[280px]">

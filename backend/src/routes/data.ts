@@ -242,28 +242,30 @@ router.get('/cap-table/historical', async (req: Request, res: Response) => {
     const historicalBalances = await getHistoricalBalances(blockNumber);
     const splitMultiplier = await getHistoricalSplitMultiplier(blockNumber);
     
-    // Calculate total supply
+    // Calculate total supply (applying split multiplier)
     let totalSupply = BigInt(0);
     historicalBalances.forEach((b: any) => {
-      const balance = BigInt(b.balance);
-      totalSupply += balance;
+      const baseBalance = BigInt(b.balance);
+      const adjustedBalance = baseBalance * splitMultiplier;
+      totalSupply += adjustedBalance;
     });
     
     // Get block timestamp
     const { getBlockTimestamp } = require('../services/database.service');
     const timestamp = await getBlockTimestamp(blockNumber);
     
-    // Format response
+    // Format response (applying split multiplier to all balances)
     const capTable = historicalBalances.map((b: any) => {
-      const balance = BigInt(b.balance);
+      const baseBalance = BigInt(b.balance);
+      const adjustedBalance = baseBalance * splitMultiplier;
       const percentage = totalSupply > 0
-        ? ((Number(balance) / Number(totalSupply)) * 100).toFixed(2)
+        ? ((Number(adjustedBalance) / Number(totalSupply)) * 100).toFixed(2)
         : '0.00';
       
       return {
         address: b.address,
-        balance: balance.toString(),
-        balanceFormatted: formatTokenAmount(balance.toString()),
+        balance: adjustedBalance.toString(),
+        balanceFormatted: formatTokenAmount(adjustedBalance.toString()),
         percentage,
       };
     });

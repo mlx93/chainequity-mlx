@@ -162,6 +162,7 @@ export async function getHistoricalBalances(blockNumber: number) {
       SELECT to_address AS address, SUM(amount::numeric) AS net_change
       FROM transfers
       WHERE block_number::numeric <= $1
+        AND to_address != '0x0000000000000000000000000000000000000000'
       GROUP BY to_address
     )
     SELECT 

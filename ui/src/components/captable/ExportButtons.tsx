@@ -19,9 +19,10 @@ export default function ExportButtons({ capTable, isHistorical = false, blockNum
   }
 
   const downloadCSV = () => {
-    const headers = isHistorical 
-      ? ['Account Name', 'Address', 'Balance', 'Ownership %', 'Block Number']
-      : ['Account Name', 'Address', 'Balance', 'Ownership %']
+    const headers = ['Account Name', 'Address', 'Balance', 'Ownership %']
+    if (isHistorical && blockNumber) {
+      headers.push('Block Number')
+    }
     
     const rows = capTable.capTable.map(entry => {
       const row = [
