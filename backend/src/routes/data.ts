@@ -238,34 +238,31 @@ router.get('/cap-table/historical', async (req: Request, res: Response) => {
     }
     
     // Reconstruct historical balances from transfers
-    const { getHistoricalBalances, getHistoricalSplitMultiplier } = require('../services/database.service');
+    const { getHistoricalBalances } = require('../services/database.service');
     const historicalBalances = await getHistoricalBalances(blockNumber);
-    const splitMultiplier = await getHistoricalSplitMultiplier(blockNumber);
     
-    // Calculate total supply (applying split multiplier)
+    // Calculate total supply (do NOT apply split multiplier - balances are already correct)
     let totalSupply = BigInt(0);
     historicalBalances.forEach((b: any) => {
-      const baseBalance = BigInt(b.balance);
-      const adjustedBalance = baseBalance * splitMultiplier;
-      totalSupply += adjustedBalance;
+      const balance = BigInt(b.balance);
+      totalSupply += balance;
     });
     
     // Get block timestamp
     const { getBlockTimestamp } = require('../services/database.service');
     const timestamp = await getBlockTimestamp(blockNumber);
     
-    // Format response (applying split multiplier to all balances)
+    // Format response (do NOT apply split multiplier)
     const capTable = historicalBalances.map((b: any) => {
-      const baseBalance = BigInt(b.balance);
-      const adjustedBalance = baseBalance * splitMultiplier;
+      const balance = BigInt(b.balance);
       const percentage = totalSupply > 0
-        ? ((Number(adjustedBalance) / Number(totalSupply)) * 100).toFixed(2)
+        ? ((Number(balance) / Number(totalSupply)) * 100).toFixed(2)
         : '0.00';
       
       return {
         address: b.address,
-        balance: adjustedBalance.toString(),
-        balanceFormatted: formatTokenAmount(adjustedBalance.toString()),
+        balance: balance.toString(),
+        balanceFormatted: formatTokenAmount(balance.toString()),
         percentage,
       };
     });
@@ -275,7 +272,7 @@ router.get('/cap-table/historical', async (req: Request, res: Response) => {
       timestamp: timestamp || new Date().toISOString(),
       totalSupply: totalSupply.toString(),
       holderCount: capTable.length,
-      splitMultiplier: Number(splitMultiplier),
+      splitMultiplier: 1, // Not used for historical queries
       capTable,
     });
   } catch (error) {
