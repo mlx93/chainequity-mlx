@@ -32,11 +32,22 @@ export default function ExportButtons({ capTable, isHistorical = false, blockNum
       return value
     }
     
+    // Helper to round balance to whole number
+    const roundBalance = (balanceFormatted: string): string => {
+      // Remove commas and parse as number
+      const numericValue = parseFloat(balanceFormatted.replace(/,/g, ''))
+      if (isNaN(numericValue)) return balanceFormatted
+      
+      // Round to nearest whole number and format with commas
+      const rounded = Math.round(numericValue)
+      return rounded.toLocaleString('en-US')
+    }
+    
     const rows = capTable.capTable.map(entry => {
       const row = [
         escapeCSV(getDisplayName(entry.address)),
         escapeCSV(entry.address),
-        escapeCSV(entry.balanceFormatted),
+        escapeCSV(roundBalance(entry.balanceFormatted)),
         escapeCSV(entry.percentage + '%'),
       ]
       if (isHistorical && blockNumber) {
