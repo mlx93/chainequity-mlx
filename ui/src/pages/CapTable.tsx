@@ -179,7 +179,7 @@ export default function CapTable() {
                   <SelectTrigger id="snapshot-select" className="h-9 w-[240px]">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent side="bottom" className="max-h-[280px]">
                     <SelectItem value="current">Current</SelectItem>
                     {snapshotsData?.snapshots.map((snapshot) => (
                       <SelectItem key={snapshot.blockNumber} value={snapshot.blockNumber.toString()}>

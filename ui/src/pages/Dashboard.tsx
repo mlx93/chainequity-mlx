@@ -36,7 +36,7 @@ export default function Dashboard() {
           <p className="text-base text-muted-foreground">Manage approvals, minting,</p>
           <p className="text-base text-muted-foreground">and corporate actions</p>
         </div>
-        <div className="flex items-center gap-6 mr-8">
+        <div className="flex items-center gap-6 absolute left-1/2 transform -translate-x-1/2">
           <div className="border-2 border-black px-4 py-2 rounded">
             <span className="text-2xl font-bold">{symbol || 'ACME'}</span>
           </div>
