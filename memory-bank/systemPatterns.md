@@ -87,7 +87,8 @@
 - Address: `0xFCc9E74019a2be5808d63A941a84dEbE0fC39964`
 - Network: Base Sepolia (Chain ID: 84532)
 - Deployment Block: `33313307`
-- Owner: Gnosis Safe `0x6264F29968e8fd2810cB79fb806aC65dAf9db73d`
+- Owner: **Admin Wallet** `0x4f10f93e2b0f5faf6b6e5a03e8e48f96921d24c6` (Demo Setup)
+- Gnosis Safe: `0x6264F29968e8fd2810cB79fb806aC65dAf9db73d` (Created but not used as owner in demo)
 
 ### Event Indexer (Phase 2B)
 **Location**: `/indexer/`
@@ -226,12 +227,33 @@ POST /api/update-symbol       → Admin: Change symbol
 
 **Tradeoff**: None - this is strictly better.
 
-### 4. Gnosis Safe Ownership
-**Decision**: All admin functions use `onlyOwner` modifier, contract owned by Gnosis Safe.
+### 4. Gnosis Safe Ownership (Production) vs Single-Sig (Demo)
+**Production Design**: All admin functions use `onlyOwner` modifier, contract owned by Gnosis Safe (2-of-3 multi-sig).
 
-**Rationale**: Securities compliance requires multi-party controls. No single person should control token issuance.
+**Demo Implementation**: Contract deployed with admin wallet as owner for simplified demonstration.
 
-**Tradeoff**: Admin operations require coordination between 2 signers. Acceptable for securities use case.
+**Rationale**: Securities compliance requires multi-party controls. No single person should control token issuance in production. Demo uses single-sig to avoid multi-sig coordination complexity during demonstrations.
+
+**How It Works**:
+- **Demo Setup**: 
+  - Admin wallet (`0x4f10f93e2b0f5faf6b6e5a03e8e48f96921d24c6`) is the contract owner
+  - Backend signs transactions directly with `ADMIN_PRIVATE_KEY`
+  - All admin functions (mint, burn, approve, split, symbol change) work immediately
+  - Gnosis Safe exists (`0x6264F29968e8fd2810cB79fb806aC65dAf9db73d`) but is not used as owner
+
+- **Production Setup** (how it should be deployed):
+  - Deploy contract with Gnosis Safe address as owner (change line 24 in `Deploy.s.sol`)
+  - Backend submits transactions TO the Safe (not directly to contract)
+  - Requires 2-of-3 signatures to execute any admin function
+  - Admin wallet becomes one of the Safe signers, not the contract owner
+
+**Migration Path**: To convert demo to production:
+1. Deploy new GatedToken with Safe as owner: `new GatedToken("Name", "SYMBOL", SAFE_ADDRESS)`
+2. Update backend to use Safe SDK for transaction submission
+3. Configure Safe with appropriate signers and threshold
+4. Test all admin operations with multi-sig workflow
+
+**Tradeoff**: Demo requires trust in single admin key. Production distributes trust across multiple signers.
 
 ### 5. Allowlist Gating via `_update()` Hook
 **Decision**: Override OpenZeppelin's `_update()` internal function to check recipient approval on all transfers.

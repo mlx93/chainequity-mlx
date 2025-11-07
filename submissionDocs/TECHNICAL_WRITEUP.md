@@ -96,16 +96,41 @@
 
 **Tradeoff**: Requires indexer to run 24/7. Mitigated by Railway's managed infrastructure.
 
-### 3. Multi-Signature Admin Controls
+### 3. Multi-Signature Admin Controls (Production) vs Single-Sig (Demo)
 
-**Decision**: Gnosis Safe (2-of-3) owns contract and controls all admin functions.
+**Production Design**: Gnosis Safe (2-of-3) owns contract and controls all admin functions.
+
+**Demo Implementation**: Admin wallet owns contract directly for simplified demonstration.
 
 **Rationale**:
-- Industry standard for real tokenized securities
-- Demonstrates decentralization principles
-- No single point of failure for administrative actions
+- **Production**: Industry standard for real tokenized securities. Demonstrates decentralization principles. No single point of failure for administrative actions.
+- **Demo**: Avoids multi-sig coordination complexity during live demonstrations. Allows immediate execution of admin functions without requiring multiple signatures.
 
-**Tradeoff**: Admin operations require coordination between 2 signers. Acceptable for securities compliance requirements.
+**How It Works**:
+
+**Demo Setup** (Current Implementation):
+- Contract owner: Admin wallet (`0x4f10f93e2b0f5faf6b6e5a03e8e48f96921d24c6`)
+- Deployment: `new GatedToken("ACME", "ACME", adminAddress)` in `Deploy.s.sol`
+- Backend: Signs transactions directly with `ADMIN_PRIVATE_KEY` via viem `walletClient`
+- Admin functions execute immediately with single signature
+- Gnosis Safe exists but is not used as owner
+
+**Production Setup** (Recommended):
+- Contract owner: Gnosis Safe (2-of-3 multi-sig)
+- Deployment: `new GatedToken("ACME", "ACME", SAFE_ADDRESS)` in `Deploy.s.sol`
+- Backend: Submits transactions TO Safe via Safe SDK, requires 2-of-3 signatures
+- Admin functions require coordination between signers
+- Admin wallet becomes one of the Safe signers, not the contract owner
+
+**Migration Steps**:
+1. Change deployment script line 24 from `adminAddress` to `vm.envAddress("SAFE_ADDRESS")`
+2. Update backend to integrate Safe SDK for transaction submission
+3. Configure Safe with 3 signers and 2-of-3 threshold
+4. Test multi-sig workflow for all admin functions
+
+**Tradeoff**: 
+- Demo: Fast and simple, but single point of failure. Suitable for prototype only.
+- Production: Slower admin operations, requires coordination, but meets compliance standards.
 
 ### 4. Allowlist Gating at Transfer Level
 
@@ -169,17 +194,24 @@
 
 **Risk Level**: Low for demo, Medium for production scale
 
-### 5. No Security Audit
+### 5. No Security Audit + Single-Sig Owner (Demo)
 
 **Severity**: High (for production)  
-**Impact**: Smart contracts not audited for production use.
+**Impact**: 
+- Smart contracts not audited for production use
+- Single admin key has full control over all admin functions (mint, burn, approve, split, symbol)
 
 **Mitigation**: 
-- This is a technical prototype only
-- Production deployment requires professional security audit
+- This is explicitly a technical prototype for demonstration purposes only
+- Production deployment requires:
+  - Professional security audit (Trail of Bits, OpenZeppelin, Consensys Diligence)
+  - Multi-sig ownership via Gnosis Safe (2-of-3 or higher)
+  - Penetration testing
+  - Code review by independent security experts
 - All code is open source for review
+- Disclaimer prominently displayed in UI and documentation
 
-**Risk Level**: N/A for demo, High for production
+**Risk Level**: N/A for demo, **Critical** for production without audit and multi-sig
 
 ---
 
@@ -251,12 +283,14 @@
 - Address: `0xFCc9E74019a2be5808d63A941a84dEbE0fC39964`
 - Network: Base Sepolia (Chain ID: 84532)
 - Deployment Block: `33313307`
+- Owner: **Admin Wallet** `0x4f10f93e2b0f5faf6b6e5a03e8e48f96921d24c6` (Demo Setup - Single Signature)
 - Explorer: https://sepolia.basescan.org/address/0xFCc9E74019a2be5808d63A941a84dEbE0fC39964
 
-**Gnosis Safe**:
+**Gnosis Safe** (Created but not used as owner in demo):
 - Address: `0x6264F29968e8fd2810cB79fb806aC65dAf9db73d`
 - Threshold: 2-of-3 signers
 - Interface: https://app.safe.global
+- **Note**: For production deployment, contract should be owned by this Safe
 
 **Backend API**:
 - URL: https://tender-achievement-production-3aa5.up.railway.app/api
@@ -412,6 +446,24 @@ curl https://tender-achievement-production-3aa5.up.railway.app/api/health
 ## Disclaimer
 
 **⚠️ IMPORTANT: This is a technical prototype demonstration only.**
+
+### Demo vs Production Architecture
+
+**Current Demo Uses Single-Sig Owner**:
+- Admin wallet (`0x4f10f93e2b0f5faf6b6e5a03e8e48f96921d24c6`) owns the contract
+- Backend signs transactions directly with private key
+- All admin functions execute immediately
+- **Purpose**: Simplifies demonstration and rapid testing
+- **Risk**: Single point of failure, single key compromise = full control lost
+
+**Production Requires Multi-Sig Owner**:
+- Gnosis Safe (2-of-3 or higher) should own the contract
+- Backend submits transactions for multi-party approval
+- Admin functions require coordination between signers
+- **Purpose**: Meets securities compliance standards, eliminates single point of failure
+- **Benefit**: Industry-standard security model with distributed trust
+
+### Production Requirements
 
 This software is NOT regulatory-compliant and should NOT be used for real securities issuance without:
 - Professional legal review

@@ -239,7 +239,10 @@ ChainEquity/
 - Address: `0xFCc9E74019a2be5808d63A941a84dEbE0fC39964`
 - Network: Base Sepolia (Chain ID: 84532)
 - Deployment Block: `33313307`
-- Owner: Gnosis Safe `0x6264F29968e8fd2810cB79fb806aC65dAf9db73d`
+- Owner: **Admin Wallet** `0x4f10f93e2b0f5faf6b6e5a03e8e48f96921d24c6` (Demo Setup)
+- Gnosis Safe: `0x6264F29968e8fd2810cB79fb806aC65dAf9db73d` (Created but not used as owner in demo)
+
+**⚠️ Demo vs Production Note**: See "Demo vs Production Deployment" section below for ownership architecture details.
 
 ### Event Indexer
 
@@ -391,13 +394,15 @@ POST /api/admin/burn-all         → Admin: Burn all tokens (demo reset)
 
 **Tradeoff**: None - this is strictly better.
 
-### 4. Gnosis Safe Ownership
+### 4. Gnosis Safe Ownership (Production) vs Single-Sig (Demo)
 
-**Decision**: All admin functions use `onlyOwner` modifier, contract owned by Gnosis Safe.
+**Production Design**: All admin functions use `onlyOwner` modifier, contract owned by Gnosis Safe (2-of-3 multi-sig).
 
-**Rationale**: Securities compliance requires multi-party controls. No single person should control token issuance. Industry standard for real tokenized securities.
+**Demo Implementation**: Contract deployed with admin wallet as owner for simplified demonstration.
 
-**Tradeoff**: Admin operations require coordination between 2 signers. Acceptable for securities use case.
+**Rationale**: Securities compliance requires multi-party controls. No single person should control token issuance. Industry standard for real tokenized securities. Demo uses single-sig to avoid multi-sig coordination complexity during demonstrations.
+
+**Tradeoff**: Demo requires trust in single admin key. Production distributes trust across multiple signers. Admin operations in production require coordination between 2-of-3 signers.
 
 ### 5. Allowlist Gating via `_update()` Hook
 
@@ -472,11 +477,107 @@ POST /api/admin/burn-all         → Admin: Burn all tokens (demo reset)
 
 ---
 
+## Demo vs Production Deployment
+
+### Current Demo Setup
+
+**Smart Contract Ownership**:
+- Contract owner: Admin wallet (`0x4f10f93e2b0f5faf6b6e5a03e8e48f96921d24c6`)
+- Deployment script uses: `new GatedToken("ACME Corp Equity", "ACME", adminAddress)`
+- Backend signs transactions directly with `ADMIN_PRIVATE_KEY`
+- All admin functions (mint, burn, approve, split, symbol) execute immediately with single signature
+
+**Rationale**:
+- Simplifies demonstration and testing
+- Avoids multi-sig coordination delays during live demos
+- Allows rapid iteration during development
+- Gnosis Safe exists but is not used as contract owner
+
+**Trust Model**: 
+- Single admin key has full control
+- Suitable for prototype/demo only
+- NOT suitable for production with real securities
+
+### Production Deployment (Recommended)
+
+**Smart Contract Ownership**:
+- Contract owner: Gnosis Safe (`0x6264F29968e8fd2810cB79fb806aC65dAf9db73d`)
+- Deployment script uses: `new GatedToken("ACME Corp Equity", "ACME", SAFE_ADDRESS)`
+- Backend submits transactions TO the Safe (not directly to contract)
+- Requires 2-of-3 signatures from Safe signers to execute admin functions
+
+**Migration Steps**:
+1. **Update Deployment Script** (`contracts/script/Deploy.s.sol`):
+   ```solidity
+   // Change line 24 from:
+   adminAddress
+   
+   // To:
+   vm.envAddress("SAFE_ADDRESS")
+   ```
+
+2. **Update Backend** (`backend/src/config/viem.ts`):
+   ```typescript
+   // Replace walletClient with Safe SDK integration
+   import Safe from '@safe-global/protocol-kit';
+   
+   const safe = await Safe.create({
+     safeAddress: env.SAFE_ADDRESS,
+     provider: env.BASE_SEPOLIA_RPC,
+   });
+   ```
+
+3. **Configure Gnosis Safe**:
+   - Add 3 signer addresses
+   - Set threshold to 2-of-3
+   - Fund Safe with gas ETH
+   - Test multi-sig workflow
+
+4. **Update Transaction Submission Flow**:
+   - Backend creates transaction data
+   - Backend submits to Safe API for signing
+   - 2 signers review and approve
+   - Transaction executes on-chain
+
+**Benefits**:
+- No single point of failure
+- Industry-standard security model
+- Regulatory compliance alignment
+- Audit trail for all admin actions
+
+**Tradeoffs**:
+- Slower admin operations (requires coordination)
+- More complex backend integration
+- Requires multiple signers to be available
+- Higher operational overhead
+
+### Comparison Table
+
+| Aspect | Demo Setup | Production Setup |
+|--------|------------|------------------|
+| **Owner** | Admin wallet (single-sig) | Gnosis Safe (2-of-3 multi-sig) |
+| **Transaction Time** | Immediate | Minutes (requires 2 signatures) |
+| **Backend Complexity** | Simple (direct signing) | Complex (Safe SDK integration) |
+| **Security** | Single key compromise = full control lost | Requires 2 of 3 keys compromised |
+| **Compliance** | ❌ Not suitable for production | ✅ Industry standard |
+| **Gas Cost** | Lower (single signature) | Higher (multi-sig execution) |
+| **Use Case** | Prototype/demo only | Production securities |
+
+---
+
 ## Security Considerations
 
 ### Multi-Signature Control
+
+**Demo Setup**: 
+- Single admin wallet owns contract
+- Suitable for prototype demonstration only
+- ⚠️ Single point of failure
+
+**Production Setup**:
 - All admin functions require Gnosis Safe (2-of-3 signatures)
 - No single point of failure for administrative actions
+- Industry standard for tokenized securities
 
 ### Environment Variables
 - All secrets stored in environment variables

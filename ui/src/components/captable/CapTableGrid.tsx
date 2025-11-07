@@ -82,7 +82,7 @@ export default function CapTableGrid({
                 )}
               </Button>
             </TableHead>
-            <TableHead>
+            <TableHead className="text-center">
               <Button
                 variant="ghost"
                 size="sm"
@@ -143,7 +143,7 @@ export default function CapTableGrid({
                       </Button>
                     </div>
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="text-center">
                     {balance?.toLocaleString?.() ?? '0'}
                   </TableCell>
                   <TableCell>
