@@ -101,9 +101,6 @@ export default function NotConnected() {
                 <Wallet className="mr-2 h-4 w-4" />
                 Connect MetaMask
               </Button>
-              <p className="text-xs text-muted-foreground text-center mt-2">
-                ⚠️ This is a technical prototype demonstration only. NOT regulatory-compliant. Do not use for real securities without legal review.
-              </p>
             </div>
           ) : (
             <div className="space-y-2">
@@ -115,6 +112,9 @@ export default function NotConnected() {
               </p>
             </div>
           )}
+          <p className="text-xs text-muted-foreground text-center mt-4">
+            This is a technical prototype demonstration only. NOT regulatory compliant. Do not use for real securities without legal review.
+          </p>
         </CardContent>
       </Card>
     </div>
