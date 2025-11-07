@@ -85,7 +85,7 @@ export default function TransactionHistory({ address }: TransactionHistoryProps)
                 <TableCell className="font-mono text-sm">
                   {formatAddress(transfer.to)}
                 </TableCell>
-                <TableCell className="text-center font-medium">
+                <TableCell className="text-right font-medium">
                   {transfer.amountFormatted}
                 </TableCell>
                 <TableCell>
