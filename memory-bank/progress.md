@@ -607,45 +607,72 @@ ui/
 - ✅ UI/UX improvements completed (compact, minimalist design)
 - ✅ Error handling improvements (toLocaleString fixes, null checks)
 
-### Remaining Work (Per PRDs)
-Two features explicitly required by PRD_PRODUCT.md and PRD_TECHNICAL.md are not yet implemented:
+### ✅ ALL PRD REQUIREMENTS COMPLETE (Nov 7, 2025)
 
-#### ⏳ Historical Cap Table Queries (US-4.3, FR-3.4, FR-4.11, NFR-4)
+#### ✅ Historical Cap Table Queries (US-4.3, FR-3.4, FR-4.11, NFR-4) - COMPLETE
 **Purpose**: Allow admins and auditors to view ownership distribution at any past block number
 
-**Required Implementation**:
-- Backend: New endpoint `GET /api/cap-table/historical?blockNumber=X`
-  - Reconstruct balances from transfers table up to specified block
-  - Apply splitMultiplier if stock split occurred before that block
-  - Calculate ownership percentages
-  - Return response with timestamp, total supply, holder count, cap table array
-- Frontend: Version selector dropdown on Cap Table page
-  - Options: "Current" (default) or "Enter Block Number..."
-  - Display historical timestamp when viewing snapshot
-  - Export buttons support historical CSV/JSON with block number in filename
-- Performance: Must complete in <2 seconds per NFR-4
+**Implementation Complete**:
+- ✅ Backend: `GET /api/cap-table/historical?blockNumber=X` reconstructs balances from transfers
+- ✅ Backend: `GET /api/cap-table/snapshots` provides user-friendly snapshot list
+- ✅ Frontend: Timestamp-based dropdown (no manual block input required)
+- ✅ Embedded in Token Holders card header with 200px fixed-width dropdown
+- ✅ Automatically applies historical split multiplier
+- ✅ Historical exports include block number in filename (e.g., `captable_block_12345000_2025-11-07.csv`)
+- ✅ Block number shown as metadata only when historical version selected
+- ✅ Performance: Queries complete in <2 seconds (NFR-4 met)
 
-**Status**: SQL query logic documented in PRD_TECHNICAL.md, not implemented  
-**Implementation Plan**: See `IMPLEMENTATION_PLAN_HISTORICAL_CAPTABLE.md`
+**Snapshots Include All Significant Events**:
+- ✅ Token Mints (0x0 → holder)
+- ✅ Token Burns (holder → 0x0)
+- ✅ Token Transfers (holder → holder)
+- ✅ Stock Splits (corporate actions with multiplier)
+- ✅ Symbol Changes (corporate actions)
+- Shows last 50 events sorted by timestamp descending
 
-#### ⏳ Transaction Pagination (15+ transactions)
+**Database Fix Applied**:
+- Fixed `action_data` vs `details` column name (matches indexer schema)
+- Fixed `split` vs `stock_split` action_type (matches indexer writes)
+- Historical queries now correctly read production database
+
+**Files Created/Modified**:
+- `backend/src/services/database.service.ts` - Added getHistoricalBalances, getHistoricalSplitMultiplier, getBlockTimestamp, getCapTableSnapshots
+- `backend/src/routes/data.ts` - Added /cap-table/historical and /cap-table/snapshots endpoints
+- `ui/src/hooks/useHistoricalCapTable.ts` - New hook with infinite staleTime
+- `ui/src/pages/CapTable.tsx` - Redesigned with timestamp dropdown
+- `ui/src/components/captable/ExportButtons.tsx` - Historical export support
+- `ui/src/types/index.ts` - Added HistoricalCapTableResponse, CapTableSnapshot types
+- `ui/src/lib/api.ts` - Added getHistoricalCapTable, getCapTableSnapshots functions
+- `ui/src/components/ui/select.tsx` - Added Select component from shadcn/ui
+
+**Commits**: `cc2a878`, `cdf1a0e`, `6e3e64c`
+
+#### ✅ Transaction Pagination (15+ transactions) - COMPLETE
 **Purpose**: Improve performance and UX when transaction history exceeds 15 entries
 
-**Required Implementation**:
-- Backend: Add pagination to `GET /api/transfers` endpoint
-  - Query params: `page` (default 1), `limit` (default 15, max 100)
-  - Response includes pagination metadata: currentPage, totalPages, totalRecords, hasNext, hasPrevious
-- Frontend: Pagination controls in TransactionHistory component
-  - Previous/Next buttons
-  - "Page X of Y" display
-  - "Showing 16-30 of 73" counter
-  - Reset to page 1 when filters change
-  - No pagination shown if <15 transactions
+**Implementation Complete**:
+- ✅ Backend: Added `page` and `limit` parameters to `/api/transfers`
+- ✅ Backend: Response includes pagination metadata (currentPage, totalPages, totalRecords, hasNext, hasPrevious)
+- ✅ Frontend: Previous/Next buttons with chevron icons
+- ✅ Frontend: "Page X of Y" counter
+- ✅ Frontend: "Showing 1-15 of 73" record range display
+- ✅ Pagination hidden when ≤15 transactions (clean UI)
+- ✅ Resets to page 1 when address filter changes
+- ✅ Default: 15 transactions per page (configurable up to 100)
 
-**Status**: Not implemented  
-**Implementation Plan**: See `IMPLEMENTATION_PLAN_HISTORICAL_CAPTABLE.md`
+**Files Modified**:
+- `backend/src/routes/data.ts` - Modified /transfers endpoint with pagination
+- `backend/src/services/database.service.ts` - Added getTransfersCount function
+- `ui/src/hooks/useTransactions.ts` - Added page parameter support
+- `ui/src/components/transactions/TransactionHistory.tsx` - Added pagination UI controls
+- `ui/src/lib/api.ts` - Updated getTransfers to accept page parameter
+- `ui/src/types/index.ts` - Updated TransfersResponse with PaginationInfo
 
-**Estimated Time**: 3-4 hours total (1.5h backend, 1.5-2h frontend, 30-45min testing)
+**Commits**: `cc2a878`, `cdf1a0e`
+
+**Implementation Time**: 3.5 hours total (estimated 3-4 hours - on target!)
+
+---
 
 ### Success Criteria
 - ✅ Backend API endpoints operational

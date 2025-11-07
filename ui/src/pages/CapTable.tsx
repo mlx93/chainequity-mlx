@@ -117,9 +117,7 @@ export default function CapTable() {
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold">Cap Table</h1>
-        <p className="text-muted-foreground">
-          Current token holders as of block {capTable?.blockNumber?.toLocaleString() ?? 'N/A'}
-        </p>
+        <p className="text-muted-foreground">View current and historical ownership distribution</p>
       </div>
 
       <div className="grid gap-4 md:grid-cols-3">
@@ -155,50 +153,61 @@ export default function CapTable() {
         <CardHeader>
           <div className="flex items-start justify-between gap-4">
             <div className="flex-1">
-              <div className="flex items-center gap-4 mb-3">
-                <CardTitle>Token Holders</CardTitle>
-                <div className="flex items-center gap-2">
-                  <Label htmlFor="snapshot-select" className="text-xs text-muted-foreground whitespace-nowrap">
-                    Version:
-                  </Label>
-                  <Select 
-                    value={selectedSnapshotId} 
-                    onValueChange={setSelectedSnapshotId}
-                  >
-                    <SelectTrigger id="snapshot-select" className="h-8 w-[200px]">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="current">Current</SelectItem>
-                      {snapshotsData?.snapshots.map((snapshot) => (
-                        <SelectItem key={snapshot.blockNumber} value={snapshot.blockNumber.toString()}>
-                          {new Date(snapshot.timestamp).toLocaleDateString('en-US', {
-                            month: 'short',
-                            day: 'numeric',
-                            year: 'numeric',
-                            hour: '2-digit',
-                            minute: '2-digit'
-                          })} - {snapshot.description}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  {isHistorical && selectedSnapshot && (
-                    <span className="text-xs text-muted-foreground">
-                      Block {selectedSnapshot.blockNumber.toLocaleString()}
-                    </span>
-                  )}
-                </div>
-              </div>
+              <CardTitle className="mb-3">Token Holders</CardTitle>
               <CardDescription>
-                Updated at {capTable?.timestamp ? new Date(capTable.timestamp).toLocaleString() : 'N/A'}
+                {isHistorical && selectedSnapshot
+                  ? `Snapshot from ${new Date(selectedSnapshot.timestamp).toLocaleString('en-US', {
+                      month: 'short',
+                      day: 'numeric',
+                      year: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit'
+                    })}`
+                  : `Updated at ${capTable?.timestamp ? new Date(capTable.timestamp).toLocaleString() : 'N/A'}`
+                }
               </CardDescription>
             </div>
-            <ExportButtons 
-              capTable={capTable!} 
-              isHistorical={isHistorical}
-              blockNumber={selectedBlock ?? undefined}
-            />
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2">
+                <Label htmlFor="snapshot-select" className="text-sm text-muted-foreground whitespace-nowrap">
+                  Version:
+                </Label>
+                <Select 
+                  value={selectedSnapshotId} 
+                  onValueChange={setSelectedSnapshotId}
+                >
+                  <SelectTrigger id="snapshot-select" className="h-9 w-[240px]">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="current">Current</SelectItem>
+                    {snapshotsData?.snapshots.map((snapshot) => (
+                      <SelectItem key={snapshot.blockNumber} value={snapshot.blockNumber.toString()}>
+                        {new Date(snapshot.timestamp).toLocaleDateString('en-US', {
+                          month: 'short',
+                          day: 'numeric',
+                          year: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit'
+                        })} - {snapshot.description}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex flex-col items-end gap-1">
+                <ExportButtons 
+                  capTable={capTable!} 
+                  isHistorical={isHistorical}
+                  blockNumber={selectedBlock ?? undefined}
+                />
+                {isHistorical && selectedSnapshot && (
+                  <span className="text-xs text-muted-foreground">
+                    Block {selectedSnapshot.blockNumber.toLocaleString()}
+                  </span>
+                )}
+              </div>
+            </div>
           </div>
         </CardHeader>
         <CardContent>
