@@ -67,3 +67,5 @@ After fixing:
 - Logs show: `✅ Database schema initialized successfully`
 
 
+
+

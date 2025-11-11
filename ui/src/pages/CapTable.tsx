@@ -195,11 +195,11 @@ export default function CapTable() {
                   </SelectContent>
                 </Select>
               </div>
-              <ExportButtons 
-                capTable={capTable!} 
-                isHistorical={isHistorical}
-                blockNumber={selectedBlock ?? undefined}
-              />
+                <ExportButtons 
+                  capTable={capTable!} 
+                  isHistorical={isHistorical}
+                  blockNumber={selectedBlock ?? undefined}
+                />
             </div>
           </div>
         </CardHeader>

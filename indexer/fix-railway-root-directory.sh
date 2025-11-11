@@ -115,3 +115,5 @@ echo "Remember: Root directory must be set in Railway dashboard!"
 echo "See RAILWAY_DOCKERFILE_FIX.md for detailed troubleshooting."
 
 
+
+

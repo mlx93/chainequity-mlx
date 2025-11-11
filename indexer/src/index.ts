@@ -480,9 +480,31 @@ process.on('SIGTERM', async () => {
   process.exit(0);
 });
 
-// Start the indexer
-startIndexer().catch((error) => {
-  console.error('❌ Indexer failed to start:', error);
+// Start the indexer with retry logic
+async function startWithRetry(maxRetries = 3, retryDelay = 5000) {
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      await startIndexer();
+      // If startIndexer completes without error, we're watching events
+      // Keep the process alive
+      return;
+    } catch (error) {
+      console.error(`❌ Indexer failed to start (attempt ${attempt}/${maxRetries}):`, error);
+      
+      if (attempt < maxRetries) {
+        console.log(`⏳ Retrying in ${retryDelay / 1000} seconds...`);
+        await new Promise(resolve => setTimeout(resolve, retryDelay));
+        retryDelay *= 2; // Exponential backoff
+      } else {
+        console.error('❌ Max retries reached. Exiting.');
+        process.exit(1);
+      }
+    }
+  }
+}
+
+startWithRetry().catch((error) => {
+  console.error('❌ Fatal error in indexer:', error);
   process.exit(1);
 });
 

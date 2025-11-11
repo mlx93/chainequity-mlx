@@ -64,3 +64,5 @@ CREATE INDEX IF NOT EXISTS idx_corporate_actions_block_number ON corporate_actio
 CREATE INDEX IF NOT EXISTS idx_corporate_actions_type ON corporate_actions(action_type);
 
 
+
+
